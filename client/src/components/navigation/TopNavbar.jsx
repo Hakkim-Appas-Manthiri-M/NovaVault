@@ -1,14 +1,10 @@
 import { useEffect, useState } from "react";
-import {
-  Heart,
-  Menu,
-  Search,
-  ShoppingCart,
-  X,
-} from "lucide-react";
+import { Heart, Menu, Search, ShoppingCart, X } from "lucide-react";
 import { Link, NavLink } from "react-router-dom";
 
 import NovaVaultLogo from "./NovaVaultLogo";
+
+import { useStore } from "../../context/useStore";
 
 const navigation = [
   { label: "Store", to: "/games" },
@@ -19,6 +15,7 @@ const navigation = [
 ];
 
 function TopNavbar() {
+  const { wishlistCount, cartCount } = useStore();
   const [searchQuery, setSearchQuery] = useState("");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -75,11 +72,7 @@ function TopNavbar() {
           </button>
 
           {/* Logo */}
-          <Link
-            to="/"
-            aria-label="NovaVault home"
-            className="shrink-0"
-          >
+          <Link to="/" aria-label="NovaVault home" className="shrink-0">
             <NovaVaultLogo />
           </Link>
 
@@ -144,9 +137,14 @@ function TopNavbar() {
             <Link
               to="/wishlist"
               aria-label="Wishlist"
-              className="flex size-9 items-center justify-center rounded-lg text-slate-400 transition hover:bg-white/[0.04] hover:text-white"
+              className="relative flex size-9 items-center justify-center rounded-lg text-slate-400 transition hover:bg-white/[0.04] hover:text-white"
             >
               <Heart className="size-[17px]" />
+              {wishlistCount > 0 && (
+                <span className="absolute -right-1 -top-1 flex size-3.5 items-center justify-center rounded-full bg-violet-600 text-[7px] font-bold leading-none text-white">
+                  {wishlistCount}
+                </span>
+              )}
             </Link>
 
             {/* Cart */}
@@ -157,9 +155,11 @@ function TopNavbar() {
             >
               <ShoppingCart className="size-[17px]" />
 
-              <span className="absolute right-0.5 top-0.5 flex min-w-3.5 items-center justify-center rounded-full bg-violet-500 px-1 text-[7px] font-bold leading-3 text-white">
-                2
-              </span>
+              {cartCount > 0 && (
+                <span className="absolute -right-1 -top-1 flex size-3.5 items-center justify-center rounded-full bg-violet-600 text-[7px] font-bold leading-none text-white">
+                  {cartCount}
+                </span>
+              )}
             </Link>
 
             {/* Profile */}
@@ -242,6 +242,11 @@ function TopNavbar() {
               >
                 <Heart className="size-4" />
                 Wishlist
+                {wishlistCount > 0 && (
+                  <span className="ml-auto rounded-full bg-violet-500 px-2 py-0.5 text-[8px] font-bold text-white">
+                    {wishlistCount}
+                  </span>
+                )}
               </NavLink>
 
               {/* Cart */}
@@ -252,10 +257,11 @@ function TopNavbar() {
               >
                 <ShoppingCart className="size-4" />
                 Cart
-
-                <span className="ml-auto rounded-full bg-violet-500 px-2 py-0.5 text-[8px] font-bold text-white">
-                  2
-                </span>
+                {cartCount > 0 && (
+                  <span className="ml-auto rounded-full bg-violet-500 px-2 py-0.5 text-[8px] font-bold text-white">
+                    {cartCount}
+                  </span>
+                )}
               </NavLink>
 
               {/* Profile */}
@@ -267,9 +273,7 @@ function TopNavbar() {
                 <span className="flex size-6 items-center justify-center rounded-full border border-violet-400/30 bg-violet-500/10 text-[8px] font-bold text-violet-200">
                   H
                 </span>
-
                 Profile
-
                 <span className="ml-auto text-[8px] normal-case tracking-normal text-slate-600">
                   Hakkim
                 </span>

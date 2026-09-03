@@ -249,7 +249,7 @@ function GameDetails() {
 
   useEffect(() => {
     if (activeMedia !== 0) {
-      setIsPlaying(false);
+      videoRef.current?.pause();
 
       if (videoRef.current) {
         videoRef.current.pause();
@@ -293,7 +293,7 @@ function GameDetails() {
             className="
               mt-6 inline-flex min-h-10 items-center gap-2
               rounded-lg bg-violet-600 px-5
-              text-[8px] font-bold uppercase tracking-[0.08em]
+              !text-[10px] font-bold uppercase tracking-[0.08em]
               text-white transition hover:bg-violet-500
             "
           >
@@ -373,16 +373,20 @@ function GameDetails() {
    */
 
   const selectPrevious = () => {
-    setActiveMedia((current) =>
-      current === 0 ? mediaCount - 1 : current - 1
-    );
-  };
+  setIsPlaying(false);
 
-  const selectNext = () => {
-    setActiveMedia((current) =>
-      current === mediaCount - 1 ? 0 : current + 1
-    );
-  };
+  setActiveMedia((current) =>
+    current === 0 ? mediaCount - 1 : current - 1,
+  );
+};
+
+const selectNext = () => {
+  setIsPlaying(false);
+
+  setActiveMedia((current) =>
+    current === mediaCount - 1 ? 0 : current + 1,
+  );
+};
 
   /*
    * ============================================================
@@ -414,7 +418,7 @@ function GameDetails() {
             to="/games"
             className="
               inline-flex items-center gap-2
-              text-[8px] font-bold uppercase tracking-[0.08em]
+              !text-[10px] font-bold uppercase tracking-[0.08em]
               text-slate-500 transition-colors
               hover:text-white
             "
@@ -451,15 +455,15 @@ function GameDetails() {
 
             {/* Game Information */}
             <div className="min-w-0 -translate-y-4">
-              <p className="text-[8px] font-bold uppercase tracking-[0.25em] text-violet-400">
+              <p className="!text-[10px] font-bold uppercase tracking-[0.25em] text-violet-400">
                 NovaVault Game
               </p>
 
-              <h1 className="nv-display mt-2 text-3xl font-black tracking-tight text-white sm:text-4xl lg:text-5xl">
+              <h1 className="nv-display mt-2 text-2xl font-black tracking-tight text-white sm:text-4xl lg:text-4xl">
                 {game.title}
               </h1>
 
-              <p className="mt-2 text-[9px] font-medium uppercase tracking-[0.12em] text-slate-500">
+              <p className="mt-2 !text-[9px] font-medium uppercase tracking-[0.12em] text-slate-500">
                 {game.genre || "Action"} · PC
               </p>
 
@@ -468,7 +472,7 @@ function GameDetails() {
                 <div className="flex items-center gap-1.5">
                   <Star className="size-3.5 fill-current text-amber-400" />
 
-                  <span className="text-[9px] font-bold text-white">
+                  <span className="!text-[9px] font-bold text-white">
                     {game.rating}
                   </span>
                 </div>
@@ -477,14 +481,14 @@ function GameDetails() {
                   <>
                     <span className="text-slate-700">•</span>
 
-                    <span className="text-[8px] text-slate-500">
+                    <span className="!text-[10px] text-slate-500">
                       {game.reviews} reviews
                     </span>
                   </>
                 )}
               </div>
 
-              <p className="mt-4 max-w-2xl text-[10px] leading-5 text-slate-400 sm:text-[11px] sm:leading-6">
+              <p className="mt-4 max-w-2xl !text-[12px] leading-5 text-slate-400 sm:!text-[11px] sm:leading-6">
                 {game.description ||
                   "Enter a new world filled with discovery, challenge, and unforgettable moments."}
               </p>
@@ -511,14 +515,14 @@ function GameDetails() {
                     type="button"
                     className="
                       inline-flex min-h-6 items-center justify-center gap-2
-                      rounded-lg bg-violet-600 px-2
-                      text-[7px] font-bold uppercase tracking-[0.04em]
+                      rounded-lg bg-violet-600 px-3
+                      !text-[12px] font-bold uppercase tracking-[0.06em]
                       text-white shadow-lg shadow-violet-950/20
                       transition-all hover:bg-violet-500
                       active:scale-[0.98]
                     "
                   >
-                    <Play className="size-3.5 fill-current" />
+                    <Play className="size-2.5 fill-current" />
                     Buy Now
                   </button>
 
@@ -1066,7 +1070,7 @@ function GameDetails() {
                 >
                   <Check className="size-4 text-violet-400" />
 
-                  <p className="mt-3 text-[8px] font-bold uppercase tracking-[0.06em] text-slate-300">
+                  <p className="mt-3 !text-[8px] font-bold uppercase tracking-[0.06em] text-slate-300">
                     {feature}
                   </p>
                 </div>
@@ -1082,7 +1086,7 @@ function GameDetails() {
           <section className="mt-12 sm:mt-14">
             <div className="mb-5 flex items-end justify-between gap-4">
               <div>
-                <p className="text-[7px] font-bold uppercase tracking-[0.25em] text-violet-400">
+                <p className="!text-[8px] font-bold uppercase tracking-[0.25em] text-violet-400">
                   You May Like
                 </p>
 

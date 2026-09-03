@@ -60,48 +60,25 @@ function GameCollection({
     }
   }, [])
 
-  /*
-   * Reset position when screen size changes.
-   */
-  useEffect(() => {
-    setCurrentIndex(0)
-  }, [visibleCount])
-
-  /*
-   * Keep current position valid when the
-   * number of games changes.
-   */
-  useEffect(() => {
-    const maxIndex = Math.max(
-      games.length - visibleCount,
-      0,
-    )
-
-    if (currentIndex > maxIndex) {
-      setCurrentIndex(maxIndex)
-    }
-  }, [
-    games.length,
-    visibleCount,
-    currentIndex,
-  ])
 
   if (!games.length) {
     return null
   }
 
-  const maxIndex = Math.max(
-    games.length - visibleCount,
-    0,
-  )
+ const maxIndex = Math.max(
+  games.length - visibleCount,
+  0,
+)
 
-  const canGoPrevious = currentIndex > 0
-  const canGoNext = currentIndex < maxIndex
+const safeCurrentIndex = Math.min(currentIndex, maxIndex)
 
-  const visibleGames = games.slice(
-    currentIndex,
-    currentIndex + visibleCount,
-  )
+const canGoPrevious = safeCurrentIndex > 0
+const canGoNext = safeCurrentIndex < maxIndex
+
+const visibleGames = games.slice(
+  safeCurrentIndex,
+  safeCurrentIndex + visibleCount,
+)
 
   const goPrevious = () => {
     setCurrentIndex((current) =>
@@ -110,10 +87,10 @@ function GameCollection({
   }
 
   const goNext = () => {
-    setCurrentIndex((current) =>
-      Math.min(current + 1, maxIndex),
-    )
-  }
+  setCurrentIndex(
+    Math.min(safeCurrentIndex + 1, maxIndex),
+  )
+}
 
   return (
     <div className="w-full min-w-0">
@@ -217,18 +194,14 @@ function GameCollection({
         >
           <span
             className="
-              text-[7px]
+              !text-[7px]
               font-bold
               uppercase
               tracking-[0.1em]
               text-slate-500
             "
           >
-            {Math.min(
-              currentIndex + 1,
-              Math.max(games.length, 1),
-            )}{' '}
-            / {games.length}
+            {safeCurrentIndex + 1} / {maxIndex + 1}
           </span>
         </div>
 

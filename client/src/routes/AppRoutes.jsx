@@ -5,6 +5,8 @@ import ComingSoon from "../pages/ComingSoon";
 import GameDetails from "../pages/GameDetails";
 import Games from "../pages/Games";
 import Home from "../pages/Home";
+import Wishlist from "../pages/Wishlist";
+import Cart from "../pages/Cart";
 
 function AppRoutes() {
   return (
@@ -23,7 +25,7 @@ function AppRoutes() {
         <Route path="/library" element={<ComingSoon title="Library" />} />
 
         {/* Wishlist */}
-        <Route path="/wishlist" element={<ComingSoon title="Wishlist" />} />
+        <Route path="/wishlist" element={<Wishlist />} />
 
         {/* Profile */}
         <Route path="/profile" element={<ComingSoon title="Profile" />} />
@@ -35,7 +37,7 @@ function AppRoutes() {
         <Route path="/settings" element={<ComingSoon title="Settings" />} />
 
         {/* Cart */}
-        <Route path="/cart" element={<ComingSoon title="Cart" />} />
+        <Route path="/cart" element={<Cart />} />
 
         {/* Community */}
         <Route path="/community" element={<ComingSoon title="Community" />} />

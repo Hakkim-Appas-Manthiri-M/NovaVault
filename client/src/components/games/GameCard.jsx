@@ -1,7 +1,14 @@
 import { Heart, ShoppingCart, Star } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useStore } from "../../context/useStore";
 
 function GameCard({ game }) {
+  const { toggleWishlist, isWishlisted, addToCart, isInCart, } = useStore();
+
+const wishlisted = isWishlisted(game.id);
+
+const inCart = isInCart(game.id);
+
   const hasDiscount =
     Number(game.discount) > 0 && Number(game.originalPrice) > game.price;
 
@@ -28,11 +35,11 @@ function GameCard({ game }) {
         "
       >
         <img
-          src={game.image}
+          src={game.portraitImage ?? game.image}
           alt={game.title}
           loading="lazy"
           className="
-            h-full w-full object-cover
+            h-full w-full object-cover object-[center_30%]
             transition-transform duration-500 ease-out
             group-hover:scale-[1.045]
             motion-reduce:transform-none
@@ -87,6 +94,7 @@ function GameCard({ game }) {
           onClick={(event) => {
             event.preventDefault();
             event.stopPropagation();
+            toggleWishlist(game);
           }}
           className="
             absolute right-3 top-3
@@ -103,7 +111,7 @@ function GameCard({ game }) {
             active:scale-95
           "
         >
-          <Heart className="size-3.5" />
+          <Heart className={["size-3.5 transition-all duration-200", wishlisted ? "fill-violet-400 text-violet-400" : "text-slate-300", ].join(" ") }/>
         </button>
       </Link>
 
@@ -188,6 +196,7 @@ function GameCard({ game }) {
               onClick={(event) => {
                 event.preventDefault();
                 event.stopPropagation();
+                addToCart(game);
               }}
               className="
                 flex size-8 shrink-0
@@ -203,7 +212,7 @@ function GameCard({ game }) {
                 active:scale-95
               "
             >
-              <ShoppingCart className="size-3.5" />
+              <ShoppingCart className={["size-3.5 transition-colors duration-200", inCart ? "text-violet-400" : "text-slate-400", ].join(" ")}/>
             </button>
           </div>
         </div>

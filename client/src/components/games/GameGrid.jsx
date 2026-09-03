@@ -1,6 +1,10 @@
 import GameCard from "./GameCard";
 
-function GameGrid({ games = [] }) {
+function GameGrid({
+  games = [],
+  emptyTitle = "No games found",
+  emptyDescription = "Try changing your search or filters.",
+}) {
   if (!games.length) {
     return (
       <div
@@ -15,12 +19,12 @@ function GameGrid({ games = [] }) {
         "
       >
         <div>
-          <p className="text-[11px] font-semibold text-slate-300">
-            No games found
+          <p className="!text-[16px] font-semibold text-slate-300">
+            {emptyTitle}
           </p>
 
-          <p className="mt-1 text-[9px] text-slate-600">
-            Try changing your search or filters.
+          <p className="mt-1 !text-[13px] text-slate-600">
+            {emptyDescription}
           </p>
         </div>
       </div>

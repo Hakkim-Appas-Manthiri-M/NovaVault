@@ -1,13 +1,17 @@
-import AppRoutes from './routes/AppRoutes'
-import PageLoader from './components/common/PageLoader'
+import AppRoutes from "./routes/AppRoutes";
+import PageLoader from "./components/common/PageLoader";
+import StoreProvider from "./context/StoreProvider";
 
 function App() {
   return (
     <>
       <PageLoader />
-      <AppRoutes />
+
+      <StoreProvider>
+        <AppRoutes />
+      </StoreProvider>
     </>
-  )
+  );
 }
 
-export default App
+export default App;
