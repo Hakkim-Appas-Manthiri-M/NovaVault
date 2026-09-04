@@ -18,9 +18,11 @@ export const featuredGames = [
     platforms: ["PC", "PS5", "Xbox"],
     accent: "amber",
     image:
-      "https://www.gamewallpapers.com/img_script/wallpaper_dir/img.php?src=wallpaper_resident_evil_requiem_03_2560x1080.jpg&height=506&sharpen",
+      "https://image.api.playstation.com/vulcan/ap/rnd/202512/1506/3878ff92261c1fda7ce03772ac149514ce6f6bf5c715e64b.png",
+    mobileImage: 
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRHVvSrtCSlrtUHD_GvZUzR9Clb63TCq9_RnGANiluPo3pgibSQuGe7xefj&s=10",
     portraitImage:
-      "https://cdn1.epicgames.com/spt-assets/b2e589fac93746fc8d20b4177f5b3a60/resident-evil-requiem-g8jiq.jpg",
+      "https://image.api.playstation.com/vulcan/ap/rnd/202512/1205/79661d7a2bdb9784749b4e57e1456ca89f7ac7bed8615aee.png",
   },
 
   {
@@ -39,6 +41,8 @@ export const featuredGames = [
     accent: "cyan",
     image:
       "https://image.api.playstation.com/vulcan/img/rnd/202011/1215/WyHa1BM3ISDVqYSEUMB9VZJs.png",
+    mobileImage: 
+      "https://media.rockstargames.com/rockstargames-newsite/uploads/735dced71b9c0a15490e7ce2995df16f61fb2e79.jpg",
     portraitImage:
       "https://image.api.playstation.com/cdn/UP1004/CUSA03041_00/Hpl5MtwQgOVF9vJqlfui6SDB5Jl4oBSq.png",
   },
@@ -59,6 +63,8 @@ export const featuredGames = [
     accent: "amber",
     image:
       "https://image.api.playstation.com/vulcan/img/rnd/202010/2122/19xis9VT5XfnXsLSMkxUjvVd.png",
+    mobileImage: 
+      "https://sm.ign.com/ign_za/cover/m/marvels-sp/marvels-spider-man-remastered_az82.jpg",
     portraitImage:
       "https://image.api.playstation.com/vulcan/ap/rnd/202009/3021/B2aUYFC0qUAkNnjbTHRyhrg3.png",
   },
@@ -78,7 +84,9 @@ export const featuredGames = [
     platforms: ["PC", "PS5", "Xbox"],
     accent: "amber",
     image:
-      "https://cdn2.unrealengine.com/007firstlight-keyart-clean-16x9-3840x2160-1920x1080-b5bdfd056805.jpg",
+      "https://image.api.playstation.com/vulcan/ap/rnd/202506/0421/3f7672a695a9487071b261cc7c0d55ad7c25ebb39c8dc3ec.png",
+    mobileImage: 
+      "https://www.rollingstone.com/wp-content/uploads/2025/06/007-first-light.jpg",
     portraitImage:
       "https://image.api.playstation.com/vulcan/ap/rnd/202507/0215/f54f11bcf773a3bcace540344dc12154973f53d3490b93fc.png",
   },
@@ -349,6 +357,8 @@ export const gameMedia = {
       url: "https://www.youtube.com/embed/T54OWinnymM",
     },
 
+    trailerThumbnail: "https://image.api.playstation.com/vulcan/ap/rnd/202512/1506/3878ff92261c1fda7ce03772ac149514ce6f6bf5c715e64b.png",
+
     screenshots: [
       "https://cdn1.epicgames.com/spt-assets/b2e589fac93746fc8d20b4177f5b3a60/resident-evil-requiem-3kmy1.png",
       "https://cdn1.epicgames.com/spt-assets/b2e589fac93746fc8d20b4177f5b3a60/resident-evil-requiem-9s8g1.png",
@@ -371,8 +381,9 @@ export const gameMedia = {
       url: "https://www.youtube.com/embed/g-WKpapqVU8",
     },
 
+    trailerThumbnail: "https://i.ytimg.com/vi/g-WKpapqVU8/maxresdefault.jpg",
+
     screenshots: [
-      "https://i.ytimg.com/vi/g-WKpapqVU8/maxresdefault.jpg",
       "https://cdn2.unrealengine.com/Diesel/productv2/heather/home/EGS_RockstarGames_RedDeadRedemption2_G1A_00-1920x1080-308f101576da37225c889173094f373f2afc56c1.jpg",
       "https://images.ctfassets.net/h1rqp7q66d54/4c41lXEzQ57OGnrzbOZjVb/2f755efd51a4c60031c7f83e1469afd6/RDR2_Screenshot_022.jpg",
       "https://images.ctfassets.net/h1rqp7q66d54/4aMKMYMwXLw68HIppk76op/2b7051ed84248738d5a5756dca76298a/RDR2_Screenshot_024.jpg",
@@ -391,8 +402,9 @@ export const gameMedia = {
       url: "https://www.youtube.com/embed/1E051WtpyWg",
     },
 
+    trailerThumbnail: "https://cdn2.unrealengine.com/egs-marvelsspidermanremastered-insomniacgamesnixxessoftware-g1c-00-1920x1080-4a527569ebcb.jpg",
+
     screenshots: [
-      "https://cdn2.unrealengine.com/egs-marvelsspidermanremastered-insomniacgamesnixxessoftware-g1c-00-1920x1080-4a527569ebcb.jpg",
       "https://cdn2.unrealengine.com/egs-marvelsspidermanremastered-insomniacgamesnixxessoftware-g1c-01-1920x1080-91ea509ebb2d.jpg",
       "https://cdn2.unrealengine.com/egs-marvelsspidermanremastered-insomniacgamesnixxessoftware-g1a-00-1920x1080-25b4862bff3b.jpg",
       "https://cdn2.unrealengine.com/egs-marvelsspidermanremastered-insomniacgamesnixxessoftware-g1a-01-1920x1080-89160030c92b.jpg",
@@ -411,8 +423,9 @@ export const gameMedia = {
       url: "https://www.youtube.com/embed/J4qY9DYE184",
     },
 
+    trailerThumbnail: "https://cdn1.epicgames.com/spt-assets/ec961a13750b4d1da6881b1ca0eaecab/007-first-light-1y8ny.jpg",
+
     screenshots: [
-      "https://cdn1.epicgames.com/spt-assets/ec961a13750b4d1da6881b1ca0eaecab/007-first-light-1y8ny.jpg",
       "https://cdn1.epicgames.com/spt-assets/ec961a13750b4d1da6881b1ca0eaecab/007-first-light-xbdhw.jpg",
       "https://cdn1.epicgames.com/spt-assets/ec961a13750b4d1da6881b1ca0eaecab/007-first-light-1y7ow.jpg",
       "https://cdn1.epicgames.com/spt-assets/ec961a13750b4d1da6881b1ca0eaecab/007-first-light-o90jy.jpg",
@@ -431,8 +444,9 @@ export const gameMedia = {
       url: "https://www.youtube.com/embed/-CI9CcGQnGE",
     },
 
+    trailerThumbnail: "https://cdn1.epicgames.com/salesEvent/salesEvent/EGS_SherlockHolmesTheDevilsDaughter_Frogwares_S1_2560x1440-3852321c809322210cb7522fc72cbf86",
+
     screenshots: [
-      "https://cdn1.epicgames.com/salesEvent/salesEvent/EGS_SherlockHolmesTheDevilsDaughter_Frogwares_S1_2560x1440-3852321c809322210cb7522fc72cbf86",
       "https://cdn2.unrealengine.com/egs-sherlockholmesthedevilsdaughter-frogwares-g1a-01-1920x1080-17367735e2cc.jpg",
       "https://cdn2.unrealengine.com/egs-sherlockholmesthedevilsdaughter-frogwares-g1a-02-1920x1080-11f21ffc7dec.jpg",
       "https://cdn2.unrealengine.com/egs-sherlockholmesthedevilsdaughter-frogwares-g1a-03-1920x1080-e703c0ddf1c8.jpg",
@@ -451,8 +465,9 @@ export const gameMedia = {
       url: "https://www.youtube.com/embed/eG1FwkENMLU",
     },
 
+    trailerThumbnail: "https://cdn1.epicgames.com/spt-assets/53150f5307944899a0e8d8b95147449c/winter-survival-video-1iip5.png",
+
     screenshots: [
-      "https://cdn1.epicgames.com/spt-assets/53150f5307944899a0e8d8b95147449c/winter-survival-video-1iip5.png",
       "https://cdn1.epicgames.com/spt-assets/53150f5307944899a0e8d8b95147449c/winter-survival-m7606.jpg",
       "https://cdn1.epicgames.com/spt-assets/53150f5307944899a0e8d8b95147449c/winter-survival-p9el3.jpg",
       "https://cdn1.epicgames.com/spt-assets/53150f5307944899a0e8d8b95147449c/winter-survival-1eyhw.png",
@@ -471,8 +486,9 @@ export const gameMedia = {
       url: "https://www.youtube.com/embed/E9_iyrd8EsA",
     },
 
+    trailerThumbnail: "https://cdn2.unrealengine.com/egs-strandeddeep-beamteamgames-launch0-1920x1080-e57b7791ffe9.jpg",
+
     screenshots: [
-      "https://cdn2.unrealengine.com/egs-strandeddeep-beamteamgames-launch0-1920x1080-e57b7791ffe9.jpg",
       "https://cdn2.unrealengine.com/egs-strandeddeep-beamteamgames-g1a-01-1920x1080-205c7e5efcd7.jpg",
       "https://cdn2.unrealengine.com/egs-strandeddeep-beamteamgames-g1a-02-1920x1080-83567172897c.jpg",
       "https://cdn2.unrealengine.com/egs-strandeddeep-beamteamgames-g1a-03-1920x1080-0547b26b6fc6.jpg",
@@ -491,8 +507,9 @@ export const gameMedia = {
       url: "https://www.youtube.com/embed/J18lzTVgnn4",
     },
 
+    trailerThumbnail: "https://cdn1.epicgames.com/offer/f9bc208b965c4fb7afd0c842d764fc37/EGS_SherlockHolmesTheAwakened_Frogwares_S1_2560x1440-1478dec1467c4c12c7cf8b501e8e7d9b",
+
     screenshots: [
-      "https://cdn1.epicgames.com/offer/f9bc208b965c4fb7afd0c842d764fc37/EGS_SherlockHolmesTheAwakened_Frogwares_S1_2560x1440-1478dec1467c4c12c7cf8b501e8e7d9b",
       "https://cdn2.unrealengine.com/egs-sherlockholmestheawakened-frogwares-g1a-00-1920x1080-7e37dc75a6e8.jpg",
       "https://cdn2.unrealengine.com/egs-sherlockholmestheawakened-frogwares-g1a-01-1920x1080-68c767f0dbc7.jpg",
       "https://cdn2.unrealengine.com/egs-sherlockholmestheawakened-frogwares-g1a-02-1920x1080-b1825d8b5e2e.jpg",
@@ -511,8 +528,9 @@ export const gameMedia = {
       url: "https://www.youtube.com/embed/dtJj0So2yq4",
     },
 
+    trailerThumbnail: "https://cdn2.unrealengine.com/gtao-mf-partner-social16x9-1920x1080-deliv-1920x1080-b78d0fa04513.jpg",
+
     screenshots: [
-      "https://cdn2.unrealengine.com/gtao-mf-partner-social16x9-1920x1080-deliv-1920x1080-b78d0fa04513.jpg",
       "https://media-cdn.epicgames.com/9576884a222e4750be33789921606d42/9576884a222e4750be33789921606d42-00001-thumb.png",
       "https://cdn2.unrealengine.com/egs-grandtheftautovenhanced-rockstarnorth-g1a-00-1920x1080-a8017c5fca10.jpg",
       "https://cdn2.unrealengine.com/egs-grandtheftautovenhanced-rockstarnorth-g1a-01-1920x1080-8a0a482bfe2b.jpg",
@@ -531,8 +549,9 @@ export const gameMedia = {
       url: "https://www.youtube.com/embed/0YKjFoGxbec",
     },
 
+    trailerThumbnail: "https://cdn1.epicgames.com/salesEvent/salesEvent/amoguslandscape_2560x1440-3fac17e8bb45d81ec9b2c24655758075",
+
     screenshots: [
-      "https://cdn1.epicgames.com/salesEvent/salesEvent/amoguslandscape_2560x1440-3fac17e8bb45d81ec9b2c24655758075",
       "https://cdn2.unrealengine.com/egs-amongus-innersloth-g1a-02-1920x1080-0729ec4e1291.jpg",
       "https://cdn2.unrealengine.com/egs-amongus-innersloth-g1a-03-1920x1080-2b74d07d4ea1.jpg",
       "https://cdn2.unrealengine.com/egs-amongus-innersloth-g1a-04-1920x1080-beb449f0e067.jpg",
@@ -551,8 +570,9 @@ export const gameMedia = {
       url: "https://www.youtube.com/embed/1O6Qstncpnc",
     },
 
+    trailerThumbnail: "https://cdn2.unrealengine.com/egs-hogwartslegacy-avalanchesoftware-g1c-00-1920x1080-3f98e9656ef5.jpg",
+
     screenshots: [
-      "https://cdn2.unrealengine.com/egs-hogwartslegacy-avalanchesoftware-g1c-00-1920x1080-3f98e9656ef5.jpg",
       "https://cdn2.unrealengine.com/egs-hogwartslegacydigitaldeluxeedition-avalanchesoftware-editions-g1c-01-1920x1080-5d3335652e7c.jpg",
       "https://cdn2.unrealengine.com/egs-hogwartslegacy-avalanchesoftware-g1a-00-1920x1080-6ae741e030bb.jpg",
       "https://cdn2.unrealengine.com/egs-hogwartslegacy-avalanchesoftware-g1a-01-1920x1080-abc96a86b4f0.jpg",
@@ -571,8 +591,9 @@ export const gameMedia = {
       url: "https://www.youtube.com/embed/W-SpP-Z0Uu8",
     },
 
+    trailerThumbnail: "https://image.api.playstation.com/vulcan/ap/rnd/202501/2717/0c5df2b67b23263d055f3b78aeb77a6ce4668bb078fced77.jpg",
+
     screenshots: [
-      "https://image.api.playstation.com/vulcan/ap/rnd/202501/2717/0c5df2b67b23263d055f3b78aeb77a6ce4668bb078fced77.jpg",
       "https://www.topgear.com/sites/default/files/2025/05/Forza%20Horizon%205%2010.jpg",
       "https://www.topgear.com/sites/default/files/2025/05/Forza%20Horizon%205%201.jpg",
       "https://gamingbolt.com/wp-content/uploads/2021/06/forza-horizon-5-image-3.jpg",
@@ -591,8 +612,9 @@ export const gameMedia = {
       url: "https://www.youtube.com/embed/YHhwdyWkwTQ",
     },
 
+    trailerThumbnail: "https://cdn1.epicgames.com/spt-assets/f9616d900e1048a29ee9ffe9523c1594/crimson-desert-video-1pyo9.jpg",
+
     screenshots: [
-      "https://cdn1.epicgames.com/spt-assets/f9616d900e1048a29ee9ffe9523c1594/crimson-desert-video-1pyo9.jpg",
       "https://cdn1.epicgames.com/spt-assets/f9616d900e1048a29ee9ffe9523c1594/crimson-desert-rpwq9.jpg",
       "https://cdn1.epicgames.com/spt-assets/f9616d900e1048a29ee9ffe9523c1594/crimson-desert-1rbna.jpg",
       "https://cdn1.epicgames.com/spt-assets/f9616d900e1048a29ee9ffe9523c1594/crimson-desert-1arza.jpg",
@@ -611,8 +633,9 @@ export const gameMedia = {
       url: "https://www.youtube.com/embed/8EZhCzFaQuw",
     },
 
+    trailerThumbnail: "https://cdn1.epicgames.com/spt-assets/011270e3237f4bf69a3459942f005393/subnautica-2-video-15wwi.png",
+
     screenshots: [
-      "https://cdn1.epicgames.com/spt-assets/011270e3237f4bf69a3459942f005393/subnautica-2-video-15wwi.png",
       "https://cdn1.epicgames.com/spt-assets/011270e3237f4bf69a3459942f005393/subnautica-2-1p8u2.jpg",
       "https://cdn1.epicgames.com/spt-assets/011270e3237f4bf69a3459942f005393/subnautica-2-5eh8a.jpg",
       "https://cdn1.epicgames.com/spt-assets/011270e3237f4bf69a3459942f005393/subnautica-2-hrgcg.jpg",
@@ -631,8 +654,9 @@ export const gameMedia = {
       url: "https://www.youtube.com/embed/4b6hcN5vZsw",
     },
 
+    trailerThumbnail: "https://cdn1.epicgames.com/spt-assets/3e0c82e7863e40818a56f934edc55712/death-stranding-2-on-the-beach-video-7d5x2.jpg",
+
     screenshots: [
-      "https://cdn1.epicgames.com/spt-assets/3e0c82e7863e40818a56f934edc55712/death-stranding-2-on-the-beach-video-7d5x2.jpg",
       "https://cdn1.epicgames.com/spt-assets/3e0c82e7863e40818a56f934edc55712/death-stranding-2-on-the-beach-video-1u283.jpg",
       "https://cdn1.epicgames.com/spt-assets/3e0c82e7863e40818a56f934edc55712/death-stranding-2-on-the-beach-k1yu9.jpg",
       "https://cdn1.epicgames.com/spt-assets/3e0c82e7863e40818a56f934edc55712/death-stranding-2-on-the-beach-1e4o2.jpg",
@@ -651,8 +675,9 @@ export const gameMedia = {
       url: "https://www.youtube.com/embed/e0dNAq3f5pU",
     },
 
+    trailerThumbnail: "https://cdn2.unrealengine.com/featuredimage-1920x1080-f93b0095dcce.png?resize=1&w=1920&h=1080&quality=medium",
+
     screenshots: [
-      "https://cdn2.unrealengine.com/featuredimage-1920x1080-f93b0095dcce.png?resize=1&w=1920&h=1080&quality=medium",
       "https://cdn2.unrealengine.com/breathedgeblogpost1-1920x1080-25902b002840.jpg",
     ],
   },
@@ -668,8 +693,9 @@ export const gameMedia = {
       url: "https://www.youtube.com/embed/8sHJhrFF4V0",
     },
 
+    trailerThumbnail: "https://cdn1.epicgames.com/spt-assets/4e573b1b397348d385d12ddc640fc894/resonance-a-plague-tale-legacy-2trkv.jpg",
+
     screenshots: [
-      "https://cdn1.epicgames.com/spt-assets/4e573b1b397348d385d12ddc640fc894/resonance-a-plague-tale-legacy-2trkv.jpg",
       "https://cdn1.epicgames.com/spt-assets/4e573b1b397348d385d12ddc640fc894/resonance-a-plague-tale-legacy-1sbkq.jpg",
       "https://cdn1.epicgames.com/spt-assets/4e573b1b397348d385d12ddc640fc894/resonance-a-plague-tale-legacy-4yu7x.jpg",
       "https://cdn1.epicgames.com/spt-assets/4e573b1b397348d385d12ddc640fc894/resonance-a-plague-tale-legacy-y25ef.jpg",
@@ -688,8 +714,9 @@ export const gameMedia = {
       url: "https://www.youtube.com/embed/-iXraESkNGE",
     },
 
+    trailerThumbnail: "https://cdn2.unrealengine.com/01-havana-vista-gold-3840x2160-eaa9bb316009.png",
+
     screenshots: [
-      "https://cdn2.unrealengine.com/01-havana-vista-gold-3840x2160-eaa9bb316009.png",
       "https://cdn2.unrealengine.com/02-naval-gameplay-final-fix-3840x2160-bf3a4c93769c.png",
       "https://cdn2.unrealengine.com/03-edward-parry-gold-3840x2160-2acf16968c61.png",
       "https://cdn2.unrealengine.com/04-vista-boat-gold-3840x2160-e84617b6cd74.png",
@@ -708,8 +735,9 @@ export const gameMedia = {
       url: "https://www.youtube.com/embed/ZbERWU5bc50",
     },
 
+    trailerThumbnail: "https://cdn1.epicgames.com/spt-assets/50e956c439ca454ca17efefdf49fdbae/dispatch-video-jfkur.png",
+
     screenshots: [
-      "https://cdn1.epicgames.com/spt-assets/50e956c439ca454ca17efefdf49fdbae/dispatch-video-jfkur.png",
       "https://cdn1.epicgames.com/spt-assets/50e956c439ca454ca17efefdf49fdbae/dispatch-1vjjy.png",
       "https://cdn1.epicgames.com/spt-assets/50e956c439ca454ca17efefdf49fdbae/dispatch-15gmt.png",
       "https://cdn1.epicgames.com/spt-assets/50e956c439ca454ca17efefdf49fdbae/dispatch-uye1d.png",

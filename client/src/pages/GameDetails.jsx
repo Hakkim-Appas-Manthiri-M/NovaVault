@@ -11,7 +11,7 @@ import {
   Star,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 
 import PageContainer from "../components/common/PageContainer";
 import GameCard from "../components/games/GameCard";
@@ -22,6 +22,8 @@ import {
   newReleases,
   trendingGames,
 } from "../constants/gameData";
+
+import { useStore } from "../context/useStore";
 
 const allGames = [...featuredGames, ...trendingGames, ...newReleases];
 
@@ -56,19 +58,21 @@ function getYouTubeVideoId(url = "") {
 }
 
 function GameDetails() {
+  const { toggleWishlist, isWishlisted, addToCart, isInCart } = useStore();
+
   const { gameId } = useParams();
+
+  const navigate = useNavigate();
 
   const game = allGames.find((item) => item.id === gameId);
 
   const mediaData = gameMedia?.[gameId];
 
-  const screenshots =
-    mediaData?.screenshots || (game ? [game.image] : []);
+  const screenshots = mediaData?.screenshots || (game ? [game.image] : []);
 
   const trailer = mediaData?.trailer || null;
 
-  const trailerUrl =
-    typeof trailer === "string" ? trailer : trailer?.url || "";
+  const trailerUrl = typeof trailer === "string" ? trailer : trailer?.url || "";
 
   const trailerType =
     typeof trailer === "string"
@@ -88,6 +92,7 @@ function GameDetails() {
   const videoRef = useRef(null);
   const youtubeContainerRef = useRef(null);
   const youtubePlayerRef = useRef(null);
+  const thumbnailContainerRef = useRef(null);
 
   /*
    * ============================================================
@@ -96,11 +101,7 @@ function GameDetails() {
    */
 
   useEffect(() => {
-    if (
-      !isTrailerActive ||
-      trailerType !== "youtube" ||
-      !youtubeVideoId
-    ) {
+    if (!isTrailerActive || trailerType !== "youtube" || !youtubeVideoId) {
       return undefined;
     }
 
@@ -184,9 +185,7 @@ function GameDetails() {
         return;
       }
 
-      const existingScript = document.getElementById(
-        "youtube-iframe-api"
-      );
+      const existingScript = document.getElementById("youtube-iframe-api");
 
       if (existingScript) {
         const previousCallback = window.onYouTubeIframeAPIReady;
@@ -315,7 +314,6 @@ function GameDetails() {
 
   const mediaCount = screenshots.length + 1;
 
-
   /*
    * ============================================================
    * PLAY / PAUSE
@@ -334,9 +332,7 @@ function GameDetails() {
       try {
         const playerState = player.getPlayerState();
 
-        if (
-          playerState === window.YT.PlayerState.PLAYING
-        ) {
+        if (playerState === window.YT.PlayerState.PLAYING) {
           player.pauseVideo();
         } else {
           player.playVideo();
@@ -373,20 +369,43 @@ function GameDetails() {
    */
 
   const selectPrevious = () => {
-  setIsPlaying(false);
+    setIsPlaying(false);
 
-  setActiveMedia((current) =>
-    current === 0 ? mediaCount - 1 : current - 1,
-  );
-};
+    setActiveMedia((current) => (current === 0 ? mediaCount - 1 : current - 1));
+  };
 
-const selectNext = () => {
-  setIsPlaying(false);
+  const selectNext = () => {
+    setIsPlaying(false);
 
-  setActiveMedia((current) =>
-    current === mediaCount - 1 ? 0 : current + 1,
-  );
-};
+    setActiveMedia((current) => (current === mediaCount - 1 ? 0 : current + 1));
+  };
+
+  const scrollThumbnails = (direction) => {
+    thumbnailContainerRef.current?.scrollBy({
+      left: direction * 180,
+      behavior: "smooth",
+    });
+  };
+
+
+  const handleWishlist = () => {
+    if (!game) return;
+
+    toggleWishlist(game);
+  };
+
+  const handleAddToCart = () => {
+    if (!game) return;
+
+    addToCart(game);
+  };
+
+  const handleBuyNow = () => {
+    if (!game) return;
+
+    addToCart(game);
+    navigate("/cart");
+  };
 
   /*
    * ============================================================
@@ -498,10 +517,7 @@ const selectNext = () => {
                 <div className="flex items-baseline gap-2">
                   {hasDiscount && (
                     <span className="text-[11px] text-slate-600 line-through">
-                      ₹
-                      {Number(game.originalPrice).toLocaleString(
-                        "en-IN"
-                      )}
+                      ₹{Number(game.originalPrice).toLocaleString("en-IN")}
                     </span>
                   )}
 
@@ -513,6 +529,7 @@ const selectNext = () => {
                 <div className="flex gap-2">
                   <button
                     type="button"
+                    onClick={handleBuyNow}
                     className="
                       inline-flex min-h-6 items-center justify-center gap-2
                       rounded-lg bg-violet-600 px-3
@@ -528,6 +545,7 @@ const selectNext = () => {
 
                   <button
                     type="button"
+                    onClick={handleAddToCart}
                     aria-label={`Add ${game.title} to cart`}
                     className="
                       flex size-9 items-center justify-center
@@ -538,11 +556,14 @@ const selectNext = () => {
                       active:scale-95
                     "
                   >
-                    <ShoppingCart className="size-4" />
+                    <ShoppingCart
+                      className={`size-4 ${isInCart(game.id) ? "fill-current" : ""}`}
+                    />
                   </button>
 
                   <button
                     type="button"
+                    onClick={handleWishlist}
                     aria-label={`Add ${game.title} to wishlist`}
                     className="
                       flex size-9 items-center justify-center
@@ -553,7 +574,9 @@ const selectNext = () => {
                       active:scale-95
                     "
                   >
-                    <Heart className="size-4" />
+                    <Heart
+                      className={`size-4 ${isWishlisted(game.id) ? "fill-current" : ""}`}
+                    />
                   </button>
                 </div>
               </div>
@@ -605,8 +628,7 @@ const selectNext = () => {
               <div className="relative overflow-hidden rounded-2xl border border-white/[0.08] bg-[#090D19] shadow-xl shadow-black/20">
                 {isTrailerActive ? (
                   <div className="relative aspect-video w-full bg-black">
-                    {trailerType === "youtube" &&
-                    youtubeVideoId ? (
+                    {trailerType === "youtube" && youtubeVideoId ? (
                       <>
                         <div
                           ref={youtubeContainerRef}
@@ -619,9 +641,7 @@ const selectNext = () => {
                           onClick={toggleVideo}
                           disabled={!youtubeReady}
                           aria-label={
-                            isPlaying
-                              ? "Pause trailer"
-                              : "Play trailer"
+                            isPlaying ? "Pause trailer" : "Play trailer"
                           }
                           className="
                             absolute left-1/2 top-1/2 z-20
@@ -669,9 +689,7 @@ const selectNext = () => {
                           type="button"
                           onClick={toggleVideo}
                           aria-label={
-                            isPlaying
-                              ? "Pause trailer"
-                              : "Play trailer"
+                            isPlaying ? "Pause trailer" : "Play trailer"
                           }
                           className="
                             absolute left-1/2 top-1/2 z-20
@@ -716,9 +734,7 @@ const selectNext = () => {
                     backdrop-blur-md
                   "
                 >
-                  {isTrailerActive
-                    ? "Official Trailer"
-                    : "Screenshot"}
+                  {isTrailerActive ? "Official Trailer" : "Screenshot"}
                 </div>
 
                 {/* Navigation */}
@@ -781,12 +797,16 @@ const selectNext = () => {
               {/* =================================================
                   LANDSCAPE THUMBNAILS
               ================================================== */}
-              <div className="mt-3 flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-                {/* Trailer thumbnail */}
-                <button
-                  type="button"
-                  onClick={() => setActiveMedia(0)}
-                  className={`
+              <div className="relative mt-3">
+                <div
+                  ref={thumbnailContainerRef}
+                  className="flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+                >
+                  {/* Trailer thumbnail */}
+                  <button
+                    type="button"
+                    onClick={() => setActiveMedia(0)}
+                    className={`
                     group relative w-[120px] min-w-[120px]
                     overflow-hidden rounded-lg border
                     transition-all duration-200
@@ -797,38 +817,38 @@ const selectNext = () => {
                         : "border-white/[0.07] hover:border-white/20"
                     }
                   `}
-                >
-                  <div className="relative aspect-video">
-                    <img
-                      src={game.image}
-                      alt={`${game.title} trailer`}
-                      className="h-full w-full object-cover"
-                    />
+                  >
+                    <div className="relative aspect-video">
+                      <img
+                        src={mediaData?.trailerThumbnail ?? game.image}
+                        alt={`${game.title} trailer preview`}
+                        className="h-full w-full object-cover"
+                      />
 
-                    <div className="absolute inset-0 bg-black/40" />
+                      <div className="absolute inset-0 bg-black/40" />
 
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <span className="flex size-7 items-center justify-center rounded-full bg-white/90 text-black">
-                        <Play className="ml-0.5 size-3 fill-current" />
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <span className="flex size-7 items-center justify-center rounded-full bg-white/90 text-black">
+                          <Play className="ml-0.5 size-3 fill-current" />
+                        </span>
+                      </div>
+
+                      <span className="absolute bottom-1.5 left-1.5 rounded bg-black/60 px-1.5 py-1 text-[6px] font-bold uppercase tracking-wide text-white">
+                        Trailer
                       </span>
                     </div>
+                  </button>
 
-                    <span className="absolute bottom-1.5 left-1.5 rounded bg-black/60 px-1.5 py-1 text-[6px] font-bold uppercase tracking-wide text-white">
-                      Trailer
-                    </span>
-                  </div>
-                </button>
+                  {/* Screenshot thumbnails */}
+                  {screenshots.map((image, index) => {
+                    const mediaIndex = index + 1;
 
-                {/* Screenshot thumbnails */}
-                {screenshots.map((image, index) => {
-                  const mediaIndex = index + 1;
-
-                  return (
-                    <button
-                      key={`${image}-${index}`}
-                      type="button"
-                      onClick={() => setActiveMedia(mediaIndex)}
-                      className={`
+                    return (
+                      <button
+                        key={`${image}-${index}`}
+                        type="button"
+                        onClick={() => setActiveMedia(mediaIndex)}
+                        className={`
                         group relative w-[120px] min-w-[120px]
                         overflow-hidden rounded-lg border
                         transition-all duration-200
@@ -839,25 +859,41 @@ const selectNext = () => {
                             : "border-white/[0.07] hover:border-white/20"
                         }
                       `}
-                    >
-                      <img
-                        src={image}
-                        alt={`${game.title} screenshot ${
-                          index + 1
-                        }`}
-                        className="
+                      >
+                        <img
+                          src={image}
+                          alt={`${game.title} screenshot ${index + 1}`}
+                          className="
                           aspect-video h-full w-full object-cover
                           transition-transform duration-300
                           group-hover:scale-105
                         "
-                      />
+                        />
 
-                      {activeMedia === mediaIndex && (
-                        <div className="absolute inset-0 bg-violet-500/10" />
-                      )}
-                    </button>
-                  );
-                })}
+                        {activeMedia === mediaIndex && (
+                          <div className="absolute inset-0 bg-violet-500/10" />
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => scrollThumbnails(-1)}
+                  aria-label="Scroll thumbnails left"
+                  className="absolute left-1 top-1/2 z-20 hidden size-8 -translate-y-1/2 items-center justify-center rounded-lg border border-white/10 bg-black/60 text-slate-300 shadow-lg backdrop-blur-md transition hover:border-violet-400/30 hover:bg-violet-600 hover:text-white lg:flex"
+                >
+                  <ChevronLeft className="size-4" />
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => scrollThumbnails(1)}
+                  aria-label="Scroll thumbnails right"
+                  className="absolute right-1 top-1/2 z-20 hidden size-8 -translate-y-1/2 items-center justify-center rounded-lg border border-white/10 bg-black/60 text-slate-300 shadow-lg backdrop-blur-md transition hover:border-violet-400/30 hover:bg-violet-600 hover:text-white lg:flex"
+                >
+                  <ChevronRight className="size-4" />
+                </button>
               </div>
             </div>
 
@@ -880,9 +916,7 @@ const selectNext = () => {
                 {/* Basic info */}
                 <div className="mt-5 space-y-3">
                   <div className="flex items-center justify-between gap-4">
-                    <span className="text-[8px] text-slate-600">
-                      Genre
-                    </span>
+                    <span className="text-[8px] text-slate-600">Genre</span>
 
                     <span className="text-right text-[8px] font-semibold text-slate-300">
                       {game.genre || "Action"}
@@ -892,9 +926,7 @@ const selectNext = () => {
                   <div className="h-px bg-white/[0.05]" />
 
                   <div className="flex items-center justify-between gap-4">
-                    <span className="text-[8px] text-slate-600">
-                      Platform
-                    </span>
+                    <span className="text-[8px] text-slate-600">Platform</span>
 
                     <span className="text-[8px] font-semibold text-slate-300">
                       {(game.platforms || ["PC"]).join(" · ")}
@@ -904,9 +936,7 @@ const selectNext = () => {
                   <div className="h-px bg-white/[0.05]" />
 
                   <div className="flex items-center justify-between gap-4">
-                    <span className="text-[8px] text-slate-600">
-                      Rating
-                    </span>
+                    <span className="text-[8px] text-slate-600">Rating</span>
 
                     <span className="flex items-center gap-1 text-[8px] font-semibold text-slate-300">
                       <Star className="size-3 fill-current text-amber-400" />
@@ -929,9 +959,7 @@ const selectNext = () => {
 
                     <div className="mt-2 space-y-2">
                       <div className="flex justify-between gap-3">
-                        <span className="text-[7px] text-slate-600">
-                          OS
-                        </span>
+                        <span className="text-[7px] text-slate-600">OS</span>
 
                         <span className="text-right text-[7px] text-slate-400">
                           Windows 10
@@ -978,9 +1006,7 @@ const selectNext = () => {
 
                     <div className="mt-2 space-y-2">
                       <div className="flex justify-between gap-3">
-                        <span className="text-[7px] text-slate-600">
-                          OS
-                        </span>
+                        <span className="text-[7px] text-slate-600">OS</span>
 
                         <span className="text-right text-[7px] text-slate-400">
                           Windows 11
@@ -1109,10 +1135,7 @@ const selectNext = () => {
 
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
               {relatedGames.map((relatedGame) => (
-                <GameCard
-                  key={relatedGame.id}
-                  game={relatedGame}
-                />
+                <GameCard key={relatedGame.id} game={relatedGame} />
               ))}
             </div>
           </section>

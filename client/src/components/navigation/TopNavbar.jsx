@@ -7,8 +7,8 @@ import NovaVaultLogo from "./NovaVaultLogo";
 import { useStore } from "../../context/useStore";
 
 const navigation = [
-  { label: "Store", to: "/games" },
-  { label: "Library", to: "/library" },
+  { label: "Discover", to: "/games" },
+  { label: "Vault", to: "/library" },
   { label: "Community", to: "/community" },
   { label: "News", to: "/news" },
   { label: "Support", to: "/support" },
@@ -22,13 +22,19 @@ function TopNavbar() {
   // Lock background scrolling when mobile menu is open
   useEffect(() => {
     if (mobileMenuOpen) {
+      document.documentElement.style.overflow = "hidden";
       document.body.style.overflow = "hidden";
+      document.body.style.overscrollBehavior = "none";
     } else {
+      document.documentElement.style.overflow = "";
       document.body.style.overflow = "";
+      document.body.style.overscrollBehavior = "";
     }
 
     return () => {
+      document.documentElement.style.overflow = "";
       document.body.style.overflow = "";
+      document.body.style.overscrollBehavior = "";
     };
   }, [mobileMenuOpen]);
 
@@ -60,17 +66,6 @@ function TopNavbar() {
       ========================== */}
       <header className="fixed left-0 right-0 top-0 z-50 w-full border-b border-white/[0.06] bg-[#050711]/95 backdrop-blur-xl">
         <div className="mx-auto flex h-[70px] max-w-[1536px] items-center px-4 sm:px-6 lg:px-7">
-          {/* Mobile menu button */}
-          <button
-            type="button"
-            aria-label="Open menu"
-            aria-expanded={mobileMenuOpen}
-            onClick={() => setMobileMenuOpen(true)}
-            className="mr-3 flex size-9 items-center justify-center rounded-lg text-slate-400 transition hover:bg-white/[0.04] hover:text-white lg:hidden"
-          >
-            <Menu className="size-[18px]" />
-          </button>
-
           {/* Logo */}
           <Link to="/" aria-label="NovaVault home" className="shrink-0">
             <NovaVaultLogo />
@@ -84,7 +79,7 @@ function TopNavbar() {
                 to={item.to}
                 className={({ isActive }) =>
                   [
-                    "relative py-[26px] text-[9px] font-bold uppercase tracking-[0.07em] transition-colors",
+                    "relative py-[26px] !text-[10px] font-bold uppercase tracking-[0.07em] transition-colors",
                     isActive
                       ? "text-violet-400"
                       : "text-slate-400 hover:text-white",
@@ -118,7 +113,7 @@ function TopNavbar() {
                 value={searchQuery}
                 onChange={(event) => setSearchQuery(event.target.value)}
                 placeholder="Search games, DLC, developers..."
-                className="h-9 w-full rounded-lg border border-white/[0.08] bg-[#080B15] pl-9 pr-8 text-[9px] text-white outline-none transition-all duration-200 placeholder:text-[13px] placeholder:text-slate-500 hover:border-white/[0.12] focus:border-violet-500/40"
+                className="h-9 w-full rounded-lg border border-white/[0.08] bg-[#080B15] pl-9 pr-8 !text-[13px] text-white outline-none transition-all duration-200 placeholder:!text-[13px] placeholder:text-slate-500 hover:border-white/[0.12] focus:border-violet-500/40"
               />
 
               {searchQuery && (
@@ -137,7 +132,7 @@ function TopNavbar() {
             <Link
               to="/wishlist"
               aria-label="Wishlist"
-              className="relative flex size-9 items-center justify-center rounded-lg text-slate-400 transition hover:bg-white/[0.04] hover:text-white"
+              className="relative hidden size-9 items-center justify-center rounded-lg text-slate-400 transition hover:bg-white/[0.04] hover:text-white lg:flex"
             >
               <Heart className="size-[17px]" />
               {wishlistCount > 0 && (
@@ -151,7 +146,7 @@ function TopNavbar() {
             <Link
               to="/cart"
               aria-label="Shopping cart"
-              className="relative flex size-9 items-center justify-center rounded-lg text-slate-400 transition hover:bg-white/[0.04] hover:text-white"
+              className="relative hidden size-9 items-center justify-center rounded-lg text-slate-400 transition hover:bg-white/[0.04] hover:text-white lg:flex"
             >
               <ShoppingCart className="size-[17px]" />
 
@@ -171,10 +166,21 @@ function TopNavbar() {
                 H
               </span>
 
-              <span className="hidden text-[9px] font-semibold text-slate-300 md:block">
+              <span className="hidden !text-[9px] font-semibold text-slate-300 md:block">
                 Hakkim
               </span>
             </Link>
+
+            {/* Mobile menu button */}
+            <button
+              type="button"
+              aria-label="Open menu"
+              aria-expanded={mobileMenuOpen}
+              onClick={() => setMobileMenuOpen(true)}
+              className="mr-0 flex size-9 items-center justify-center rounded-lg text-slate-400 transition hover:bg-white/[0.04] hover:text-white lg:hidden"
+            >
+              <Menu className="size-[18px]" />
+            </button>
           </div>
         </div>
       </header>
@@ -183,7 +189,14 @@ function TopNavbar() {
           MOBILE FULLSCREEN MENU
       ========================== */}
       {mobileMenuOpen && (
-        <div className="fixed inset-0 z-[100] w-full bg-[#050711] lg:hidden">
+        <div
+          className="
+        fixed inset-0 z-[100] h-[100dvh] w-full overflow-y-auto
+        overscroll-none bg-[#050711] lg:hidden 
+        [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-track]:bg-transparent
+        [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-white/10"
+          style={{ touchAction: "pan-y" }}
+        >
           {/* Mobile menu header */}
           <div className="flex h-[70px] items-center border-b border-white/[0.06] px-4 sm:px-6">
             <Link

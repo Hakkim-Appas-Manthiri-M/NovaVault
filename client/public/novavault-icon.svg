@@ -1,0 +1,53 @@
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  viewBox="0 0 64 64"
+  fill="none"
+>
+  <defs>
+    <linearGradient
+      id="nova"
+      x1="8"
+      y1="8"
+      x2="56"
+      y2="56"
+      gradientUnits="userSpaceOnUse"
+    >
+      <stop stop-color="#A78BFA"/>
+      <stop offset="0.5" stop-color="#8B5CF6"/>
+      <stop offset="1" stop-color="#6D28D9"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Vault frame -->
+  <path
+    d="M32 4L55 17V47L32 60L9 47V17L32 4Z"
+    fill="#080B15"
+    stroke="url(#nova)"
+    stroke-width="3"
+  />
+
+  <!-- Inner vault -->
+  <path
+    d="M32 12L48 21V43L32 52L16 43V21L32 12Z"
+    fill="#0B1020"
+    stroke="rgba(167,139,250,0.35)"
+    stroke-width="1.5"
+  />
+
+  <!-- Stylized N -->
+  <path
+    d="M20 42V22L32 38V22L44 42V22"
+    stroke="url(#nova)"
+    stroke-width="5"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+
+  <!-- Core -->
+  <circle
+    cx="32"
+    cy="32"
+    r="2.5"
+    fill="#C4B5FD"
+  />
+</svg>

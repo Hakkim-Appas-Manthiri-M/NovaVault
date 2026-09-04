@@ -95,32 +95,29 @@ function HomeHero() {
             }}
             className="absolute inset-0"
           >
-            <motion.img
-              src={activeGame.image}
-              alt=""
-              aria-hidden="true"
-              className="
-                absolute
-                inset-0
-                h-full
-                w-full
-                object-cover
+            <picture className="absolute inset-0 block">
+              <source
+                media="(max-width: 499px)"
+                srcSet={activeGame.mobileImage ?? activeGame.image}
+              />
 
-                object-[62%_center]
-
-                sm:object-center
-              "
-              initial={{
-                scale: 1.03,
-              }}
-              animate={{
-                scale: 1,
-              }}
-              transition={{
-                duration: 7,
-                ease: "linear",
-              }}
-            />
+              <motion.img
+                src={activeGame.image}
+                alt=""
+                aria-hidden="true"
+                className="absolute inset-0 h-full w-full object-cover object-[62%_center] sm:object-center"
+                initial={{
+                  scale: 1.03,
+                }}
+                animate={{
+                  scale: 1,
+                }}
+                transition={{
+                  duration: 7,
+                  ease: "linear",
+                }}
+              />
+            </picture>
 
             {/* Main cinematic overlay */}
             <div
@@ -409,8 +406,8 @@ function HomeHero() {
               >
                 {/* BUY NOW */}
 
-                <button
-                  type="button"
+                <Link
+                  to={`/games/${activeGame.id}`}
                   className="
                     inline-flex
                     h-8
@@ -452,7 +449,7 @@ function HomeHero() {
                   <span className="!text-[10px] sm:hidden">Buy</span>
 
                   <span className="hidden !text-[10px] sm:inline">Buy Now</span>
-                </button>
+                </Link>
 
                 {/* VIEW GAME */}
 
