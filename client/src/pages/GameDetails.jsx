@@ -557,7 +557,7 @@ function GameDetails() {
                     "
                   >
                     <ShoppingCart
-                      className={`size-4 ${isInCart(game.id) ? "fill-current" : ""}`}
+                      className={`size-4 ${isInCart(game.id) ? "text-violet-600" : ""}`}
                     />
                   </button>
 
@@ -575,7 +575,7 @@ function GameDetails() {
                     "
                   >
                     <Heart
-                      className={`size-4 ${isWishlisted(game.id) ? "fill-current" : ""}`}
+                      className={`size-4 ${isWishlisted(game.id) ? "fill-violet-600 text-violet-600" : ""}`}
                     />
                   </button>
                 </div>

@@ -111,7 +111,7 @@ const inCart = isInCart(game.id);
             active:scale-95
           "
         >
-          <Heart className={["size-3.5 transition-all duration-200", wishlisted ? "fill-violet-400 text-violet-400" : "text-slate-300", ].join(" ") }/>
+          <Heart className={["size-3.5 transition-all duration-200", wishlisted ? "fill-violet-600 text-violet-600" : "text-slate-300", ].join(" ") }/>
         </button>
       </Link>
 
@@ -212,7 +212,7 @@ const inCart = isInCart(game.id);
                 active:scale-95
               "
             >
-              <ShoppingCart className={["size-3.5 transition-colors duration-200", inCart ? "text-violet-400" : "text-slate-400", ].join(" ")}/>
+              <ShoppingCart className={["size-3.5 transition-colors duration-200", inCart ? "text-violet-600" : "text-slate-400", ].join(" ")}/>
             </button>
           </div>
         </div>

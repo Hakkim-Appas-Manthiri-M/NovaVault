@@ -95,7 +95,7 @@ function Cart() {
                   {/* Artwork */}
                   <div className="h-20 w-14 shrink-0 overflow-hidden rounded-lg bg-white/[0.03] sm:h-24 sm:w-16">
                     <img
-                      src={item.portraitImage}
+                      src={item.portraitImage || item.image}
                       alt={item.title}
                       className="h-full w-full object-cover"
                     />
