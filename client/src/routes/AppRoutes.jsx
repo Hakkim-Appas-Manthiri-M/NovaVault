@@ -7,11 +7,26 @@ import Games from "../pages/Games";
 import Home from "../pages/Home";
 import Wishlist from "../pages/Wishlist";
 import Cart from "../pages/Cart";
+import Categories from "../pages/Categories";
+import Deals from "../pages/Deals";
+import Login from "../pages/Login";
+import Register from "../pages/Register";
+import ProtectedRoute from "./ProtectedRoute";
+import Checkout from "../pages/Checkout";
+import Profile from "../pages/Profile";
 
 function AppRoutes() {
   return (
     <Routes>
+      {/* Authentication */}
+      <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
+
       <Route element={<AppShell />}>
+        {/* =========================
+            PUBLIC STORE
+        ========================== */}
+
         {/* Home */}
         <Route path="/" element={<Home />} />
 
@@ -21,41 +36,75 @@ function AppRoutes() {
         {/* Game Details */}
         <Route path="/games/:gameId" element={<GameDetails />} />
 
-        {/* Library */}
-        <Route path="/library" element={<ComingSoon title="Library" />} />
-
-        {/* Wishlist */}
-        <Route path="/wishlist" element={<Wishlist />} />
-
-        {/* Profile */}
-        <Route path="/profile" element={<ComingSoon title="Profile" />} />
-
-        {/* Downloads */}
-        <Route path="/downloads" element={<ComingSoon title="Downloads" />} />
-
-        {/* Settings */}
-        <Route path="/settings" element={<ComingSoon title="Settings" />} />
+        {/* Categories */}
+        <Route path="/categories" element={<Categories />} />
 
         {/* Cart */}
         <Route path="/cart" element={<Cart />} />
 
+        {/* Wishlist */}
+        <Route path="/wishlist" element={<Wishlist />} />
+
+        {/* Deals */}
+        <Route path="/deals" element={<Deals />} />
+
+        {/* =========================
+            PROTECTED USER AREA
+        ========================== */}
+
+        <Route element={<ProtectedRoute />}>
+          {/* Library */}
+          <Route
+            path="/library"
+            element={<ComingSoon title="Library" />}
+          />
+
+          {/* Profile */}
+          <Route path="/profile" element={<Profile />} />
+
+          {/* Downloads */}
+          <Route
+            path="/downloads"
+            element={<ComingSoon title="Downloads" />}
+          />
+
+          {/* Settings */}
+          <Route
+            path="/settings"
+            element={<ComingSoon title="Settings" />}
+          />
+
+          {/* Checkout */}
+          <Route path="/checkout" element={<Checkout />} />
+        </Route>
+
+        {/* =========================
+            PUBLIC / COMING SOON
+        ========================== */}
+
         {/* Community */}
-        <Route path="/community" element={<ComingSoon title="Community" />} />
+        <Route
+          path="/community"
+          element={<ComingSoon title="Community" />}
+        />
 
         {/* News */}
-        <Route path="/news" element={<ComingSoon title="News" />} />
+        <Route
+          path="/news"
+          element={<ComingSoon title="News" />}
+        />
 
         {/* Support */}
-        <Route path="/support" element={<ComingSoon title="Support" />} />
+        <Route
+          path="/support"
+          element={<ComingSoon title="Support" />}
+        />
 
         {/* New Releases */}
         <Route
           path="/new-releases"
           element={<ComingSoon title="New Releases" />}
         />
-
-        {/* Deals */}
-        <Route path="/deals" element={<ComingSoon title="Vault Deals" />} />
 
         {/* Fallback */}
         <Route path="*" element={<Navigate to="/" replace />} />

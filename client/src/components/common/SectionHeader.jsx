@@ -11,7 +11,7 @@ function SectionHeader({
     <div className="mb-5 flex items-end justify-between gap-4">
       <div>
         {eyebrow && (
-          <p className="mb-1.5 text-[8px] font-bold uppercase tracking-[0.25em] text-violet-400">
+          <p className="mb-1.5 !text-[8px] font-bold uppercase tracking-[0.25em] text-violet-400">
             {eyebrow}
           </p>
         )}
@@ -21,7 +21,7 @@ function SectionHeader({
         </h2>
 
         {description && (
-          <p className="mt-1.5 max-w-xl text-[10px] leading-5 text-slate-600">
+          <p className="mt-1.5 max-w-xl !text-[10px] leading-5 text-slate-600">
             {description}
           </p>
         )}
@@ -30,7 +30,7 @@ function SectionHeader({
       {link && (
         <Link
           to={link.to}
-          className="group hidden items-center gap-1.5 text-[9px] font-bold uppercase tracking-[0.08em] text-slate-500 transition hover:text-violet-300 sm:flex"
+          className="group flex shrink-0 items-center gap-1.5 !text-[9px] font-bold uppercase tracking-[0.08em] text-slate-500 transition hover:text-violet-300"
         >
           {link.label}
 

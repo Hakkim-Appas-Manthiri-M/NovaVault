@@ -27,15 +27,15 @@ const inCart = isInCart(game.id);
       "
     >
       {/* Artwork */}
-      <Link
-        to={`/games/${game.id}`}
+      <Link 
+        to={`/games/${game.slug || game.id}`}
         className="
           relative block aspect-[5/6]
           overflow-hidden bg-[#0B0F1C]
         "
       >
-        <img
-          src={game.portraitImage ?? game.image}
+        <img 
+          src={game.portraitImage || game.image}
           alt={game.title}
           loading="lazy"
           className="
@@ -118,8 +118,8 @@ const inCart = isInCart(game.id);
       {/* Card information */}
       <div className="relative px-3 pb-3 pt-2.5">
         {/* Title */}
-        <Link
-          to={`/games/${game.id}`}
+        <Link 
+          to={`/games/${game.slug || game.id}`}
           className="
             block truncate
             text-[11px] font-bold

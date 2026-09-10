@@ -53,7 +53,7 @@ function GameGridError({
               border border-white/[0.06]
               bg-white/[0.02]
               px-3
-              text-[9px]
+              !text-[9px]
               font-semibold
               uppercase
               tracking-[0.06em]

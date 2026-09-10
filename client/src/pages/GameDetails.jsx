@@ -16,16 +16,9 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import PageContainer from "../components/common/PageContainer";
 import GameCard from "../components/games/GameCard";
 
-import {
-  featuredGames,
-  gameMedia,
-  newReleases,
-  trendingGames,
-} from "../constants/gameData";
+import { getGameById, getGames } from "../services/gameApi";
 
 import { useStore } from "../context/useStore";
-
-const allGames = [...featuredGames, ...trendingGames, ...newReleases];
 
 function getYouTubeVideoId(url = "") {
   if (!url) return "";
@@ -57,6 +50,68 @@ function getYouTubeVideoId(url = "") {
   return "";
 }
 
+// Prevent duplicate Game Details requests during React StrictMode
+// and rapid navigation between the same game.
+const detailsRequestCache = new Map();
+
+function loadGameDetails(gameId) {
+  const cachedRequest = detailsRequestCache.get(gameId);
+
+  if (cachedRequest) {
+    return cachedRequest;
+  }
+
+  const request = getGameById(gameId)
+    .then(async (data) => {
+      if (!data?.game) {
+        throw new Error("Game not found.");
+      }
+
+      const gameData = {
+        ...data.game,
+        id: data.game._id,
+      };
+
+      let relatedGames = [];
+
+      if (gameData.genre) {
+        try {
+          const relatedData = await getGames({
+            genre: gameData.genre,
+            limit: 5,
+          });
+
+          relatedGames = (relatedData.games || [])
+            .filter((item) => item._id !== gameData._id)
+            .slice(0, 4)
+            .map((item) => ({
+              ...item,
+              id: item._id,
+            }));
+        } catch {
+          // Related games are optional. Do not fail the main page.
+          relatedGames = [];
+        }
+      }
+
+      return {
+        game: gameData,
+        relatedGames,
+      };
+    })
+    .finally(() => {
+      setTimeout(() => {
+        if (detailsRequestCache.get(gameId) === request) {
+          detailsRequestCache.delete(gameId);
+        }
+      }, 5000);
+    });
+
+  detailsRequestCache.set(gameId, request);
+
+  return request;
+}
+
 function GameDetails() {
   const { toggleWishlist, isWishlisted, addToCart, isInCart } = useStore();
 
@@ -64,35 +119,91 @@ function GameDetails() {
 
   const navigate = useNavigate();
 
-  const game = allGames.find((item) => item.id === gameId);
+  const [game, setGame] = useState(null);
+  const [relatedGames, setRelatedGames] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  const mediaData = gameMedia?.[gameId];
+  const mediaData = game?.media;
 
-  const screenshots = mediaData?.screenshots || (game ? [game.image] : []);
-
-  const trailer = mediaData?.trailer || null;
-
-  const trailerUrl = typeof trailer === "string" ? trailer : trailer?.url || "";
-
-  const trailerType =
-    typeof trailer === "string"
-      ? trailer.includes("youtube.com") || trailer.includes("youtu.be")
-        ? "youtube"
-        : "mp4"
-      : trailer?.type || "mp4";
-
-  const youtubeVideoId =
-    trailerType === "youtube" ? getYouTubeVideoId(trailerUrl) : "";
+  const screenshots =
+    mediaData?.screenshots?.length > 0
+      ? mediaData.screenshots
+      : game
+        ? [game.image]
+        : [];
 
   const [activeMedia, setActiveMedia] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [youtubeReady, setYoutubeReady] = useState(false);
-  const isTrailerActive = activeMedia === 0;
 
   const videoRef = useRef(null);
   const youtubeContainerRef = useRef(null);
   const youtubePlayerRef = useRef(null);
   const thumbnailContainerRef = useRef(null);
+
+  const isTrailerActive = activeMedia === 0;
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadDetails = async () => {
+      if (!gameId) {
+        setGame(null);
+        setRelatedGames([]);
+        setError("Game not found.");
+        setLoading(false);
+        return;
+      }
+
+      setLoading(true);
+      setError("");
+      setGame(null);
+      setRelatedGames([]);
+      setActiveMedia(0);
+      setIsPlaying(false);
+      setYoutubeReady(false);
+
+      try {
+        const data = await loadGameDetails(gameId);
+
+        if (cancelled) return;
+
+        setGame(data.game);
+        setRelatedGames(data.relatedGames);
+      } catch (err) {
+        if (cancelled) return;
+
+        setGame(null);
+        setRelatedGames([]);
+        setError(err.message || "Failed to load game.");
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    };
+
+    loadDetails();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [gameId]);
+
+  const trailer = mediaData?.trailer || "";
+
+  const trailerUrl =
+    typeof trailer === "string" ? trailer : trailer?.url || "";
+
+  const trailerType =
+    mediaData?.trailerType ||
+    (trailerUrl.includes("youtube.com") || trailerUrl.includes("youtu.be")
+      ? "youtube"
+      : "mp4");
+
+  const youtubeVideoId =
+    trailerType === "youtube" ? getYouTubeVideoId(trailerUrl) : "";
 
   /*
    * ============================================================
@@ -270,47 +381,147 @@ function GameDetails() {
    * ============================================================
    */
 
-  if (!game) {
+  if (loading) {
     return (
-      <PageContainer className="py-12">
-        <div className="flex min-h-[60vh] flex-col items-center justify-center text-center">
-          <p className="text-[8px] font-bold uppercase tracking-[0.25em] text-violet-400">
-            NovaVault
-          </p>
+      <div className="min-h-screen animate-pulse">
+        <section className="relative overflow-hidden border-b border-white/[0.06]">
+          <div className="absolute inset-0 bg-[#050711]" />
 
-          <h1 className="nv-display mt-3 text-3xl font-bold text-white">
-            Game Not Found
-          </h1>
+          <PageContainer className="relative py-6 sm:py-8 lg:py-10">
+            <div className="h-3 w-24 rounded bg-white/[0.05]" />
 
-          <p className="mt-2 max-w-md text-[10px] leading-5 text-slate-500">
-            The game you're looking for doesn't exist in the NovaVault
-            collection.
-          </p>
+            <div className="mt-7 grid gap-7 lg:grid-cols-[280px_minmax(0,1fr)] lg:items-end xl:grid-cols-[320px_minmax(0,1fr)]">
+              <div className="mx-auto w-full max-w-[260px] lg:mx-0 lg:max-w-none">
+                <div className="aspect-[4/5] overflow-hidden rounded-2xl border border-white/[0.08] bg-white/[0.04]" />
+              </div>
 
-          <Link
-            to="/games"
-            className="
-              mt-6 inline-flex min-h-10 items-center gap-2
-              rounded-lg bg-violet-600 px-5
-              !text-[10px] font-bold uppercase tracking-[0.08em]
-              text-white transition hover:bg-violet-500
-            "
-          >
-            <ArrowLeft className="size-3.5" />
-            Back to Store
-          </Link>
-        </div>
-      </PageContainer>
+              <div className="min-w-0">
+                <div className="h-2.5 w-28 rounded bg-violet-400/10" />
+                <div className="mt-3 h-9 w-3/4 rounded bg-white/[0.06] sm:h-11" />
+                <div className="mt-3 h-2.5 w-32 rounded bg-white/[0.04]" />
+
+                <div className="mt-5 flex gap-3">
+                  <div className="h-3 w-12 rounded bg-white/[0.05]" />
+                  <div className="h-3 w-20 rounded bg-white/[0.04]" />
+                </div>
+
+                <div className="mt-4 max-w-2xl space-y-2">
+                  <div className="h-2.5 w-full rounded bg-white/[0.035]" />
+                  <div className="h-2.5 w-11/12 rounded bg-white/[0.035]" />
+                  <div className="h-2.5 w-3/4 rounded bg-white/[0.035]" />
+                </div>
+
+                <div className="mt-6 flex items-center gap-3">
+                  <div className="h-6 w-20 rounded bg-white/[0.05]" />
+                  <div className="h-8 w-20 rounded-lg bg-violet-500/10" />
+                  <div className="size-8 rounded-lg bg-white/[0.04]" />
+                  <div className="size-8 rounded-lg bg-white/[0.04]" />
+                </div>
+
+                <div className="mt-5 flex gap-2">
+                  <div className="h-7 w-14 rounded-md bg-white/[0.035]" />
+                  <div className="h-7 w-16 rounded-md bg-white/[0.035]" />
+                </div>
+              </div>
+            </div>
+          </PageContainer>
+        </section>
+
+        <PageContainer className="py-8 sm:py-10 lg:py-12">
+          <div className="mb-5">
+            <div className="h-2 w-24 rounded bg-violet-400/10" />
+            <div className="mt-2 h-6 w-40 rounded bg-white/[0.05]" />
+          </div>
+
+          <div className="grid gap-4 xl:grid-cols-[minmax(0,1.8fr)_minmax(260px,0.75fr)]">
+            <div>
+              <div className="aspect-video w-full rounded-2xl border border-white/[0.07] bg-white/[0.035]" />
+
+              <div className="mt-3 flex gap-2 overflow-hidden">
+                <div className="aspect-video w-[120px] shrink-0 rounded-lg bg-white/[0.04] sm:w-[140px]" />
+                <div className="aspect-video w-[120px] shrink-0 rounded-lg bg-white/[0.035] sm:w-[140px]" />
+                <div className="aspect-video w-[120px] shrink-0 rounded-lg bg-white/[0.035] sm:w-[140px]" />
+              </div>
+            </div>
+
+            <div className="rounded-2xl border border-white/[0.07] bg-[#090D19] p-5">
+              <div className="h-2 w-20 rounded bg-violet-400/10" />
+              <div className="mt-3 h-5 w-3/4 rounded bg-white/[0.05]" />
+
+              <div className="mt-6 space-y-4">
+                <div className="h-px bg-white/[0.04]" />
+                <div className="h-2.5 w-full rounded bg-white/[0.03]" />
+                <div className="h-px bg-white/[0.04]" />
+                <div className="h-2.5 w-5/6 rounded bg-white/[0.03]" />
+                <div className="h-px bg-white/[0.04]" />
+                <div className="h-2.5 w-2/3 rounded bg-white/[0.03]" />
+              </div>
+
+              <div className="mt-7 h-2 w-28 rounded bg-violet-400/10" />
+
+              <div className="mt-4 space-y-3">
+                <div className="h-2 w-full rounded bg-white/[0.03]" />
+                <div className="h-2 w-11/12 rounded bg-white/[0.03]" />
+                <div className="h-2 w-4/5 rounded bg-white/[0.03]" />
+                <div className="h-2 w-10/12 rounded bg-white/[0.03]" />
+              </div>
+
+              <div className="mt-5 h-10 rounded-lg bg-violet-500/[0.04]" />
+            </div>
+          </div>
+
+          <div className="mt-10 max-w-3xl">
+            <div className="h-2 w-20 rounded bg-violet-400/10" />
+            <div className="mt-2 h-6 w-44 rounded bg-white/[0.05]" />
+
+            <div className="mt-4 space-y-2">
+              <div className="h-2.5 w-full rounded bg-white/[0.03]" />
+              <div className="h-2.5 w-11/12 rounded bg-white/[0.03]" />
+              <div className="h-2.5 w-4/5 rounded bg-white/[0.03]" />
+            </div>
+          </div>
+        </PageContainer>
+      </div>
     );
   }
+
+if (error || !game) {
+  return (
+    <PageContainer className="py-12">
+      <div className="flex min-h-[60vh] flex-col items-center justify-center text-center">
+        <p className="text-[8px] font-bold uppercase tracking-[0.25em] text-violet-400">
+          NovaVault
+        </p>
+
+        <h1 className="nv-display mt-3 text-3xl font-bold text-white">
+          Game Not Found
+        </h1>
+
+        <p className="mt-2 max-w-md text-[10px] leading-5 text-slate-500">
+          {error || "The game you're looking for doesn't exist in the NovaVault collection."}
+        </p>
+
+        <Link
+          to="/games"
+          className="
+            mt-6 inline-flex min-h-10 items-center gap-2
+            rounded-lg bg-violet-600 px-5
+            !text-[10px] font-bold uppercase tracking-[0.08em]
+            text-white transition hover:bg-violet-500
+          "
+        >
+          <ArrowLeft className="size-3.5" />
+          Back to Store
+        </Link>
+      </div>
+    </PageContainer>
+  );
+}
 
   const hasDiscount =
     Number(game.discount) > 0 &&
     Number(game.originalPrice) > Number(game.price);
 
-  const relatedGames = allGames
-    .filter((item) => item.id !== game.id)
-    .slice(0, 4);
 
   const mediaCount = screenshots.length + 1;
 
@@ -820,7 +1031,7 @@ function GameDetails() {
                   >
                     <div className="relative aspect-video">
                       <img
-                        src={mediaData?.trailerThumbnail ?? game.image}
+                        src={mediaData?.trailerThumbnail || game.image}
                         alt={`${game.title} trailer preview`}
                         className="h-full w-full object-cover"
                       />

@@ -4,17 +4,12 @@ import { Link } from "react-router-dom";
 import { useStore } from "../context/useStore";
 
 function Cart() {
-  const {
-    cart,
-    cartCount,
-    removeFromCart,
-    updateCartQuantity,
-    clearCart,
-  } = useStore();
+  const { cart, cartCount, removeFromCart, updateCartQuantity, clearCart } =
+    useStore();
 
   const subtotal = cart.reduce(
     (total, item) => total + item.price * item.quantity,
-    0
+    0,
   );
 
   const formatPrice = (price) => {
@@ -121,10 +116,7 @@ function Cart() {
                     <button
                       type="button"
                       onClick={() =>
-                        updateCartQuantity(
-                          item.id,
-                          item.quantity - 1
-                        )
+                        updateCartQuantity(item.id, item.quantity - 1)
                       }
                       aria-label={`Decrease ${item.title} quantity`}
                       className="
@@ -144,10 +136,7 @@ function Cart() {
                     <button
                       type="button"
                       onClick={() =>
-                        updateCartQuantity(
-                          item.id,
-                          item.quantity + 1
-                        )
+                        updateCartQuantity(item.id, item.quantity + 1)
                       }
                       aria-label={`Increase ${item.title} quantity`}
                       className="
@@ -206,9 +195,7 @@ function Cart() {
 
               <div className="mt-4 space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] text-slate-600">
-                    Items
-                  </span>
+                  <span className="text-[11px] text-slate-600">Items</span>
 
                   <span className="text-[12px] font-medium text-slate-400">
                     {cartCount}
@@ -216,9 +203,7 @@ function Cart() {
                 </div>
 
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] text-slate-600">
-                    Subtotal
-                  </span>
+                  <span className="text-[11px] text-slate-600">Subtotal</span>
 
                   <span className="text-[12px] font-semibold text-slate-300">
                     {formatPrice(subtotal)}
@@ -238,25 +223,18 @@ function Cart() {
                 </div>
               </div>
 
-              <button
-                type="button"
-                disabled
+              <Link
+                to="/checkout"
                 className="
-                  mt-5 flex h-10 w-full
-                  items-center justify-center
-                  rounded-lg
-                  bg-violet-600
-                  !text-[9px]
-                  font-semibold
-                  uppercase
-                  tracking-[0.08em]
-                  text-white
-                  opacity-50
-                  cursor-not-allowed
-                "
+                  mt-5 flex h-10 w-full items-center
+                  justify-center rounded-lg bg-violet-600
+                  !text-[9px] font-semibold uppercase
+                  tracking-[0.08em] text-white transition-all
+                  duration-200 hover:bg-violet-500 hover:shadow-lg
+                  hover:shadow-violet-950/20 active:scale-[0.99]"
               >
-                Checkout Coming Soon
-              </button>
+                Proceed to Checkout
+              </Link>
 
               <Link
                 to="/games"

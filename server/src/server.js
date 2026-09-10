@@ -1,16 +1,51 @@
-const express = require('express')
+require("dotenv").config();
 
-const app = express()
+const express = require("express");
+const cookieParser = require("cookie-parser");
+const cors = require("cors");
+const helmet = require("helmet");
 
-const PORT = process.env.PORT || 5000
+const connectDB = require("./config/db");
+const apiRoutes = require("./routes");
 
-app.get('/api/health', (_req, res) => {
-  res.json({
-    success: true,
-    message: 'NovaVault API is running',
+const {
+  notFound,
+  errorHandler,
+} = require("./middleware/errorMiddleware");
+
+const { apiLimiter } = require("./middleware/securityMiddleware");
+
+const app = express();
+
+const PORT = process.env.PORT || 5000;
+
+app.use(
+  cors({
+    origin: process.env.CLIENT_URL,
+    credentials: true,
   })
-})
+);
 
-app.listen(PORT, () => {
-  console.log(`NovaVault server running on port ${PORT}`)
-})
+app.use(helmet());
+
+app.use(express.json());
+
+app.use(cookieParser());
+
+app.use("/api", apiLimiter);
+
+app.use("/api", apiRoutes);
+
+app.use(notFound);
+
+app.use(errorHandler);
+
+const startServer = async () => {
+  await connectDB();
+
+  app.listen(PORT, () => {
+    console.log(`NovaVault server running on port ${PORT}`);
+  });
+};
+
+startServer();

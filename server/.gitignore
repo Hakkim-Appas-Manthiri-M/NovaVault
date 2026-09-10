@@ -1,5 +1,5 @@
-node_modules
+node_modules/
 .env
-.env.*
-!.env.example
-*.log
+.env.local
+.env.*.local
+npm-debug.log*

@@ -1,28 +1,23 @@
 import {
   ChevronLeft,
   ChevronRight,
-} from 'lucide-react'
-import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+} from "lucide-react";
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 
-import HomeHero from '../components/hero/HomeHero'
-import GameCard from '../components/games/GameCard'
-import PageContainer from '../components/common/PageContainer'
-import SectionHeader from '../components/common/SectionHeader'
-
+import HomeHero from "../components/hero/HomeHero";
+import GameCard from "../components/games/GameCard";
+import PageContainer from "../components/common/PageContainer";
+import SectionHeader from "../components/common/SectionHeader";
+import gameCategories from "../constants/categoryData";
 import {
-  categories,
-  newReleases,
-  trendingGames,
-} from '../constants/gameData'
+  getNewReleaseGames,
+  getTrendingGames,
+} from "../services/gameApi";
 
-function GameCollection({
-  games,
-  onAddToCart,
-  onWishlist,
-}) {
-  const [currentIndex, setCurrentIndex] = useState(0)
-  const [visibleCount, setVisibleCount] = useState(2)
+function GameCollection({ games }) {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [visibleCount, setVisibleCount] = useState(2);
 
   /*
    * Responsive number of visible cards
@@ -34,63 +29,51 @@ function GameCollection({
    */
   useEffect(() => {
     const updateVisibleCount = () => {
-      const width = window.innerWidth
+      const width = window.innerWidth;
 
       if (width >= 1024) {
-        setVisibleCount(4)
+        setVisibleCount(4);
       } else if (width >= 640) {
-        setVisibleCount(3)
+        setVisibleCount(3);
       } else {
-        setVisibleCount(2)
+        setVisibleCount(2);
       }
-    }
+    };
 
-    updateVisibleCount()
+    updateVisibleCount();
 
-    window.addEventListener(
-      'resize',
-      updateVisibleCount,
-    )
+    window.addEventListener("resize", updateVisibleCount);
 
     return () => {
-      window.removeEventListener(
-        'resize',
-        updateVisibleCount,
-      )
-    }
-  }, [])
+      window.removeEventListener("resize", updateVisibleCount);
+    };
+  }, []);
 
 
   if (!games.length) {
-    return null
+    return null;
   }
 
- const maxIndex = Math.max(
-  games.length - visibleCount,
-  0,
-)
+  const safeIndex = Math.min(currentIndex, Math.max(games.length - 1, 0));
+  const maxIndex = Math.max(games.length - visibleCount, 0);
 
-const safeCurrentIndex = Math.min(currentIndex, maxIndex)
+  const safeCurrentIndex = Math.min(safeIndex, maxIndex);
 
-const canGoPrevious = safeCurrentIndex > 0
-const canGoNext = safeCurrentIndex < maxIndex
+  const canGoPrevious = safeCurrentIndex > 0;
+  const canGoNext = safeCurrentIndex < maxIndex;
 
-const visibleGames = games.slice(
-  safeCurrentIndex,
-  safeCurrentIndex + visibleCount,
-)
+  const visibleGames = games.slice(
+    safeCurrentIndex,
+    safeCurrentIndex + visibleCount,
+  );
 
   const goPrevious = () => {
-    setCurrentIndex((current) =>
-      Math.max(current - 1, 0),
-    )
-  }
+    setCurrentIndex((current) => Math.max(current - 1, 0));
+  };
 
   const goNext = () => {
-  setCurrentIndex(
-    Math.min(safeCurrentIndex + 1, maxIndex),
-  )
-}
+    setCurrentIndex(Math.min(safeCurrentIndex + 1, maxIndex));
+  };
 
   return (
     <div className="w-full min-w-0">
@@ -110,20 +93,13 @@ const visibleGames = games.slice(
           min-w-0
           grid-cols-2
           gap-3
-
           sm:grid-cols-3
-
           lg:grid-cols-4
           xl:gap-4
         "
       >
         {visibleGames.map((game) => (
-          <GameCard
-            key={game.id}
-            game={game}
-            onAddToCart={onAddToCart}
-            onWishlist={onWishlist}
-          />
+          <GameCard key={game.id} game={game} />
         ))}
       </div>
 
@@ -241,22 +217,75 @@ const visibleGames = games.slice(
         </button>
       </div>
     </div>
-  )
+  );
 }
 
-function Home() {
-  const handleAddToCart = (game) => {
-    console.log('Add to cart:', game.title)
-  }
+/*
+ * NovaVault umbrella genres.
+ *
+ * These are presentation-level categories.
+ * Individual MongoDB genres can belong to more than one
+ * umbrella category.
+ *
+ * Examples:
+ *
+ * Fantasy Action RPG
+ * → Action + RPG
+ *
+ * Survival Horror
+ * → Survival + Horror
+ *
+ * Open World Action RPG
+ * → Action + RPG
+ *
+ * Ocean Survival
+ * → Survival
+ */
 
-  const handleWishlist = (game) => {
-    console.log('Wishlist:', game.title)
-  }
+function Home() {
+  const [trendingGames, setTrendingGames] = useState([]);
+  const [newReleases, setNewReleases] = useState([]);
+  const [loadingGames, setLoadingGames] = useState(true);
+  const [gamesError, setGamesError] = useState("");
+
+  useEffect(() => {
+    const loadHomeGames = async () => {
+      try {
+        setLoadingGames(true);
+        setGamesError("");
+
+        const [trendingData, newReleaseData] = await Promise.all([
+          getTrendingGames(),
+          getNewReleaseGames(),
+        ]);
+
+        setTrendingGames(
+          (trendingData.games || []).map((game) => ({
+            ...game,
+            id: game._id,
+          })),
+        );
+
+        setNewReleases(
+          (newReleaseData.games || []).map((game) => ({
+            ...game,
+            id: game._id,
+          })),
+        );
+      } catch (error) {
+        setGamesError(error.message || "Failed to load home games.");
+      } finally {
+        setLoadingGames(false);
+      }
+    };
+
+    loadHomeGames();
+  }, []);
 
   return (
     <div className="min-h-screen bg-[#050711]">
       {/* Hero */}
-      <HomeHero />
+      <HomeHero/>
 
       <PageContainer className="py-8 sm:py-10 lg:py-12">
         {/* =====================================================
@@ -269,16 +298,27 @@ function Home() {
             title="Trending Now"
             description="The games NovaVault players are playing right now."
             link={{
-              label: 'View All',
-              to: '/games',
+              label: "View All",
+              to: "/games",
             }}
           />
 
-          <GameCollection
-            games={trendingGames}
-            onAddToCart={handleAddToCart}
-            onWishlist={handleWishlist}
-          />
+          {loadingGames ? (
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:gap-4">
+              {Array.from({ length: 4 }).map((_, index) => (
+                <div
+                  key={index}
+                  className="aspect-[5/6] animate-pulse rounded-xl border border-white/[0.06] bg-white/[0.03]"
+                />
+              ))}
+            </div>
+          ) : gamesError ? (
+            <p className="py-8 text-center !text-[10px] text-slate-600">
+              {gamesError}
+            </p>
+          ) : (
+            <GameCollection games={trendingGames} />
+          )}
         </section>
 
         {/* =====================================================
@@ -288,53 +328,108 @@ function Home() {
         <section className="mt-10 sm:mt-12 lg:mt-14">
           <SectionHeader
             eyebrow="Explore"
-            title="Browse Categories"
-            description="Find your next world by genre."
+            title="Browse by Genre"
+            description="Find the experience that fits your mood."
             link={{
-              label: 'View All',
-              to: '/categories',
+              label: "View All",
+              to: "/categories",
             }}
           />
 
-          <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-none lg:grid lg:grid-cols-8 lg:overflow-visible">
-            {categories.map((category) => (
-              <Link
-                key={category.name}
-                to={`/category/${category.slug}`}
-                className="
-                  group
-                  min-w-[108px]
-                  rounded-xl
-                  border
-                  border-white/[0.07]
-                  bg-white/[0.018]
-                  p-3
-                  transition-all
-                  duration-200
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-8">
+            {gameCategories.map((category) => {
+              const Icon = category.icon;
 
-                  hover:-translate-y-1
-                  hover:border-violet-400/20
-                  hover:bg-violet-500/[0.05]
+              return (
+                <Link
+                  key={category.name}
+                  to={`/categories?genre=${encodeURIComponent(category.name)}`}
+                  className="
+                    group
+                    relative
+                    min-h-[94px]
+                    overflow-hidden
+                    rounded-xl
+                    border
+                    border-white/[0.07]
+                    bg-[#090D19]
+                    p-3
+                    transition-all
+                    duration-200
 
-                  sm:min-w-[120px]
-                  sm:p-4
+                    hover:-translate-y-0.5
+                    hover:border-violet-400/25
+                    hover:bg-violet-500/[0.045]
+                  "
+                >
+                  {/* Icon */}
+                  <div
+                    className="
+                      flex
+                      size-8
+                      items-center
+                      justify-center
+                      rounded-lg
+                      border
+                      border-violet-400/10
+                      bg-violet-500/10
+                      text-violet-300
+                      transition-all
+                      duration-200
 
-                  lg:min-w-0
-                "
-              >
-                <div className="flex size-8 items-center justify-center rounded-lg bg-violet-500/10 text-violet-300 sm:size-9">
-                  {category.icon}
-                </div>
+                      group-hover:border-violet-400/20
+                      group-hover:bg-violet-500/15
+                      group-hover:text-violet-200
+                    "
+                  >
+                    <Icon className="size-3.5" strokeWidth={1.8} />
+                  </div>
 
-                <h3 className="mt-2.5 text-[8px] font-bold uppercase tracking-[0.04em] text-slate-200 sm:mt-3 sm:text-[9px]">
-                  {category.name}
-                </h3>
+                  {/* Content */}
+                  <div className="mt-3 min-w-0">
+                    <div className="flex items-center justify-between gap-1">
+                      <h3
+                        className="
+                          nv-display
+                          truncate
+                          !text-[11px]
+                          font-bold
+                          uppercase
+                          tracking-[0.06em]
+                          text-slate-200
+                        "
+                      >
+                        {category.name}
+                      </h3>
 
-                <p className="mt-1 text-[7px] text-slate-600 sm:text-[8px]">
-                  {category.count}
-                </p>
-              </Link>
-            ))}
+                      <ChevronRight
+                        className="
+                          size-3
+                          shrink-0
+                          text-slate-700
+                          transition-all
+                          duration-200
+
+                          group-hover:translate-x-0.5
+                          group-hover:text-violet-300
+                        "
+                      />
+                    </div>
+
+                    <p
+                      className="
+                        mt-1
+                        !text-[9px]
+                        leading-3
+                        text-slate-600
+                      "
+                    >
+                      {category.description}
+                    </p>
+                  </div>
+                </Link>
+              );
+            })}
           </div>
         </section>
 
@@ -348,16 +443,27 @@ function Home() {
             title="New Releases"
             description="Discover the latest additions to NovaVault."
             link={{
-              label: 'All Releases',
-              to: '/new-releases',
+              label: "All Releases",
+              to: "/new-releases",
             }}
           />
 
-          <GameCollection
-            games={newReleases}
-            onAddToCart={handleAddToCart}
-            onWishlist={handleWishlist}
-          />
+          {loadingGames ? (
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:gap-4">
+              {Array.from({ length: 4 }).map((_, index) => (
+                <div
+                  key={index}
+                  className="aspect-[5/6] animate-pulse rounded-xl border border-white/[0.06] bg-white/[0.03]"
+                />
+              ))}
+            </div>
+          ) : gamesError ? (
+            <p className="py-8 text-center !text-[10px] text-slate-600">
+              {gamesError}
+            </p>
+          ) : (
+            <GameCollection games={newReleases} />
+          )}
         </section>
 
         {/* =====================================================
@@ -370,7 +476,7 @@ function Home() {
 
             <div className="relative flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <p className="text-[7px] font-bold uppercase tracking-[0.25em] text-violet-400 sm:text-[8px]">
+                <p className="!text-[7px] font-bold uppercase tracking-[0.25em] text-violet-400 sm:!text-[8px]">
                   Limited Time
                 </p>
 
@@ -378,7 +484,7 @@ function Home() {
                   Vault Deals
                 </h2>
 
-                <p className="mt-2 max-w-lg text-[9px] leading-4 text-slate-500 sm:text-[10px] sm:leading-5">
+                <p className="mt-2 max-w-lg !text-[9px] leading-4 text-slate-500 sm:!text-[10px] sm:leading-5">
                   Premium titles, exceptional worlds, and limited-time prices.
                 </p>
               </div>
@@ -393,7 +499,7 @@ function Home() {
                   rounded-lg
                   bg-violet-600
                   px-4
-                  text-[8px]
+                  !text-[8px]
                   font-bold
                   uppercase
                   tracking-[0.08em]
@@ -403,7 +509,7 @@ function Home() {
 
                   sm:min-h-10
                   sm:px-5
-                  sm:text-[9px]
+                  sm:!text-[9px]
                 "
               >
                 Explore Deals
@@ -413,7 +519,7 @@ function Home() {
         </section>
       </PageContainer>
     </div>
-  )
+  );
 }
 
-export default Home
+export default Home;

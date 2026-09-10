@@ -423,9 +423,10 @@ export const gameMedia = {
       url: "https://www.youtube.com/embed/J4qY9DYE184",
     },
 
-    trailerThumbnail: "https://cdn1.epicgames.com/spt-assets/ec961a13750b4d1da6881b1ca0eaecab/007-first-light-1y8ny.jpg",
+    trailerThumbnail: "https://blog.playstation.com/tachyon/2025/06/5d78650a856871c7fe6dc1d82c0039416452498d.jpg",
 
     screenshots: [
+      "https://cdn1.epicgames.com/spt-assets/ec961a13750b4d1da6881b1ca0eaecab/007-first-light-1y8ny.jpg",
       "https://cdn1.epicgames.com/spt-assets/ec961a13750b4d1da6881b1ca0eaecab/007-first-light-xbdhw.jpg",
       "https://cdn1.epicgames.com/spt-assets/ec961a13750b4d1da6881b1ca0eaecab/007-first-light-1y7ow.jpg",
       "https://cdn1.epicgames.com/spt-assets/ec961a13750b4d1da6881b1ca0eaecab/007-first-light-o90jy.jpg",
@@ -444,11 +445,10 @@ export const gameMedia = {
       url: "https://www.youtube.com/embed/-CI9CcGQnGE",
     },
 
-    trailerThumbnail: "https://cdn1.epicgames.com/salesEvent/salesEvent/EGS_SherlockHolmesTheDevilsDaughter_Frogwares_S1_2560x1440-3852321c809322210cb7522fc72cbf86",
+    trailerThumbnail: "https://cdn2.unrealengine.com/egs-sherlockholmesthedevilsdaughter-frogwares-g1a-02-1920x1080-11f21ffc7dec.jpg",
 
     screenshots: [
       "https://cdn2.unrealengine.com/egs-sherlockholmesthedevilsdaughter-frogwares-g1a-01-1920x1080-17367735e2cc.jpg",
-      "https://cdn2.unrealengine.com/egs-sherlockholmesthedevilsdaughter-frogwares-g1a-02-1920x1080-11f21ffc7dec.jpg",
       "https://cdn2.unrealengine.com/egs-sherlockholmesthedevilsdaughter-frogwares-g1a-03-1920x1080-e703c0ddf1c8.jpg",
       "https://cdn2.unrealengine.com/egs-sherlockholmesthedevilsdaughter-frogwares-g1a-04-1920x1080-7030fae0d401.jpg",
     ],
@@ -528,9 +528,10 @@ export const gameMedia = {
       url: "https://www.youtube.com/embed/dtJj0So2yq4",
     },
 
-    trailerThumbnail: "https://cdn2.unrealengine.com/gtao-mf-partner-social16x9-1920x1080-deliv-1920x1080-b78d0fa04513.jpg",
+    trailerThumbnail: "https://media-rockstargames-com.akamaized.net/tina-uploads/posts/39245a8132ak23/70f0aca8a990d058cb6d0cb3eb69e78f3b92b787.jpg",
 
     screenshots: [
+      "https://cdn2.unrealengine.com/gtao-mf-partner-social16x9-1920x1080-deliv-1920x1080-b78d0fa04513.jpg",
       "https://media-cdn.epicgames.com/9576884a222e4750be33789921606d42/9576884a222e4750be33789921606d42-00001-thumb.png",
       "https://cdn2.unrealengine.com/egs-grandtheftautovenhanced-rockstarnorth-g1a-00-1920x1080-a8017c5fca10.jpg",
       "https://cdn2.unrealengine.com/egs-grandtheftautovenhanced-rockstarnorth-g1a-01-1920x1080-8a0a482bfe2b.jpg",
@@ -591,7 +592,7 @@ export const gameMedia = {
       url: "https://www.youtube.com/embed/W-SpP-Z0Uu8",
     },
 
-    trailerThumbnail: "https://image.api.playstation.com/vulcan/ap/rnd/202501/2717/0c5df2b67b23263d055f3b78aeb77a6ce4668bb078fced77.jpg",
+    trailerThumbnail: "https://i.ytimg.com/vi/U3mEOHvSUyw/maxresdefault.jpg",
 
     screenshots: [
       "https://www.topgear.com/sites/default/files/2025/05/Forza%20Horizon%205%2010.jpg",
@@ -633,9 +634,10 @@ export const gameMedia = {
       url: "https://www.youtube.com/embed/8EZhCzFaQuw",
     },
 
-    trailerThumbnail: "https://cdn1.epicgames.com/spt-assets/011270e3237f4bf69a3459942f005393/subnautica-2-video-15wwi.png",
+    trailerThumbnail: "https://i.ytimg.com/vi/8EZhCzFaQuw/maxresdefault.jpg",
 
     screenshots: [
+      "https://cdn1.epicgames.com/spt-assets/011270e3237f4bf69a3459942f005393/subnautica-2-video-15wwi.png",
       "https://cdn1.epicgames.com/spt-assets/011270e3237f4bf69a3459942f005393/subnautica-2-1p8u2.jpg",
       "https://cdn1.epicgames.com/spt-assets/011270e3237f4bf69a3459942f005393/subnautica-2-5eh8a.jpg",
       "https://cdn1.epicgames.com/spt-assets/011270e3237f4bf69a3459942f005393/subnautica-2-hrgcg.jpg",
@@ -675,9 +677,10 @@ export const gameMedia = {
       url: "https://www.youtube.com/embed/e0dNAq3f5pU",
     },
 
-    trailerThumbnail: "https://cdn2.unrealengine.com/featuredimage-1920x1080-f93b0095dcce.png?resize=1&w=1920&h=1080&quality=medium",
+    trailerThumbnail: "https://i.ytimg.com/vi/e0dNAq3f5pU/maxresdefault.jpg",
 
     screenshots: [
+      "https://cdn2.unrealengine.com/featuredimage-1920x1080-f93b0095dcce.png?resize=1&w=1920&h=1080&quality=medium",
       "https://cdn2.unrealengine.com/breathedgeblogpost1-1920x1080-25902b002840.jpg",
     ],
   },
@@ -714,9 +717,10 @@ export const gameMedia = {
       url: "https://www.youtube.com/embed/-iXraESkNGE",
     },
 
-    trailerThumbnail: "https://cdn2.unrealengine.com/01-havana-vista-gold-3840x2160-eaa9bb316009.png",
+    trailerThumbnail: "https://i.ytimg.com/vi/WjsTLe7bBUA/maxresdefault.jpg",
 
     screenshots: [
+      "https://cdn2.unrealengine.com/01-havana-vista-gold-3840x2160-eaa9bb316009.png",
       "https://cdn2.unrealengine.com/02-naval-gameplay-final-fix-3840x2160-bf3a4c93769c.png",
       "https://cdn2.unrealengine.com/03-edward-parry-gold-3840x2160-2acf16968c61.png",
       "https://cdn2.unrealengine.com/04-vista-boat-gold-3840x2160-e84617b6cd74.png",
@@ -735,9 +739,10 @@ export const gameMedia = {
       url: "https://www.youtube.com/embed/ZbERWU5bc50",
     },
 
-    trailerThumbnail: "https://cdn1.epicgames.com/spt-assets/50e956c439ca454ca17efefdf49fdbae/dispatch-video-jfkur.png",
+    trailerThumbnail: "https://i.ytimg.com/vi/ZbERWU5bc50/maxresdefault.jpg",
 
     screenshots: [
+      "https://cdn1.epicgames.com/spt-assets/50e956c439ca454ca17efefdf49fdbae/dispatch-video-jfkur.png",
       "https://cdn1.epicgames.com/spt-assets/50e956c439ca454ca17efefdf49fdbae/dispatch-1vjjy.png",
       "https://cdn1.epicgames.com/spt-assets/50e956c439ca454ca17efefdf49fdbae/dispatch-15gmt.png",
       "https://cdn1.epicgames.com/spt-assets/50e956c439ca454ca17efefdf49fdbae/dispatch-uye1d.png",

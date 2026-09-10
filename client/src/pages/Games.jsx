@@ -8,19 +8,13 @@ import {
   Sparkles,
   X,
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
+import { getGames } from "../services/gameApi";
 
 import GameGrid from "../components/games/GameGrid";
-import {
-  featuredGames,
-  newReleases,
-  trendingGames,
-} from "../constants/gameData";
-
-const storeGames = [...featuredGames, ...trendingGames, ...newReleases].filter(
-  (game, index, games) =>
-    games.findIndex((item) => item.id === game.id) === index,
-);
+import GameGridSkeleton from "../components/common/GameGridSkeleton";
+import GameGridError from "../components/common/GameGridError";
 
 const filterOptions = ["All Games", "Trending", "New Releases"];
 
@@ -48,15 +42,75 @@ const sortOptions = [
 ];
 
 function Games() {
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchParams] = useSearchParams();
+
+const [searchQuery, setSearchQuery] = useState(
+  searchParams.get("search") || "",
+);
   const [activeFilter, setActiveFilter] = useState("All Games");
   const [sortBy, setSortBy] = useState("featured");
   const [sortOpen, setSortOpen] = useState(false);
+  const [games, setGames] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  const loadGames = async () => {
+  setLoading(true);
+  setError("");
+
+  try {
+    const data = await getGames();
+
+    const mappedGames = (data.games || []).map((game) => ({
+      ...game,
+      id: game._id,
+    }));
+
+    setGames(mappedGames);
+  } catch (err) {
+    setError(err.message || "Failed to load games.");
+  } finally {
+    setLoading(false);
+  }
+};
+
+useEffect(() => {
+  let cancelled = false;
+
+  const fetchGames = async () => {
+    try {
+      const data = await getGames();
+
+      if (cancelled) return;
+
+      const mappedGames = (data.games || []).map((game) => ({
+        ...game,
+        id: game._id,
+      }));
+
+      setGames(mappedGames);
+    } catch (err) {
+      if (cancelled) return;
+
+      setError(err.message || "Failed to load games.");
+    } finally {
+      if (!cancelled) {
+        setLoading(false);
+      }
+    }
+  };
+
+  fetchGames();
+
+  return () => {
+    cancelled = true;
+  };
+}, []);
 
   const filteredGames = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
 
-    const games = storeGames.filter((game) => {
+    const filtered = games.filter((game) => {
       const matchesSearch =
         !query ||
         game.title.toLowerCase().includes(query) ||
@@ -64,15 +118,13 @@ function Games() {
 
       const matchesFilter =
         activeFilter === "All Games" ||
-        (activeFilter === "Trending" &&
-          trendingGames.some((item) => item.id === game.id)) ||
-        (activeFilter === "New Releases" &&
-          newReleases.some((item) => item.id === game.id));
+        (activeFilter === "Trending" && game.trending) ||
+        (activeFilter === "New Releases" && game.newRelease);
 
       return matchesSearch && matchesFilter;
     });
 
-    return [...games].sort((a, b) => {
+    return [...filtered].sort((a, b) => {
       switch (sortBy) {
         case "rating":
           return (b.rating ?? 0) - (a.rating ?? 0);
@@ -88,10 +140,10 @@ function Games() {
 
         case "featured":
         default:
-          return 0;
+          return Number(b.featured) - Number(a.featured);
       }
     });
-  }, [searchQuery, activeFilter, sortBy]);
+  }, [games, searchQuery, activeFilter, sortBy]);
 
   const activeSortLabel =
     sortOptions.find((option) => option.value === sortBy)?.label ?? "Featured";
@@ -103,7 +155,7 @@ function Games() {
         <div className="mb-6">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div className="min-w-0">
-              <p className="mb-1 text-[12px] font-bold uppercase tracking-[0.18em] text-violet-400">
+              <p className="mb-1 text-[11px] font-bold uppercase tracking-[0.18em] text-violet-400">
                 NovaVault Store
               </p>
 
@@ -319,7 +371,13 @@ function Games() {
             </div>
           </div>
 
-          <GameGrid games={filteredGames} />
+          {loading ? (
+            <GameGridSkeleton />
+          ) : error ? (
+            <GameGridError message={error} onRetry={loadGames} />
+          ) : (
+            <GameGrid games={filteredGames} />
+          )}
         </div>
       </div>
     </section>

@@ -1,6 +1,7 @@
 import {
   ChevronLeft,
   ChevronRight,
+  Heart,
   Play,
   ShoppingCart,
   Star,
@@ -8,16 +9,51 @@ import {
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { useStore } from "../../context/useStore";
 
-import { featuredGames } from "../../constants/gameData";
+import { getGames } from "../../services/gameApi";
 
 const HERO_INTERVAL = 7000;
 
 function HomeHero() {
+  const { toggleWishlist, isWishlisted } = useStore();
+  const [featuredGames, setFeaturedGames] = useState([]);
   const [activeIndex, setActiveIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   const activeGame = featuredGames[activeIndex];
+
+  useEffect(() => {
+    const loadFeaturedGames = async () => {
+      try {
+        setLoading(true);
+        setError("");
+
+        const data = await getGames({
+          featured: true,
+          limit: 5,
+        });
+
+        const games = (data.games || []).map((game) => ({
+          ...game,
+          id: game._id,
+          slug: game.slug,
+        }));
+
+        setFeaturedGames(games);
+        setActiveIndex(0);
+      } catch (err) {
+        setError(err.message || "Failed to load featured games.");
+        setFeaturedGames([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadFeaturedGames();
+  }, []);
 
   useEffect(() => {
     if (isPaused || featuredGames.length <= 1) {
@@ -31,7 +67,7 @@ function HomeHero() {
     }, HERO_INTERVAL);
 
     return () => window.clearInterval(timer);
-  }, [isPaused]);
+  }, [isPaused, featuredGames.length]);
 
   const goNext = () => {
     setActiveIndex((current) => {
@@ -45,8 +81,49 @@ function HomeHero() {
     });
   };
 
-  if (!activeGame) {
-    return null;
+  if (loading) {
+    return (
+      <section className="px-3 pt-3 sm:px-5 sm:pt-5 lg:px-7">
+        <div
+          className="
+          mx-auto max-w-[1536px]
+          h-[405px]
+          sm:h-[345px]
+          md:h-[395px]
+          lg:h-[470px]
+          animate-pulse
+          overflow-hidden rounded-2xl
+          border border-white/[0.08]
+          bg-[#090D19]
+        "
+        >
+          <div className="h-full w-full bg-white/[0.025]" />
+        </div>
+      </section>
+    );
+  }
+
+  if (error || !activeGame) {
+    return (
+      <section className="px-3 pt-3 sm:px-5 sm:pt-5 lg:px-7">
+        <div
+          className="
+          mx-auto flex max-w-[1536px]
+          h-[405px]
+          sm:h-[345px]
+          md:h-[395px]
+          lg:h-[480px]
+          items-center justify-center
+          rounded-2xl border border-white/[0.08]
+          bg-[#090D19]
+        "
+        >
+          <p className="text-[9px] font-semibold uppercase tracking-[0.15em] text-slate-600">
+            {error || "No featured games available."}
+          </p>
+        </div>
+      </section>
+    );
   }
 
   return (
@@ -98,7 +175,7 @@ function HomeHero() {
             <picture className="absolute inset-0 block">
               <source
                 media="(max-width: 499px)"
-                srcSet={activeGame.mobileImage ?? activeGame.image}
+                srcSet={activeGame.mobileImage || activeGame.image}
               />
 
               <motion.img
@@ -125,12 +202,12 @@ function HomeHero() {
                 absolute
                 inset-0
                 bg-gradient-to-r
-                from-[#050711]
-                via-[#050711]/75
+                from-[#050711]/95
+                via-[#050711]/50
                 to-transparent
 
-                max-sm:via-[#050711]/85
-                max-sm:to-[#050711]/25
+                max-sm:via-[#050711]/70
+                max-sm:to-[#050711]/15
               "
             />
 
@@ -142,8 +219,8 @@ function HomeHero() {
                 bottom-0
                 h-[58%]
                 bg-gradient-to-t
-                from-[#050711]
-                via-[#050711]/70
+                from-[#050711]/90
+                via-[#050711]/45
                 to-transparent
               "
             />
@@ -320,13 +397,17 @@ function HomeHero() {
 
                 <span className="text-slate-600">•</span>
 
-                <span className="hidden sm:inline">18.4K Reviews</span>
+                <span className="hidden sm:inline">
+                  {activeGame.reviews || "No"} Reviews
+                </span>
 
                 <span className="text-slate-600">•</span>
 
-                <span>PC</span>
-
-                <span>PS5</span>
+                {(activeGame.platforms || ["PC"])
+                  .slice(0, 2)
+                  .map((platform) => (
+                    <span key={platform}>{platform}</span>
+                  ))}
               </div>
 
               {/* Price */}
@@ -407,7 +488,7 @@ function HomeHero() {
                 {/* BUY NOW */}
 
                 <Link
-                  to={`/games/${activeGame.id}`}
+                  to={`/games/${activeGame.slug}`}
                   className="
                     inline-flex
                     h-8
@@ -454,7 +535,7 @@ function HomeHero() {
                 {/* VIEW GAME */}
 
                 <Link
-                  to={`/games/${activeGame.id}`}
+                  to={`/games/${activeGame.slug}`}
                   className="
                     inline-flex
                     h-8
@@ -512,36 +593,33 @@ function HomeHero() {
 
         <button
           type="button"
-          aria-label={`Add ${activeGame.title} to wishlist`}
+          aria-label={
+            isWishlisted(activeGame.id)
+              ? `Remove ${activeGame.title} from wishlist`
+              : `Add ${activeGame.title} to wishlist`
+          }
+          onClick={() => toggleWishlist(activeGame)}
           className="
-            absolute
-            right-3
-            top-3
-            z-20
-            flex
-            size-8
-            items-center
-            justify-center
-            rounded-lg
-            border
-            border-white/15
-            bg-black/30
-            text-white/80
-            backdrop-blur-md
-            transition
-
-            hover:border-violet-400/40
-            hover:bg-violet-500/20
-            hover:text-white
-
-            sm:right-5
-            sm:top-5
-
-            lg:right-7
-            lg:top-7
-          "
+            absolute right-3
+            top-3 z-20 flex
+            size-8 items-center
+            justify-center rounded-lg
+            border border-white/15
+          bg-black/30 text-white/80
+            backdrop-blur-md transition
+          hover:border-violet-400/40
+          hover:bg-violet-500/20
+          hover:text-white
+            sm:right-5 sm:top-5
+            lg:right-7 lg:top-7"
         >
-          <span className="text-sm">♡</span>
+          <Heart
+            className={`size-4 ${
+              isWishlisted(activeGame.id)
+                ? "fill-violet-600 text-violet-600"
+                : "text-white/80"
+            }`}
+          />
         </button>
 
         {/* =====================================================
