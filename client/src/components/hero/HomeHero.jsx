@@ -90,7 +90,7 @@ function HomeHero() {
           h-[405px]
           sm:h-[345px]
           md:h-[395px]
-          lg:h-[470px]
+          lg:h-[460px]
           animate-pulse
           overflow-hidden rounded-2xl
           border border-white/[0.08]

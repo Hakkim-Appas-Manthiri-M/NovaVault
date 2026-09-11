@@ -40,7 +40,8 @@ function SearchDropdown({
   return (
     <div
       className="
-        absolute left-0 top-[44px]
+        absolute left-0 top-[54px]
+        md:top-[42px]
         z-[200]
         w-full
         overflow-hidden
@@ -83,7 +84,7 @@ function SearchDropdown({
       ) : searchResults.length > 0 ? (
         <>
           {/* Results */}
-          <div className="max-h-[390px] overflow-y-auto p-2">
+          <div className="max-h-[267px] overflow-y-auto p-2">
             {searchResults.map((game) => (
               <button
                 key={game.id}
@@ -203,14 +204,7 @@ function TopNavbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [accountMenuOpen, setAccountMenuOpen] = useState(false);
   const accountMenuRef = useRef(null);
-
-  // =========================
-  // MOBILE SEARCH
-  // Only visible when scrollY === 0
-  // =========================
-  const [mobileSearchVisible, setMobileSearchVisible] = useState(
-    window.scrollY <= 1,
-  );
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
 
   // =========================
   // LOCK BACKGROUND SCROLL
@@ -282,59 +276,6 @@ function TopNavbar() {
       document.removeEventListener("keydown", handleKeyDown);
     };
   }, [accountMenuOpen]);
-
-  // =========================
-  // MOBILE SEARCH SCROLL BEHAVIOR
-  //
-  // TOP:
-  //   visible
-  //
-  // ANY SCROLL DOWN:
-  //   hidden
-  //
-  // SCROLL BACK UP:
-  //   stays hidden
-  //
-  // ONLY scrollY === 0:
-  //   visible again
-  // =========================
-  useEffect(() => {
-    const handleScroll = () => {
-      const currentScrollY = window.scrollY;
-
-      setMobileSearchVisible(currentScrollY <= 1);
-    };
-
-    window.addEventListener("scroll", handleScroll, {
-      passive: true,
-    });
-
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-    };
-  }, []);
-
-  // =========================
-  // MOBILE HEADER HEIGHT
-  //
-  // Search visible:
-  // 70px navbar + 61px search = 131px
-  //
-  // Search hidden:
-  // 70px navbar + 0px search = 70px
-  // =========================
-  useEffect(() => {
-    document.documentElement.style.setProperty(
-      "--nv-mobile-header-height",
-      showGlobalSearch && mobileSearchVisible ? "131px" : "70px",
-    );
-
-    return () => {
-      document.documentElement.style.removeProperty(
-        "--nv-mobile-header-height",
-      );
-    };
-  }, [mobileSearchVisible, showGlobalSearch]);
 
   // =========================
   // GLOBAL SEARCH API
@@ -656,6 +597,36 @@ function TopNavbar() {
               )}
             </Link>
 
+            {/* Mobile search button */}
+            {showGlobalSearch && (
+              <button
+                type="button"
+                aria-label="Open search"
+                aria-expanded={mobileSearchOpen}
+                onClick={() => {
+                  if (mobileSearchOpen) {
+                    clearSearch();
+                    setMobileSearchOpen(false);
+                    return;
+                  }
+
+                  setMobileSearchOpen(true);
+                }}
+                className="
+                  flex size-9
+                  items-center justify-center
+                  rounded-lg
+                  text-slate-400
+                  transition
+                  hover:bg-white/[0.04]
+                  hover:text-white
+                  md:hidden
+                "
+              >
+                <Search className="size-[17px]" />
+              </button>
+            )}
+
             {/* Profile / Authentication */}
             {authLoading ? (
               <div
@@ -686,10 +657,10 @@ function TopNavbar() {
                       items-center justify-center
                       rounded-full
                       border border-violet-400/30
-                    bg-violet-500/10
+                      bg-violet-500/10
                       !text-[9px]
                       font-bold uppercase
-                    text-violet-200
+                      text-violet-200
                     "
                   >
                     {user?.name?.charAt(0) || "U"}
@@ -700,7 +671,7 @@ function TopNavbar() {
                       hidden max-w-[70px]
                       truncate !text-[9px]
                       font-semibold
-                    text-slate-300
+                      text-slate-300
                       md:block
                     "
                   >
@@ -725,15 +696,16 @@ function TopNavbar() {
                       exit={{ opacity: 0, y: -6, scale: 0.98 }}
                       transition={{ duration: 0.16 }}
                       className="
-                        absolute z-[200] hidden
+                        fixed z-[200]
+                        right-4 top-[58px]
                         w-56 overflow-hidden rounded-xl
                         border border-white/[0.08]
-                      bg-[#080B15]/98
+                        bg-[#080B15]/98
                         shadow-2xl
                         shadow-black/50
                         backdrop-blur-2xl
 
-                        md:block md:fixed md:right-4 md:top-15
+                        md:fixed md:right-4 md:top-15
                         lg:absolute lg:right-0 lg:top-11
                       "
                     >
@@ -779,10 +751,10 @@ function TopNavbar() {
                             flex h-9 items-center gap-2.5
                             rounded-lg px-2.5
                             !text-[9px] font-semibold
-                          text-slate-400
+                            text-slate-400
                             transition
-                          hover:bg-white/[0.045]
-                          hover:text-white
+                            hover:bg-white/[0.045]
+                            hover:text-white
                           "
                         >
                           <UserRound className="size-3.5" />
@@ -796,9 +768,9 @@ function TopNavbar() {
                             flex h-9 items-center gap-2.5 
                             rounded-lg px-2.5
                             !text-[9px] font-semibold 
-                          text-slate-400 transition
-                          hover:bg-white/[0.045]
-                          hover:text-white
+                            text-slate-400 transition
+                            hover:bg-white/[0.045]
+                            hover:text-white
                           "
                         >
                           <Package className="size-3.5" />
@@ -812,10 +784,10 @@ function TopNavbar() {
                             flex h-9 items-center gap-2.5
                             rounded-lg px-2.5
                             !text-[9px] font-semibold
-                          text-slate-400
+                            text-slate-400
                             transition
-                          hover:bg-white/[0.045]
-                          hover:text-white
+                            hover:bg-white/[0.045]
+                            hover:text-white
                           "
                         >
                           <Library className="size-3.5" />
@@ -829,10 +801,10 @@ function TopNavbar() {
                             flex h-9 items-center gap-2.5
                             rounded-lg px-2.5
                             !text-[9px] font-semibold
-                          text-slate-400
+                            text-slate-400
                             transition
-                          hover:bg-white/[0.045]
-                          hover:text-white
+                            hover:bg-white/[0.045]
+                            hover:text-white
                           "
                         >
                           <Heart className="size-3.5" />
@@ -846,10 +818,10 @@ function TopNavbar() {
                             flex h-9 items-center gap-2.5
                             rounded-lg px-2.5
                             !text-[9px] font-semibold
-                          text-slate-400
+                            text-slate-400
                             transition
-                          hover:bg-white/[0.045]
-                          hover:text-white
+                            hover:bg-white/[0.045]
+                            hover:text-white
                           "
                         >
                           <ShoppingCart className="size-3.5" />
@@ -863,10 +835,10 @@ function TopNavbar() {
                             flex h-9 items-center gap-2.5
                             rounded-lg px-2.5
                             !text-[9px] font-semibold
-                          text-slate-400
+                            text-slate-400
                             transition
-                          hover:bg-white/[0.045]
-                          hover:text-white
+                            hover:bg-white/[0.045]
+                            hover:text-white
                           "
                         >
                           <Settings className="size-3.5" />
@@ -888,10 +860,10 @@ function TopNavbar() {
                             rounded-lg px-2.5
                             text-left
                             !text-[9px] font-semibold
-                          text-red-400/80
+                            text-red-400/80
                             transition
-                          hover:bg-red-500/[0.06]
-                          hover:text-red-300
+                            hover:bg-red-500/[0.06]
+                            hover:text-red-300
                           "
                         >
                           <LogOut className="size-3.5" />
@@ -909,10 +881,10 @@ function TopNavbar() {
                   ml-1 flex h-8
                   items-center gap-1.5
                   rounded-lg border border-violet-400/15
-                bg-violet-500/[0.08] px-3 !text-[9px]
+                  bg-violet-500/[0.08] px-3 !text-[9px]
                   font-bold uppercase tracking-[0.08em]
-                text-violet-300 transition hover:border-violet-400/25
-                hover:bg-violet-500/[0.14] hover:text-violet-200"
+                  text-violet-300 transition hover:border-violet-400/25
+                  hover:bg-violet-500/[0.14] hover:text-violet-200"
               >
                 <LogIn className="size-3.5" />
                 <span className="hidden sm:inline">Sign in</span>
@@ -944,7 +916,7 @@ function TopNavbar() {
         {/* =========================
             MOBILE GLOBAL SEARCH
         ========================== */}
-        {showGlobalSearch && (
+        {showGlobalSearch && mobileSearchOpen && (
           <motion.div
             className="
             box-border
@@ -955,21 +927,9 @@ function TopNavbar() {
             backdrop-blur-xl
             md:hidden
           "
-            initial={false}
-            animate={{
-              height: mobileSearchVisible ? "61px" : "0px",
-              opacity: mobileSearchVisible ? 1 : 0,
-            }}
-            transition={{
-              height: {
-                duration: 0.28,
-                ease: [0.22, 1, 0.36, 1],
-              },
-              opacity: {
-                duration: 0.18,
-                ease: "easeOut",
-              },
-            }}
+            initial={{ opacity: 0, y: -4 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.18, ease: "easeOut" }}
           >
             <div className="relative py-2.5">
               <Search
@@ -1026,7 +986,7 @@ function TopNavbar() {
               )}
 
               {/* Mobile dropdown */}
-              {searchOpen && mobileSearchVisible && (
+              {searchOpen && mobileSearchOpen && (
                 <SearchDropdown
                   searchQuery={searchQuery}
                   searchLoading={searchLoading}

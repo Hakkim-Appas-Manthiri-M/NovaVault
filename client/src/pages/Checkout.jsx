@@ -1,7 +1,6 @@
 import { useState } from "react";
 import {
   ArrowLeft,
-  CheckCircle2,
   Gamepad2,
   LoaderCircle,
   LockKeyhole,

@@ -4,6 +4,7 @@ const healthRoutes = require("./healthRoutes");
 const authRoutes = require("./authRoutes");
 const gameRoutes = require("./gameRoutes");
 const orderRoutes = require("./orderRoutes");
+const paymentRoutes = require("./paymentRoutes");
 
 const router = express.Router();
 
@@ -21,5 +22,7 @@ router.use("/auth", authRoutes);
 router.use("/games", gameRoutes);
 
 router.use("/orders", orderRoutes);
+
+router.use("/payments", paymentRoutes);
 
 module.exports = router;
