@@ -9,24 +9,19 @@ import {
   ShoppingBag,
   Trash2,
 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { motion } from "motion/react";
 
 import { createOrder } from "../services/orderApi";
 import { useStore } from "../context/useStore";
 
 function Checkout() {
-  const {
-    cart,
-    cartCount,
-    removeFromCart,
-    updateCartQuantity,
-    clearCart,
-  } = useStore();
+  const navigate = useNavigate();
+  const { cart, cartCount, removeFromCart, updateCartQuantity, clearCart } =
+    useStore();
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [createdOrder, setCreatedOrder] = useState(null);
 
   const subtotal = cart.reduce(
     (total, item) => total + Number(item.price || 0) * item.quantity,
@@ -54,8 +49,13 @@ function Checkout() {
 
       const data = await createOrder(items);
 
-      setCreatedOrder(data.order || null);
       clearCart();
+
+      navigate("/order-success", {
+        state: {
+          order: data.order,
+        },
+      });
     } catch (requestError) {
       setError(
         requestError.message ||
@@ -66,185 +66,6 @@ function Checkout() {
     }
   };
 
-  // ==========================================================
-  // ORDER CREATED
-  // ==========================================================
-
-  if (createdOrder) {
-    return (
-      <section className="min-h-screen min-w-0 px-4 py-8 sm:px-6 lg:px-7">
-        <div className="mx-auto flex min-h-[70vh] w-full max-w-[700px] items-center justify-center">
-          <motion.div
-            initial={{ opacity: 0, y: 18, scale: 0.98 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            transition={{
-              duration: 0.4,
-              ease: [0.22, 1, 0.36, 1],
-            }}
-            className="
-              w-full
-              rounded-2xl
-              border border-white/[0.07]
-              bg-[#080B15]/90
-              p-6
-              text-center
-              shadow-2xl shadow-black/40
-              backdrop-blur-2xl
-              sm:p-8
-            "
-          >
-            <div
-              className="
-                mx-auto
-                flex
-                size-14
-                items-center
-                justify-center
-                rounded-2xl
-                border border-emerald-400/15
-                bg-emerald-500/[0.07]
-                text-emerald-400
-              "
-            >
-              <CheckCircle2 className="size-7" />
-            </div>
-
-            <p
-              className="
-                mt-5
-                !text-[9px]
-                font-bold
-                uppercase
-                tracking-[0.2em]
-                text-emerald-400/80
-              "
-            >
-              Order Created
-            </p>
-
-            <h1
-              className="
-                nv-display
-                mt-2
-                text-2xl
-                font-bold
-                tracking-tight
-                text-white
-                sm:text-3xl
-              "
-            >
-              Your order is ready
-            </h1>
-
-            <p
-              className="
-                mx-auto
-                mt-2
-                max-w-md
-                !text-[10px]
-                leading-5
-                text-slate-500
-              "
-            >
-              Your NovaVault order has been created successfully.
-              Payment integration will be connected next.
-            </p>
-
-            <div
-              className="
-                mx-auto
-                mt-6
-                max-w-sm
-                rounded-xl
-                border border-white/[0.06]
-                bg-white/[0.02]
-                p-4
-              "
-            >
-              <div className="flex items-center justify-between">
-                <span className="text-[9px] font-semibold uppercase tracking-[0.1em] text-slate-600">
-                  Order ID
-                </span>
-
-                <span className="max-w-[190px] truncate text-[9px] font-medium text-slate-400">
-                  {createdOrder._id}
-                </span>
-              </div>
-
-              <div className="mt-3 flex items-center justify-between border-t border-white/[0.05] pt-3">
-                <span className="text-[9px] font-semibold uppercase tracking-[0.1em] text-slate-600">
-                  Total
-                </span>
-
-                <span className="text-[14px] font-bold text-white">
-                  {formatPrice(createdOrder.total)}
-                </span>
-              </div>
-
-              <div className="mt-2 flex items-center justify-between">
-                <span className="text-[9px] font-semibold uppercase tracking-[0.1em] text-slate-600">
-                  Status
-                </span>
-
-                <span className="rounded-full bg-amber-500/[0.08] px-2 py-1 text-[8px] font-bold uppercase tracking-[0.08em] text-amber-400">
-                  {createdOrder.status}
-                </span>
-              </div>
-            </div>
-
-            <div className="mt-6 flex flex-col gap-2 sm:flex-row sm:justify-center">
-              <Link
-                to="/games"
-                className="
-                  flex
-                  h-10
-                  items-center
-                  justify-center
-                  rounded-lg
-                  bg-violet-600
-                  px-5
-                  !text-[9px]
-                  font-bold
-                  uppercase
-                  tracking-[0.08em]
-                  text-white
-                  transition-all
-                  hover:bg-violet-500
-                "
-              >
-                Continue Shopping
-              </Link>
-
-              <Link
-                to="/"
-                className="
-                  flex
-                  h-10
-                  items-center
-                  justify-center
-                  rounded-lg
-                  border border-white/[0.07]
-                  bg-white/[0.02]
-                  px-5
-                  !text-[9px]
-                  font-semibold
-                  uppercase
-                  tracking-[0.08em]
-                  text-slate-500
-                  transition-all
-                  hover:border-white/[0.12]
-                  hover:bg-white/[0.04]
-                  hover:text-slate-300
-                "
-              >
-                Back Home
-              </Link>
-            </div>
-          </motion.div>
-        </div>
-      </section>
-    );
-  }
 
   // ==========================================================
   // EMPTY CART
@@ -443,10 +264,7 @@ function Checkout() {
                       <button
                         type="button"
                         onClick={() =>
-                          updateCartQuantity(
-                            item.id,
-                            item.quantity - 1,
-                          )
+                          updateCartQuantity(item.id, item.quantity - 1)
                         }
                         disabled={loading}
                         className="
@@ -472,10 +290,7 @@ function Checkout() {
                       <button
                         type="button"
                         onClick={() =>
-                          updateCartQuantity(
-                            item.id,
-                            item.quantity + 1,
-                          )
+                          updateCartQuantity(item.id, item.quantity + 1)
                         }
                         disabled={loading}
                         className="
@@ -498,9 +313,7 @@ function Checkout() {
                     {/* Total */}
                     <div className="hidden w-20 shrink-0 text-right sm:block">
                       <p className="text-[11px] font-semibold text-white">
-                        {formatPrice(
-                          item.price * item.quantity,
-                        )}
+                        {formatPrice(item.price * item.quantity)}
                       </p>
                     </div>
 
@@ -538,8 +351,8 @@ function Checkout() {
 
               <p className="!text-[8px] leading-4 text-slate-600">
                 Your order is securely created using your authenticated
-                NovaVault account. Payment details are not collected on
-                this step.
+                NovaVault account. Payment details are not collected on this
+                step.
               </p>
             </div>
           </div>
@@ -569,9 +382,7 @@ function Checkout() {
 
             <div className="mt-5 space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-[10px] text-slate-600">
-                  Items
-                </span>
+                <span className="text-[10px] text-slate-600">Items</span>
 
                 <span className="text-[11px] font-medium text-slate-400">
                   {cartCount}
@@ -579,9 +390,7 @@ function Checkout() {
               </div>
 
               <div className="flex items-center justify-between">
-                <span className="text-[10px] text-slate-600">
-                  Subtotal
-                </span>
+                <span className="text-[10px] text-slate-600">Subtotal</span>
 
                 <span className="text-[11px] font-semibold text-slate-300">
                   {formatPrice(subtotal)}
@@ -589,9 +398,7 @@ function Checkout() {
               </div>
 
               <div className="flex items-center justify-between">
-                <span className="text-[10px] text-slate-600">
-                  Payment
-                </span>
+                <span className="text-[10px] text-slate-600">Payment</span>
 
                 <span className="text-[9px] font-semibold uppercase tracking-[0.05em] text-emerald-400/80">
                   Next step
@@ -632,9 +439,7 @@ function Checkout() {
                 "
                 role="alert"
               >
-                <p className="!text-[9px] leading-4 text-red-300">
-                  {error}
-                </p>
+                <p className="!text-[9px] leading-4 text-red-300">{error}</p>
               </motion.div>
             )}
 
@@ -685,8 +490,8 @@ function Checkout() {
             </button>
 
             <p className="mt-3 text-center !text-[7px] leading-4 text-slate-700">
-              By continuing, your order will be created with the
-              current server-side game prices.
+              By continuing, your order will be created with the current
+              server-side game prices.
             </p>
           </aside>
         </div>

@@ -8,6 +8,7 @@ import {
   ShieldCheck,
   UserRound,
   Gamepad2Icon,
+  ShoppingCart,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { motion } from "motion/react";
@@ -85,7 +86,7 @@ function Profile() {
                     {displayName}
                   </h2>
 
-                  <div className="mt-1 flex items-center gap-1.5 text-[11px] text-slate-500">
+                  <div className="mt-1 flex items-center gap-1.5 !text-[11px] text-slate-500">
                     <Mail size={12} />
                     <span>{email}</span>
                   </div>
@@ -96,7 +97,7 @@ function Profile() {
               <div className="flex w-fit items-center gap-2 rounded-lg border border-violet-500/15 bg-violet-500/[0.06] px-3 py-2">
                 <ShieldCheck size={13} className="text-violet-400" />
 
-                <span className="text-[9px] font-semibold uppercase tracking-[0.12em] text-violet-300">
+                <span className="!text-[9px] font-semibold uppercase tracking-[0.12em] text-violet-300">
                   {role}
                 </span>
               </div>
@@ -109,7 +110,7 @@ function Profile() {
                   <CalendarDays size={15} />
                 </div>
 
-                <p className="text-[9px] uppercase tracking-[0.12em] text-slate-600">
+                <p className="!text-[9px] uppercase tracking-[0.12em] text-slate-600">
                   Member Since
                 </p>
 
@@ -123,7 +124,7 @@ function Profile() {
                   <Gamepad2Icon size={15} />
                 </div>
 
-                <p className="text-[9px] uppercase tracking-[0.12em] text-slate-600">
+                <p className="!text-[9px] uppercase tracking-[0.12em] text-slate-600">
                   Account Type
                 </p>
 
@@ -137,7 +138,7 @@ function Profile() {
                   <ShieldCheck size={15} />
                 </div>
 
-                <p className="text-[9px] uppercase tracking-[0.12em] text-slate-600">
+                <p className="!text-[9px] uppercase tracking-[0.12em] text-slate-600">
                   Account Status
                 </p>
 
@@ -162,7 +163,25 @@ function Profile() {
             </h2>
           </div>
 
-          <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+          <div className="grid grid-cols-2 gap-3 lg:grid-cols-5">
+            <Link
+              to="/orders"
+              className="group rounded-xl border border-white/[0.06] bg-[#0b0f1a] p-4 transition-all duration-200 hover:border-violet-500/20 hover:bg-white/[0.025]"
+            >
+              <Package
+                size={17}
+                className="text-cyan-400 transition-transform duration-200 group-hover:scale-110"
+              />
+
+              <p className="mt-3 text-xs font-semibold text-slate-200">
+                Orders
+              </p>
+
+              <p className="mt-1 !text-[10px] text-slate-600">
+                Purchase history
+              </p>
+            </Link>
+
             <Link
               to="/library"
               className="group rounded-xl border border-white/[0.06] bg-[#0b0f1a] p-4 transition-all duration-200 hover:border-violet-500/20 hover:bg-white/[0.025]"
@@ -176,9 +195,7 @@ function Profile() {
                 Library
               </p>
 
-              <p className="mt-1 text-[10px] text-slate-600">
-                Your games
-              </p>
+              <p className="mt-1 !text-[10px] text-slate-600">Your games</p>
             </Link>
 
             <Link
@@ -194,27 +211,21 @@ function Profile() {
                 Wishlist
               </p>
 
-              <p className="mt-1 text-[10px] text-slate-600">
-                Saved games
-              </p>
+              <p className="mt-1 !text-[10px] text-slate-600">Saved games</p>
             </Link>
 
             <Link
               to="/cart"
               className="group rounded-xl border border-white/[0.06] bg-[#0b0f1a] p-4 transition-all duration-200 hover:border-violet-500/20 hover:bg-white/[0.025]"
             >
-              <Package
+              <ShoppingCart
                 size={17}
                 className="text-amber-400 transition-transform duration-200 group-hover:scale-110"
               />
 
-              <p className="mt-3 text-xs font-semibold text-slate-200">
-                Cart
-              </p>
+              <p className="mt-3 text-xs font-semibold text-slate-200">Cart</p>
 
-              <p className="mt-1 text-[10px] text-slate-600">
-                Current items
-              </p>
+              <p className="mt-1 !text-[10px] text-slate-600">Current items</p>
             </Link>
 
             <Link
@@ -230,7 +241,7 @@ function Profile() {
                 Settings
               </p>
 
-              <p className="mt-1 text-[10px] text-slate-600">
+              <p className="mt-1 !text-[10px] text-slate-600">
                 Account settings
               </p>
             </Link>

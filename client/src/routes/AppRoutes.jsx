@@ -14,6 +14,9 @@ import Register from "../pages/Register";
 import ProtectedRoute from "./ProtectedRoute";
 import Checkout from "../pages/Checkout";
 import Profile from "../pages/Profile";
+import OrderSuccess from "../pages/OrderSuccess";
+import Orders from "../pages/Orders";
+import OrderDetails from "../pages/OrderDetails";
 
 function AppRoutes() {
   return (
@@ -76,6 +79,16 @@ function AppRoutes() {
 
           {/* Checkout */}
           <Route path="/checkout" element={<Checkout />} />
+
+          {/* Order Success */}
+          <Route path="/order-success" element={<OrderSuccess />} />
+
+          {/* Orders */}
+          <Route path="/orders" element={<Orders />} />
+
+          {/* Order Details */}
+          <Route path="/orders/:orderId" element={<OrderDetails />} />
+          
         </Route>
 
         {/* =========================

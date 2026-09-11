@@ -12,6 +12,7 @@ import {
   ShoppingCart,
   UserRound,
   X,
+  Package,
 } from "lucide-react";
 import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 
@@ -786,6 +787,22 @@ function TopNavbar() {
                         >
                           <UserRound className="size-3.5" />
                           Profile
+                        </Link>
+
+                        <Link
+                          to="/orders"
+                          onClick={() => setAccountMenuOpen(false)}
+                          className="
+                            flex h-9 items-center gap-2.5 
+                            rounded-lg px-2.5
+                            !text-[9px] font-semibold 
+                          text-slate-400 transition
+                          hover:bg-white/[0.045]
+                          hover:text-white
+                          "
+                        >
+                          <Package className="size-3.5" />
+                          <span>Orders</span>
                         </Link>
 
                         <Link
