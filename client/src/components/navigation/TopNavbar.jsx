@@ -601,7 +601,7 @@ function TopNavbar() {
             {showGlobalSearch && (
               <button
                 type="button"
-                aria-label="Open search"
+                aria-label={mobileSearchOpen ? "Close search" : "Open search"}
                 aria-expanded={mobileSearchOpen}
                 onClick={() => {
                   if (mobileSearchOpen) {
@@ -623,7 +623,11 @@ function TopNavbar() {
                   md:hidden
                 "
               >
-                <Search className="size-[17px]" />
+                {mobileSearchOpen ? (
+                  <X className="size-5" />
+                ) : (
+                  <Search className="size-5" />
+                )}
               </button>
             )}
 

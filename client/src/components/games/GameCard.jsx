@@ -1,13 +1,16 @@
-import { Heart, ShoppingCart, Star } from "lucide-react";
+import { Gift, Heart, ShoppingCart, Star } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useStore } from "../../context/useStore";
 
 function GameCard({ game }) {
-  const { toggleWishlist, isWishlisted, addToCart, isInCart, } = useStore();
+  const { toggleWishlist, isWishlisted, addToCart, isInCart, isGameOwned } =
+    useStore();
 
-const wishlisted = isWishlisted(game.id);
+  const wishlisted = isWishlisted(game.id);
 
-const inCart = isInCart(game.id);
+  const inCart = isInCart(game.id);
+
+  const owned = isGameOwned(game.id);
 
   const hasDiscount =
     Number(game.discount) > 0 && Number(game.originalPrice) > game.price;
@@ -27,14 +30,14 @@ const inCart = isInCart(game.id);
       "
     >
       {/* Artwork */}
-      <Link 
+      <Link
         to={`/games/${game.slug || game.id}`}
         className="
           relative block aspect-[5/6]
           overflow-hidden bg-[#0B0F1C]
         "
       >
-        <img 
+        <img
           src={game.portraitImage || game.image}
           alt={game.title}
           loading="lazy"
@@ -87,38 +90,74 @@ const inCart = isInCart(game.id);
           </span>
         )}
 
-        {/* Wishlist */}
-        <button
-          type="button"
-          aria-label={`Add ${game.title} to wishlist`}
-          onClick={(event) => {
-            event.preventDefault();
-            event.stopPropagation();
-            toggleWishlist(game);
-          }}
-          className="
-            absolute right-3 top-3
-            flex size-8 items-center justify-center
-            rounded-lg
-            border border-white/10
-            bg-black/35
-            text-slate-300
-            backdrop-blur-md
-            transition-all duration-200
-            hover:border-violet-400/30
-            hover:bg-violet-500/15
-            hover:text-white
-            active:scale-95
-          "
-        >
-          <Heart className={["size-3.5 transition-all duration-200", wishlisted ? "fill-violet-600 text-violet-600" : "text-slate-300", ].join(" ") }/>
-        </button>
+        {/* Wishlist / Gift */}
+        {owned ? (
+          <button
+            type="button"
+            aria-label={`Gift ${game.title}`}
+            onClick={(event) => {
+              event.preventDefault();
+              event.stopPropagation();
+
+              // Gift flow will be connected next.
+            }}
+            className="
+              absolute right-3 top-3
+              flex size-8 items-center justify-center
+              rounded-lg
+              border border-emerald-400/20
+              bg-black/35
+              text-emerald-300
+              backdrop-blur-md
+              transition-all duration-200
+              hover:border-emerald-400/35
+              hover:bg-emerald-500/15
+              hover:text-emerald-200
+              active:scale-95
+            "
+          >
+            <Gift className="size-3.5" />
+          </button>
+        ) : (
+          <button
+            type="button"
+            aria-label={`Add ${game.title} to wishlist`}
+            onClick={(event) => {
+              event.preventDefault();
+              event.stopPropagation();
+              toggleWishlist(game);
+            }}
+            className="
+              absolute right-3 top-3
+              flex size-8 items-center justify-center
+              rounded-lg
+              border border-white/10
+              bg-black/35
+              text-slate-300
+              backdrop-blur-md
+              transition-all duration-200
+              hover:border-violet-400/30
+              hover:bg-violet-500/15
+              hover:text-white
+              active:scale-95
+            "
+          >
+            <Heart
+              className={[
+                "size-3.5 transition-all duration-200",
+                wishlisted
+                  ? "fill-violet-600 text-violet-600"
+                  : "text-slate-300",
+              ].join(" ")}
+            />
+          </button>
+        )}
       </Link>
 
       {/* Card information */}
       <div className="relative px-3 pb-3 pt-2.5">
         {/* Title */}
-        <Link 
+        <Link
           to={`/games/${game.slug || game.id}`}
           className="
             block truncate
@@ -141,9 +180,7 @@ const inCart = isInCart(game.id);
             text-slate-500
           "
         >
-          <span className="truncate">
-            {game.genre || "Action"}
-          </span>
+          <span className="truncate">{game.genre || "Action"}</span>
 
           <span className="text-slate-700">•</span>
 
@@ -161,59 +198,98 @@ const inCart = isInCart(game.id);
             </span>
           </div>
 
-          {/* Price + cart */}
+          {/* Price / Ownership */}
           <div className="flex items-center gap-2">
-            <div className="text-right">
-              {hasDiscount && (
+            {owned ? (
+              <div className="flex items-center gap-2">
                 <span
                   className="
-                    mr-1.5
-                    text-[7px]
-                    text-slate-600
-                    line-through
+                    flex h-8 items-center
+                    rounded-lg
+                    border border-emerald-400/15
+                    bg-emerald-400/[0.05]
+                    px-2.5 !text-[8px] font-bold uppercase
+                    tracking-[0.06em] text-emerald-300
                   "
                 >
-                  ₹{Number(game.originalPrice).toLocaleString("en-IN")}
+                  ✓ In Library
                 </span>
-              )}
 
-              <span
-                className="
-                  nv-display
-                  text-[11px]
-                  font-bold
-                  text-white
-                "
-              >
-                ₹{Number(game.price).toLocaleString("en-IN")}
-              </span>
-            </div>
+                <button
+                  type="button"
+                  aria-label={`Gift ${game.title}`}
+                  onClick={(event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
 
-            {/* Cart icon only — no Add to Cart text */}
-            <button
-              type="button"
-              aria-label={`Add ${game.title} to cart`}
-              onClick={(event) => {
-                event.preventDefault();
-                event.stopPropagation();
-                addToCart(game);
-              }}
-              className="
-                flex size-8 shrink-0
-                items-center justify-center
-                rounded-lg
-                border border-white/[0.08]
-                bg-white/[0.03]
-                text-slate-400
-                transition-all duration-200
-                hover:border-violet-400/30
-                hover:bg-violet-500/15
-                hover:text-violet-300
-                active:scale-95
-              "
-            >
-              <ShoppingCart className={["size-3.5 transition-colors duration-200", inCart ? "text-violet-600" : "text-slate-400", ].join(" ")}/>
-            </button>
+                    // Gift flow will be connected next.
+                  }}
+                  className="
+                    flex size-8 shrink-0
+                    items-center justify-center
+                    rounded-lg
+                    border border-white/[0.08]
+                    bg-white/[0.03]
+                    text-slate-400
+                    transition-all duration-200
+                    hover:border-emerald-400/30
+                    hover:bg-emerald-500/15
+                    hover:text-emerald-300
+                    active:scale-95
+                  "
+                >
+                  <Gift className="size-3.5" />
+                </button>
+              </div>
+            ) : (
+              <>
+                <div className="text-right">
+                  {hasDiscount && (
+                    <span
+                      className="mr-1.5 text-[7px] text-slate-600 line-through"
+                    >
+                      ₹{Number(game.originalPrice).toLocaleString("en-IN")}
+                    </span>
+                  )}
+
+                  <span
+                    className="nv-display text-[11px] font-bold text-white"
+                  >
+                    ₹{Number(game.price).toLocaleString("en-IN")}
+                  </span>
+                </div>
+
+                <button
+                  type="button"
+                  aria-label={`Add ${game.title} to cart`}
+                  onClick={(event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    addToCart(game);
+                  }}
+                  className="
+                    flex size-8 shrink-0
+                    items-center justify-center
+                    rounded-lg
+                    border border-white/[0.08]
+                    bg-white/[0.03]
+                    text-slate-400
+                    transition-all duration-200
+                    hover:border-violet-400/30
+                    hover:bg-violet-500/15
+                    hover:text-violet-300
+                    active:scale-95
+                  "
+                >
+                  <ShoppingCart
+                    className={[
+                      "size-3.5 transition-colors duration-200",
+                      inCart ? "text-violet-600" : "text-slate-400",
+                    ].join(" ")}
+                  />
+                </button>
+              </>
+            )}
           </div>
         </div>
       </div>

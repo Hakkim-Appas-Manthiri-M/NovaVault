@@ -3,6 +3,7 @@ import {
   Check,
   ChevronLeft,
   ChevronRight,
+  Gift,
   Heart,
   Monitor,
   Pause,
@@ -113,7 +114,8 @@ function loadGameDetails(gameId) {
 }
 
 function GameDetails() {
-  const { toggleWishlist, isWishlisted, addToCart, isInCart } = useStore();
+  const { toggleWishlist, isWishlisted, addToCart, isInCart, isGameOwned } =
+    useStore();
 
   const { gameId } = useParams();
 
@@ -123,6 +125,8 @@ function GameDetails() {
   const [relatedGames, setRelatedGames] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+
+  const owned = game ? isGameOwned(game.id) : false;
 
   const mediaData = game?.media;
 
@@ -193,8 +197,7 @@ function GameDetails() {
 
   const trailer = mediaData?.trailer || "";
 
-  const trailerUrl =
-    typeof trailer === "string" ? trailer : trailer?.url || "";
+  const trailerUrl = typeof trailer === "string" ? trailer : trailer?.url || "";
 
   const trailerType =
     mediaData?.trailerType ||
@@ -485,43 +488,43 @@ function GameDetails() {
     );
   }
 
-if (error || !game) {
-  return (
-    <PageContainer className="py-12">
-      <div className="flex min-h-[60vh] flex-col items-center justify-center text-center">
-        <p className="text-[8px] font-bold uppercase tracking-[0.25em] text-violet-400">
-          NovaVault
-        </p>
+  if (error || !game) {
+    return (
+      <PageContainer className="py-12">
+        <div className="flex min-h-[60vh] flex-col items-center justify-center text-center">
+          <p className="text-[8px] font-bold uppercase tracking-[0.25em] text-violet-400">
+            NovaVault
+          </p>
 
-        <h1 className="nv-display mt-3 text-3xl font-bold text-white">
-          Game Not Found
-        </h1>
+          <h1 className="nv-display mt-3 text-3xl font-bold text-white">
+            Game Not Found
+          </h1>
 
-        <p className="mt-2 max-w-md text-[10px] leading-5 text-slate-500">
-          {error || "The game you're looking for doesn't exist in the NovaVault collection."}
-        </p>
+          <p className="mt-2 max-w-md text-[10px] leading-5 text-slate-500">
+            {error ||
+              "The game you're looking for doesn't exist in the NovaVault collection."}
+          </p>
 
-        <Link
-          to="/games"
-          className="
+          <Link
+            to="/games"
+            className="
             mt-6 inline-flex min-h-10 items-center gap-2
             rounded-lg bg-violet-600 px-5
             !text-[10px] font-bold uppercase tracking-[0.08em]
             text-white transition hover:bg-violet-500
           "
-        >
-          <ArrowLeft className="size-3.5" />
-          Back to Store
-        </Link>
-      </div>
-    </PageContainer>
-  );
-}
+          >
+            <ArrowLeft className="size-3.5" />
+            Back to Store
+          </Link>
+        </div>
+      </PageContainer>
+    );
+  }
 
   const hasDiscount =
     Number(game.discount) > 0 &&
     Number(game.originalPrice) > Number(game.price);
-
 
   const mediaCount = screenshots.length + 1;
 
@@ -598,24 +601,30 @@ if (error || !game) {
     });
   };
 
-
   const handleWishlist = () => {
-    if (!game) return;
+    if (!game || owned) return;
 
     toggleWishlist(game);
   };
 
   const handleAddToCart = () => {
-    if (!game) return;
+    if (!game || owned) return;
 
     addToCart(game);
   };
 
   const handleBuyNow = () => {
-    if (!game) return;
+    if (!game || owned) return;
 
     addToCart(game);
     navigate("/cart");
+  };
+
+  const handleGift = () => {
+    if (!game || !owned) return;
+
+    // Gift flow will be implemented next.
+    console.log(`Gift ${game.title}`);
   };
 
   /*
@@ -725,71 +734,118 @@ if (error || !game) {
 
               {/* Purchase */}
               <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center">
-                <div className="flex items-baseline gap-2">
-                  {hasDiscount && (
-                    <span className="text-[11px] text-slate-600 line-through">
-                      ₹{Number(game.originalPrice).toLocaleString("en-IN")}
-                    </span>
-                  )}
+                {owned ? (
+                  <>
+                    <div className="flex items-center gap-2">
+                      <div
+                        className="
+                          inline-flex min-h-7 items-center gap-1.5
+                          rounded-lg border border-violet-400/20
+                          bg-violet-500/[0.08] px-3
+                          !text-[10px] font-bold uppercase
+                          tracking-[0.06em] text-violet-300
+                        "
+                      >
+                        <Check className="size-3" />
+                        In Library
+                      </div>
 
-                  <span className="nv-display text-1xl font-bold text-white">
-                    ₹{Number(game.price).toLocaleString("en-IN")}
-                  </span>
-                </div>
+                      <button
+                        type="button"
+                        onClick={handleGift}
+                        aria-label={`Gift ${game.title}`}
+                        className="
+                          flex size-9 items-center justify-center
+                          rounded-lg
+                          border border-white/[0.08]
+                          bg-white/[0.04]
+                          text-slate-300
+                          transition-all
+                          hover:border-violet-400/30
+                          hover:bg-violet-500/10
+                          hover:text-violet-300
+                          active:scale-95
+                        "
+                      >
+                        <Gift className="size-4" />
+                      </button>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="flex items-baseline gap-2">
+                      {hasDiscount && (
+                        <span className="text-[11px] text-slate-600 line-through">
+                          ₹{Number(game.originalPrice).toLocaleString("en-IN")}
+                        </span>
+                      )}
 
-                <div className="flex gap-2">
-                  <button
-                    type="button"
-                    onClick={handleBuyNow}
-                    className="
-                      inline-flex min-h-6 items-center justify-center gap-2
-                      rounded-lg bg-violet-600 px-3
-                      !text-[12px] font-bold uppercase tracking-[0.06em]
-                      text-white shadow-lg shadow-violet-950/20
-                      transition-all hover:bg-violet-500
-                      active:scale-[0.98]
-                    "
-                  >
-                    <Play className="size-2.5 fill-current" />
-                    Buy Now
-                  </button>
+                      <span className="nv-display text-1xl font-bold text-white">
+                        ₹{Number(game.price).toLocaleString("en-IN")}
+                      </span>
+                    </div>
 
-                  <button
-                    type="button"
-                    onClick={handleAddToCart}
-                    aria-label={`Add ${game.title} to cart`}
-                    className="
-                      flex size-9 items-center justify-center
-                      rounded-lg border border-white/[0.08]
-                      bg-white/[0.04] text-slate-300
-                      transition-all hover:border-violet-400/30
-                      hover:bg-violet-500/10 hover:text-violet-300
-                      active:scale-95
-                    "
-                  >
-                    <ShoppingCart
-                      className={`size-4 ${isInCart(game.id) ? "text-violet-600" : ""}`}
-                    />
-                  </button>
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        onClick={handleBuyNow}
+                        className="
+                          inline-flex min-h-6 items-center justify-center gap-2
+                          rounded-lg bg-violet-600 px-3
+                          !text-[12px] font-bold uppercase tracking-[0.06em]
+                          text-white shadow-lg shadow-violet-950/20
+                          transition-all hover:bg-violet-500
+                          active:scale-[0.98]
+                        "
+                      >
+                        <Play className="size-2.5 fill-current" />
+                        Buy Now
+                      </button>
 
-                  <button
-                    type="button"
-                    onClick={handleWishlist}
-                    aria-label={`Add ${game.title} to wishlist`}
-                    className="
-                      flex size-9 items-center justify-center
-                      rounded-lg border border-white/[0.08]
-                      bg-white/[0.04] text-slate-300
-                      transition-all hover:border-violet-400/30
-                      hover:bg-violet-500/10 hover:text-violet-300
-                      active:scale-95
-                    "
-                  >
-                    <Heart
-                      className={`size-4 ${isWishlisted(game.id) ? "fill-violet-600 text-violet-600" : ""}`}
-                    />
-                  </button>
-                </div>
+                      <button
+                        type="button"
+                        onClick={handleAddToCart}
+                        aria-label={`Add ${game.title} to cart`}
+                        className="
+                          flex size-9 items-center justify-center
+                          rounded-lg border border-white/[0.08]
+                          bg-white/[0.04] text-slate-300
+                          transition-all hover:border-violet-400/30
+                          hover:bg-violet-500/10 hover:text-violet-300
+                          active:scale-95
+                        "
+                      >
+                        <ShoppingCart
+                          className={`size-4 ${
+                            isInCart(game.id) ? "text-violet-600" : ""
+                          }`}
+                        />
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={handleWishlist}
+                        aria-label={`Add ${game.title} to wishlist`}
+                        className="
+                          flex size-9 items-center justify-center
+                          rounded-lg border border-white/[0.08]
+                          bg-white/[0.04] text-slate-300
+                          transition-all hover:border-violet-400/30
+                          hover:bg-violet-500/10 hover:text-violet-300
+                          active:scale-95
+                        "
+                      >
+                        <Heart
+                          className={`size-4 ${
+                            isWishlisted(game.id)
+                              ? "fill-violet-600 text-violet-600"
+                              : ""
+                          }`}
+                        />
+                      </button>
+                    </div>
+                  </>
+                )}
               </div>
 
               {/* Platforms */}

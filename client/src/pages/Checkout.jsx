@@ -21,7 +21,6 @@ function Checkout() {
     cart,
     cartCount,
     removeFromCart,
-    updateCartQuantity,
   } = useStore();
 
   const [loading, setLoading] = useState(false);
@@ -47,13 +46,13 @@ function Checkout() {
     try {
       const items = cart.map((item) => ({
         game: item.id,
-        quantity: item.quantity,
+        quantity: 1,
       }));
 
       const orderData = await createOrder(items);
       const novaVaultOrder = orderData.order;
 
-      navigate("/order-success", {
+      navigate("/demo-payment", {
         state: {
           order: novaVaultOrder,
         },
@@ -178,7 +177,7 @@ function Checkout() {
             </h1>
 
             <p className="mt-1.5 text-[10px] leading-relaxed text-slate-500 sm:text-[12px]">
-              Confirm your games before creating the order.
+              Review your games before continuing to secure payment.
             </p>
           </div>
         </div>
@@ -260,67 +259,11 @@ function Checkout() {
                       </p>
                     </div>
 
-                    {/* Quantity */}
-                    <div className="flex shrink-0 items-center rounded-lg border border-white/[0.06] bg-white/[0.02]">
-                      <button
-                        type="button"
-                        onClick={() =>
-                          updateCartQuantity(
-                            item.id,
-                            item.quantity - 1,
-                          )
-                        }
-                        disabled={loading}
-                        className="
-                          flex
-                          size-7
-                          items-center
-                          justify-center
-                          text-slate-600
-                          transition
-                          hover:text-white
-                          disabled:pointer-events-none
-                          disabled:opacity-40
-                        "
-                        aria-label={`Decrease ${item.title} quantity`}
-                      >
-                        −
-                      </button>
-
-                      <span className="min-w-5 text-center text-[9px] font-semibold text-slate-300">
-                        {item.quantity}
-                      </span>
-
-                      <button
-                        type="button"
-                        onClick={() =>
-                          updateCartQuantity(
-                            item.id,
-                            item.quantity + 1,
-                          )
-                        }
-                        disabled={loading}
-                        className="
-                          flex
-                          size-7
-                          items-center
-                          justify-center
-                          text-slate-600
-                          transition
-                          hover:text-white
-                          disabled:pointer-events-none
-                          disabled:opacity-40
-                        "
-                        aria-label={`Increase ${item.title} quantity`}
-                      >
-                        +
-                      </button>
-                    </div>
 
                     {/* Total */}
                     <div className="hidden w-20 shrink-0 text-right sm:block">
                       <p className="text-[11px] font-semibold text-white">
-                        {formatPrice(item.price * item.quantity)}
+                        {formatPrice(item.price)}
                       </p>
                     </div>
 
@@ -494,12 +437,12 @@ function Checkout() {
               {loading ? (
                 <>
                   <LoaderCircle className="size-3.5 animate-spin" />
-                  Creating Order...
+                  Preparing Payment...
                 </>
               ) : (
                 <>
                   <LockKeyhole className="size-3.5" />
-                  Create Order
+                  Continue to Payment
                 </>
               )}
             </button>

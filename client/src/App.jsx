@@ -8,11 +8,11 @@ function App() {
     <>
       <PageLoader />
 
-      <StoreProvider>
-        <AuthProvider>
+      <AuthProvider>
+        <StoreProvider>
           <AppRoutes />
-        </AuthProvider>
-      </StoreProvider>
+        </StoreProvider>
+      </AuthProvider>
     </>
   );
 }

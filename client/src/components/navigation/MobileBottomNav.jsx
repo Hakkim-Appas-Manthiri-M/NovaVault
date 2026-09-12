@@ -37,7 +37,7 @@ const items = [
 
 function MobileBottomNav() {
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-white/[0.07] bg-[#060914]/95 px-2 pb-[env(safe-area-inset-bottom)] pt-1.5 backdrop-blur-xl lg:hidden">
+    <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-white/[0.07] bg-[#060914]/95 px-2 pb-[env(safe-area-inset-bottom)] pt-1.5 lg:hidden">
       <div className="mx-auto flex max-w-lg items-center justify-around">
         {items.map((item) => {
           const Icon = item.icon
@@ -49,7 +49,7 @@ function MobileBottomNav() {
               end={item.to === '/'}
               className={({ isActive }) =>
                 [
-                  'flex min-w-14 flex-col items-center gap-1 rounded-lg px-2 py-1.5 transition-colors',
+                  'flex min-w-14 flex-col items-center gap-1 rounded-lg px-2 py-1.5 transition-colors duration-150',
                   isActive
                     ? 'text-violet-300'
                     : 'text-slate-600 hover:text-slate-300',

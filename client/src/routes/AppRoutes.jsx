@@ -2,6 +2,7 @@ import { Navigate, Route, Routes } from "react-router-dom";
 
 import AppShell from "../layouts/AppShell";
 import ComingSoon from "../pages/ComingSoon";
+import Library from "../pages/Library";
 import GameDetails from "../pages/GameDetails";
 import Games from "../pages/Games";
 import Home from "../pages/Home";
@@ -17,6 +18,7 @@ import Profile from "../pages/Profile";
 import OrderSuccess from "../pages/OrderSuccess";
 import Orders from "../pages/Orders";
 import OrderDetails from "../pages/OrderDetails";
+import DemoPayment from "../pages/DemoPayment";
 
 function AppRoutes() {
   return (
@@ -57,10 +59,7 @@ function AppRoutes() {
 
         <Route element={<ProtectedRoute />}>
           {/* Library */}
-          <Route
-            path="/library"
-            element={<ComingSoon title="Library" />}
-          />
+          <Route path="/library" element={<Library />} />
 
           {/* Profile */}
           <Route path="/profile" element={<Profile />} />
@@ -79,6 +78,9 @@ function AppRoutes() {
 
           {/* Checkout */}
           <Route path="/checkout" element={<Checkout />} />
+
+          {/* Demo Payment */}
+          <Route path="/demo-payment" element={<DemoPayment />} />
 
           {/* Order Success */}
           <Route path="/order-success" element={<OrderSuccess />} />

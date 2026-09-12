@@ -2,13 +2,9 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 
 function generateToken(userId) {
-  return jwt.sign(
-    { userId },
-    process.env.JWT_SECRET,
-    {
-      expiresIn: "7d",
-    }
-  );
+  return jwt.sign({ userId }, process.env.JWT_SECRET, {
+    expiresIn: "7d",
+  });
 }
 
 function setAuthCookie(res, token) {
@@ -115,6 +111,13 @@ function logout(_req, res) {
 }
 
 async function getCurrentUser(req, res, next) {
+  if (!req.user) {
+    return res.status(200).json({
+      success: true,
+      user: null,
+    });
+  }
+
   try {
     const user = await User.findById(req.user.userId);
 

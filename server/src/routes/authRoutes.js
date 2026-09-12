@@ -14,7 +14,10 @@ const {
 
 const validateRequest = require("../middleware/validationMiddleware");
 
-const protect = require("../middleware/authMiddleware");
+const {
+  protect,
+  optionalAuth,
+} = require("../middleware/authMiddleware");
 
 const router = express.Router();
 
@@ -34,6 +37,6 @@ router.post(
 
 router.post("/logout", logout);
 
-router.get("/me", protect, getCurrentUser);
+router.get("/me", optionalAuth, getCurrentUser);
 
 module.exports = router;

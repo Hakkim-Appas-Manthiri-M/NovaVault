@@ -6,11 +6,16 @@ import {
 } from "react";
 
 import { StoreContext } from "./StoreContext";
+import { getMyLibrary } from "../services/ownershipApi";
+import useAuth from "./useAuth";
 
 const WISHLIST_STORAGE_KEY = "novavault_wishlist";
 const CART_STORAGE_KEY = "novavault_cart";
 
 function StoreProvider({ children }) {
+
+  const { isAuthenticated } = useAuth();
+
   // ============================================================
   // WISHLIST
   // ============================================================
@@ -47,6 +52,13 @@ function StoreProvider({ children }) {
     }
   });
 
+    // ============================================================
+  // OWNERSHIP
+  // ============================================================
+
+  const [ownedGameIds, setOwnedGameIds] = useState([]);
+  const [ownershipLoading, setOwnershipLoading] = useState(true);
+
   // ============================================================
   // PERSIST WISHLIST
   // ============================================================
@@ -68,6 +80,55 @@ function StoreProvider({ children }) {
       JSON.stringify(cart)
     );
   }, [cart]);
+
+    // ============================================================
+  // LOAD OWNERSHIP
+  // ============================================================
+
+  useEffect(() => {
+  let cancelled = false;
+
+  const loadOwnership = async () => {
+    if (!isAuthenticated) {
+      setOwnedGameIds([]);
+
+      if (!cancelled) {
+        setOwnershipLoading(false);
+      }
+
+      return;
+    }
+
+    try {
+      setOwnershipLoading(true);
+
+      const data = await getMyLibrary();
+
+      if (!cancelled) {
+        const ids = (data.games || [])
+          .map((game) => game._id || game.id)
+          .filter(Boolean)
+          .map((id) => id.toString());
+
+        setOwnedGameIds(ids);
+      }
+    } catch {
+      if (!cancelled) {
+        setOwnedGameIds([]);
+      }
+    } finally {
+      if (!cancelled) {
+        setOwnershipLoading(false);
+      }
+    }
+  };
+
+  loadOwnership();
+
+  return () => {
+    cancelled = true;
+  };
+}, [isAuthenticated]);
 
   // ============================================================
   // WISHLIST ACTIONS
@@ -166,6 +227,17 @@ function StoreProvider({ children }) {
     [cart]
   );
 
+    const isGameOwned = useCallback(
+    (gameId) => {
+      if (!gameId) {
+        return false;
+      }
+
+      return ownedGameIds.includes(gameId.toString());
+    },
+    [ownedGameIds]
+  );
+
   const clearCart = useCallback(() => {
     setCart([]);
   }, []);
@@ -194,6 +266,10 @@ function StoreProvider({ children }) {
       updateCartQuantity,
       isInCart,
       clearCart,
+
+      ownedGameIds,
+      ownershipLoading,
+      isGameOwned,
     }),
     [
       wishlist,
@@ -207,6 +283,10 @@ function StoreProvider({ children }) {
       updateCartQuantity,
       isInCart,
       clearCart,
+
+      ownedGameIds,
+      ownershipLoading,
+      isGameOwned,
     ]
   );
 

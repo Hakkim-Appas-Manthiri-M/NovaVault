@@ -1,6 +1,7 @@
 import {
   ChevronLeft,
   ChevronRight,
+  Gift,
   Heart,
   Play,
   ShoppingCart,
@@ -16,7 +17,7 @@ import { getGames } from "../../services/gameApi";
 const HERO_INTERVAL = 7000;
 
 function HomeHero() {
-  const { toggleWishlist, isWishlisted } = useStore();
+  const { toggleWishlist, isWishlisted, isGameOwned } = useStore();
   const [featuredGames, setFeaturedGames] = useState([]);
   const [activeIndex, setActiveIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
@@ -24,6 +25,8 @@ function HomeHero() {
   const [error, setError] = useState("");
 
   const activeGame = featuredGames[activeIndex];
+
+  const owned = activeGame ? isGameOwned(activeGame.id) : false;
 
   useEffect(() => {
     const loadFeaturedGames = async () => {
@@ -411,59 +414,44 @@ function HomeHero() {
               </div>
 
               {/* Price */}
-              <div
-                className="
-                  mt-2
-                  flex
-                  items-center
-                  gap-2
+              {!owned && (
+                <div
+                  className="mt-2 flex items-center gap-2 sm:mt-3"
+                >
+                  {activeGame.discount > 0 && (
+                    <span
+                      className="
+                        rounded-md bg-violet-600
+                        px-2 py-1 !text-[7px]
+                        font-bold text-white
+                        sm:!text-[8px]
+                      "
+                    >
+                      -{activeGame.discount}%
+                    </span>
+                  )}
 
-                  sm:mt-3
-                "
-              >
-                {activeGame.discount > 0 && (
                   <span
                     className="
-                      rounded-md
-                      bg-violet-600
-                      px-2
-                      py-1
-                      text-[7px]
-                      font-bold
+                      nv-display
+                      text-sm font-bold
                       text-white
-
-                      sm:text-[8px]
+                      sm:text-lg
                     "
                   >
-                    -{activeGame.discount}%
+                    ₹{activeGame.price.toLocaleString("en-IN")}
                   </span>
-                )}
 
-                <span
-                  className="
-                    nv-display
-                    text-sm
-                    font-bold
-                    text-white
-
-                    sm:text-lg
-                  "
-                >
-                  ₹{activeGame.price.toLocaleString("en-IN")}
-                </span>
-
-                <span
-                  className="
-                    text-[7px]
-                    text-slate-500
-                    line-through
-
-                    sm:text-[8px]
-                  "
-                >
-                  ₹{activeGame.originalPrice.toLocaleString("en-IN")}
-                </span>
-              </div>
+                  <span
+                    className="
+                      !text-[7px] text-slate-500
+                      line-through sm:!text-[8px]
+                    "
+                  >
+                    ₹{activeGame.originalPrice.toLocaleString("en-IN")}
+                  </span>
+                </div>
+              )}
 
               {/* =================================================
                   CTA BUTTONS
@@ -477,111 +465,162 @@ function HomeHero() {
 
               <div
                 className="
-                  mt-3
-                  flex
-                  items-center
-                  gap-2
-
+                  mt-3 flex
+                  items-center gap-2
                   sm:mt-4
                 "
               >
-                {/* BUY NOW */}
+                {owned ? (
+                  <>
+                    {/* IN LIBRARY */}
+                    <Link
+                      to="/library"
+                      className="
+                        inline-flex h-8
+                        min-h-8 w-auto
+                        shrink-0 items-center
+                        justify-center gap-1.5
+                        rounded-md border
+                        border-violet-400/20
+                        bg-violet-500/10
+                        px-3 !text-[8px]
+                        font-bold uppercase
+                        leading-none tracking-[0.06em]
+                        text-violet-300 backdrop-blur-md
+                        transition-all duration-200
+                        hover:border-violet-400/40
+                        hover:bg-violet-500/15
+                        hover:text-violet-200
+                        active:scale-[0.98]
+                        sm:h-10 sm:min-h-10
+                        sm:gap-2 sm:rounded-lg
+                        sm:px-4 sm:!text-[9px]
+                      "
+                    >
+                      <span className="text-[10px]">✓</span>
+                      <span>Library</span>
+                    </Link>
 
-                <Link
-                  to={`/games/${activeGame.slug}`}
-                  className="
-                    inline-flex
-                    h-8
-                    min-h-8
-                    w-auto
-                    shrink-0
-                    items-center
-                    justify-center
-                    gap-1.5
-                    rounded-md
-                    bg-violet-600
-                    px-3
-                    !text-[8px]
-                    font-bold
-                    uppercase
-                    leading-none
-                    tracking-[0.06em]
-                    text-white
-                    shadow-lg
-                    shadow-violet-950/20
-                    transition-all
-                    duration-200
+                    {/* GIFT */}
+                    <button
+                      type="button"
+                      aria-label={`Gift ${activeGame.title}`}
+                      onClick={() => {
+                        console.log(`Gift ${activeGame.title}`);
+                      }}
+                      className="
+                        flex size-8
+                        shrink-0 items-center
+                        justify-center rounded-md
+                        border border-white/10
+                        bg-black/20 text-slate-300
+                        backdrop-blur-md
+                        transition-all duration-200
+                        hover:border-violet-400/30
+                        hover:bg-violet-500/10
+                        hover:text-violet-300
+                        active:scale-95
+                        sm:size-10 sm:rounded-lg
+                      "
+                    >
+                      <Gift className="size-3.5 sm:size-4" />
+                    </button>
 
-                    hover:bg-violet-500
-                    hover:shadow-violet-900/30
+                    {/* VIEW GAME */}
+                    <Link
+                      to={`/games/${activeGame.slug}`}
+                      className="
+                        inline-flex h-8
+                        min-h-8 w-auto
+                        shrink-0 items-center
+                        justify-center gap-1.5
+                        rounded-md border
+                        border-white/10 bg-black/20
+                        px-3 !text-[8px]
+                        font-bold uppercase
+                        leading-none tracking-[0.06em]
+                        text-slate-200 backdrop-blur-md
+                        transition-all duration-200
+                        hover:border-white/20
+                        hover:bg-white/[0.06]
+                        hover:text-white
+                        active:scale-[0.98]
+                        sm:h-10 sm:min-h-10
+                        sm:gap-2 sm:rounded-lg
+                        sm:px-4 sm:!text-[9px]
+                      "
+                    >
+                      <Play className="size-3 shrink-0" />
+                      <span className="sm:hidden">View</span>
+                      <span className="hidden sm:inline">View Game</span>
+                    </Link>
+                  </>
+                ) : (
+                  <>
+                    {/* BUY NOW */}
+                    <Link
+                      to={`/games/${activeGame.slug}`}
+                      className="
+                        inline-flex h-8
+                        min-h-8 w-auto
+                        shrink-0 items-center
+                        justify-center gap-1.5
+                        rounded-md bg-violet-600
+                        px-3 !text-[8px] font-bold
+                        uppercase leading-none
+                        tracking-[0.06em]
+                        text-white shadow-lg
+                        shadow-violet-950/20
+                        transition-all duration-200
+                        hover:bg-violet-500
+                        hover:shadow-violet-900/30
+                        active:scale-[0.98]
+                        sm:h-10 sm:min-h-10
+                        sm:gap-2 sm:rounded-lg
+                        sm:px-4 sm:!text-[8px]
+                      "
+                    >
+                      <ShoppingCart className="size-3 shrink-0" />
 
-                    active:scale-[0.98]
+                      <span className="!text-[10px] sm:hidden">Buy</span>
 
-                    sm:h-10
-                    sm:min-h-10
-                    sm:gap-2
-                    sm:rounded-lg
-                    sm:px-4
-                    sm:!text-[8px]
-                  "
-                >
-                  <ShoppingCart className="size-3 shrink-0" />
+                      <span className="hidden !text-[10px] sm:inline">
+                        Buy Now
+                      </span>
+                    </Link>
 
-                  <span className="!text-[10px] sm:hidden">Buy</span>
+                    {/* VIEW GAME */}
+                    <Link
+                      to={`/games/${activeGame.slug}`}
+                      className="
+                        inline-flex h-8
+                        min-h-8 w-auto
+                        shrink-0 items-center
+                        justify-center gap-1.5
+                        rounded-md border
+                        border-white/10 bg-black/20
+                        px-3 !text-[8px]
+                        font-bold uppercase
+                        leading-none tracking-[0.06em]
+                        text-slate-200 backdrop-blur-md
+                        transition-all duration-200
+                        hover:border-white/20
+                        hover:bg-white/[0.06]
+                        hover:text-white
+                        active:scale-[0.98]
+                        sm:h-10 sm:min-h-10
+                        sm:gap-2 sm:rounded-lg
+                        sm:px-4 sm:!text-[9px]
+                      "
+                    >
+                      <Play className="size-3 shrink-0" />
 
-                  <span className="hidden !text-[10px] sm:inline">Buy Now</span>
-                </Link>
+                      <span className="sm:hidden">View</span>
 
-                {/* VIEW GAME */}
-
-                <Link
-                  to={`/games/${activeGame.slug}`}
-                  className="
-                    inline-flex
-                    h-8
-                    min-h-8
-                    w-auto
-                    shrink-0
-                    items-center
-                    justify-center
-                    gap-1.5
-                    rounded-md
-                    border
-                    border-white/10
-                    bg-black/20
-                    px-3
-                    text-[8px]
-                    font-bold
-                    uppercase
-                    leading-none
-                    tracking-[0.06em]
-                    text-slate-200
-                    backdrop-blur-md
-                    transition-all
-                    duration-200
-
-                    hover:border-white/20
-                    hover:bg-white/[0.06]
-                    hover:text-white
-
-                    active:scale-[0.98]
-
-                    sm:h-10
-                    sm:min-h-10
-                    sm:gap-2
-                    sm:rounded-lg
-                    sm:px-4
-                    sm:text-[9px]
-                  "
-                >
-                  <Play className="size-3 shrink-0" />
-
-                  {/* Small label on mobile */}
-                  <span className="sm:hidden">View</span>
-
-                  {/* Full label on tablet/desktop */}
-                  <span className="hidden sm:inline">View Game</span>
-                </Link>
+                      <span className="hidden sm:inline">View Game</span>
+                    </Link>
+                  </>
+                )}
               </div>
             </motion.div>
           </AnimatePresence>
@@ -591,15 +630,16 @@ function HomeHero() {
             WISHLIST
             ===================================================== */}
 
-        <button
-          type="button"
-          aria-label={
-            isWishlisted(activeGame.id)
-              ? `Remove ${activeGame.title} from wishlist`
-              : `Add ${activeGame.title} to wishlist`
-          }
-          onClick={() => toggleWishlist(activeGame)}
-          className="
+        {!owned && (
+          <button
+            type="button"
+            aria-label={
+              isWishlisted(activeGame.id)
+                ? `Remove ${activeGame.title} from wishlist`
+                : `Add ${activeGame.title} to wishlist`
+            }
+            onClick={() => toggleWishlist(activeGame)}
+            className="
             absolute right-3
             top-3 z-20 flex
             size-8 items-center
@@ -612,15 +652,16 @@ function HomeHero() {
           hover:text-white
             sm:right-5 sm:top-5
             lg:right-7 lg:top-7"
-        >
-          <Heart
-            className={`size-4 ${
-              isWishlisted(activeGame.id)
-                ? "fill-violet-600 text-violet-600"
-                : "text-white/80"
-            }`}
-          />
-        </button>
+          >
+            <Heart
+              className={`size-4 ${
+                isWishlisted(activeGame.id)
+                  ? "fill-violet-600 text-violet-600"
+                  : "text-white/80"
+              }`}
+            />
+          </button>
+        )}
 
         {/* =====================================================
             CAROUSEL CONTROLS

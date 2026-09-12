@@ -17,9 +17,9 @@ const createOrder = async (req, res, next) => {
       });
     }
 
-    // Prevent duplicate game IDs in the same order.
+    // A NovaVault account can own a game only once.
+    // Prevent duplicate games inside the same order.
     const gameIds = items.map((item) => item.game);
-
     const uniqueGameIds = [...new Set(gameIds)];
 
     if (uniqueGameIds.length !== gameIds.length) {
@@ -39,7 +39,8 @@ const createOrder = async (req, res, next) => {
       });
     }
 
-    // Get the current game information directly from MongoDB.
+    // Always calculate prices from the database.
+    // Never trust prices sent by the client.
     const games = await Game.find({
       _id: { $in: uniqueGameIds },
     }).lean();
@@ -50,34 +51,35 @@ const createOrder = async (req, res, next) => {
       });
     }
 
+    // Prevent purchasing games already owned by this user.
     const existingOwnerships = await GameOwnership.find({
-  user: req.user.userId,
-  game: { $in: uniqueGameIds },
-})
-  .select("game")
-  .lean();
+      user: req.user.userId,
+      game: { $in: uniqueGameIds },
+    })
+      .select("game")
+      .lean();
 
-if (existingOwnerships.length > 0) {
-  const ownedGameIds = new Set(
-    existingOwnerships.map((ownership) =>
-      ownership.game.toString(),
-    ),
-  );
+    if (existingOwnerships.length > 0) {
+      const ownedGameIds = new Set(
+        existingOwnerships.map((ownership) =>
+          ownership.game.toString(),
+        ),
+      );
 
-  const ownedGames = games.filter((game) =>
-    ownedGameIds.has(game._id.toString()),
-  );
+      const ownedGames = games.filter((game) =>
+        ownedGameIds.has(game._id.toString()),
+      );
 
-  return res.status(409).json({
-    message:
-      ownedGames.length === 1
-        ? `${ownedGames[0].title} is already in your library.`
-        : "One or more selected games are already in your library.",
-    ownedGameIds: ownedGames.map((game) =>
-      game._id.toString(),
-    ),
-  });
-}
+      return res.status(409).json({
+        message:
+          ownedGames.length === 1
+            ? `${ownedGames[0].title} is already in your library.`
+            : "One or more selected games are already in your library.",
+        ownedGameIds: ownedGames.map((game) =>
+          game._id.toString(),
+        ),
+      });
+    }
 
     const gameMap = new Map(
       games.map((game) => [game._id.toString(), game]),
@@ -89,11 +91,14 @@ if (existingOwnerships.length > 0) {
     const orderItems = [];
 
     for (const item of items) {
+      // Each game represents one digital ownership.
+      // Multiple copies of the same digital game are not allowed.
       const quantity = Number(item.quantity);
 
-      if (!Number.isInteger(quantity) || quantity < 1 || quantity > 99) {
+      if (quantity !== 1) {
         return res.status(400).json({
-          message: "Each item quantity must be a whole number between 1 and 99.",
+          message:
+            "Each game can only be purchased once per NovaVault account.",
         });
       }
 
@@ -101,21 +106,21 @@ if (existingOwnerships.length > 0) {
 
       if (!game) {
         return res.status(400).json({
-          message: "One or more selected games could not be found.",
+          message:
+            "One or more selected games could not be found.",
         });
       }
 
       const price = Number(game.price || 0);
       const originalPrice = Number(game.originalPrice || 0);
 
-      const itemSubtotal = price * quantity;
+      const itemSubtotal = price;
 
       const itemOriginalSubtotal =
-        originalPrice > price
-          ? originalPrice * quantity
-          : itemSubtotal;
+        originalPrice > price ? originalPrice : itemSubtotal;
 
       subtotal += itemSubtotal;
+
       discount += Math.max(
         0,
         itemOriginalSubtotal - itemSubtotal,
@@ -129,7 +134,7 @@ if (existingOwnerships.length > 0) {
         price,
         originalPrice,
         discount: Number(game.discount || 0),
-        quantity,
+        quantity: 1,
         subtotal: itemSubtotal,
       });
     }
