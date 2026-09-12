@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   ArrowLeft,
   Gamepad2,
@@ -12,59 +12,20 @@ import { Link, useNavigate } from "react-router-dom";
 import { motion } from "motion/react";
 
 import { createOrder } from "../services/orderApi";
-import {
-  createRazorpayOrder,
-  verifyRazorpayPayment,
-} from "../services/paymentApi";
 import { useStore } from "../context/useStore";
 
 function Checkout() {
   const navigate = useNavigate();
-  const { cart, cartCount, removeFromCart, updateCartQuantity, clearCart } =
-    useStore();
+
+  const {
+    cart,
+    cartCount,
+    removeFromCart,
+    updateCartQuantity,
+  } = useStore();
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-
-  const [razorpayReady, setRazorpayReady] = useState(false);
-
-  const [pendingOrder, setPendingOrder] = useState(null);
-
-  useEffect(() => {
-    if (window.Razorpay) {
-      setRazorpayReady(true);
-      return;
-    }
-
-    const existingScript = document.querySelector(
-      'script[src="https://checkout.razorpay.com/v1/checkout.js"]',
-    );
-
-    if (existingScript) {
-      existingScript.addEventListener("load", () => setRazorpayReady(true));
-      return;
-    }
-
-    const script = document.createElement("script");
-
-    script.src = "https://checkout.razorpay.com/v1/checkout.js";
-    script.async = true;
-
-    script.onload = () => {
-      setRazorpayReady(true);
-    };
-
-    script.onerror = () => {
-      setError("Unable to load the payment gateway. Please try again.");
-    };
-
-    document.body.appendChild(script);
-
-    return () => {
-      script.onload = null;
-      script.onerror = null;
-    };
-  }, []);
 
   const subtotal = cart.reduce(
     (total, item) => total + Number(item.price || 0) * item.quantity,
@@ -80,105 +41,30 @@ function Checkout() {
       return;
     }
 
-    if (!razorpayReady || !window.Razorpay) {
-      setError("Payment gateway is still loading. Please try again.");
-      return;
-    }
-
     setError("");
     setLoading(true);
 
     try {
-      // 1. Create or reuse NovaVault order
-      let novaVaultOrder = pendingOrder;
+      const items = cart.map((item) => ({
+        game: item.id,
+        quantity: item.quantity,
+      }));
 
-      if (!novaVaultOrder) {
-        const items = cart.map((item) => ({
-          game: item.id,
-          quantity: item.quantity,
-        }));
+      const orderData = await createOrder(items);
+      const novaVaultOrder = orderData.order;
 
-        const orderData = await createOrder(items);
-
-        novaVaultOrder = orderData.order;
-        setPendingOrder(novaVaultOrder);
-      }
-
-      // 2. Create or reuse Razorpay order
-      const razorpayData = await createRazorpayOrder(novaVaultOrder._id);
-
-      // 3. Open Razorpay Checkout
-      const options = {
-        key: razorpayData.keyId,
-        amount: razorpayData.amount,
-        currency: razorpayData.currency,
-        name: "NovaVault",
-        description: "Game purchase",
-        order_id: razorpayData.razorpayOrderId,
-
-        handler: async (paymentResponse) => {
-          try {
-            setError("");
-
-            const verificationData = await verifyRazorpayPayment({
-              novaVaultOrderId: novaVaultOrder._id,
-              razorpay_payment_id: paymentResponse.razorpay_payment_id,
-              razorpay_order_id: paymentResponse.razorpay_order_id,
-              razorpay_signature: paymentResponse.razorpay_signature,
-            });
-
-            clearCart();
-            setPendingOrder(null);
-
-            navigate("/order-success", {
-              state: {
-                order: verificationData.order,
-              },
-            });
-          } catch (verificationError) {
-            setLoading(false);
-
-            setError(
-              verificationError.message ||
-                "Payment verification failed. Please contact support if your payment was deducted.",
-            );
-          }
+      navigate("/order-success", {
+        state: {
+          order: novaVaultOrder,
         },
-
-        modal: {
-          ondismiss: () => {
-            setLoading(false);
-
-            setError(
-              "Payment was cancelled. Your order is still available to retry.",
-            );
-          },
-        },
-
-        theme: {
-          color: "#7c3aed",
-        },
-      };
-
-      const razorpay = new window.Razorpay(options);
-
-      razorpay.on("payment.failed", (response) => {
-        setLoading(false);
-
-        setError(
-          response.error?.description ||
-            "Payment failed. Your order is still available to retry.",
-        );
       });
-
-      razorpay.open();
     } catch (requestError) {
-      setLoading(false);
-
       setError(
         requestError.message ||
-          "Unable to start the payment. Please try again.",
+          "Unable to create your order. Please try again.",
       );
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -379,7 +265,10 @@ function Checkout() {
                       <button
                         type="button"
                         onClick={() =>
-                          updateCartQuantity(item.id, item.quantity - 1)
+                          updateCartQuantity(
+                            item.id,
+                            item.quantity - 1,
+                          )
                         }
                         disabled={loading}
                         className="
@@ -405,7 +294,10 @@ function Checkout() {
                       <button
                         type="button"
                         onClick={() =>
-                          updateCartQuantity(item.id, item.quantity + 1)
+                          updateCartQuantity(
+                            item.id,
+                            item.quantity + 1,
+                          )
                         }
                         disabled={loading}
                         className="
@@ -466,8 +358,8 @@ function Checkout() {
 
               <p className="!text-[8px] leading-4 text-slate-600">
                 Your order is securely created using your authenticated
-                NovaVault account. Payment details are not collected on this
-                step.
+                NovaVault account. Payment details are not collected on
+                this step.
               </p>
             </div>
           </div>
@@ -497,7 +389,9 @@ function Checkout() {
 
             <div className="mt-5 space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-[10px] text-slate-600">Items</span>
+                <span className="text-[10px] text-slate-600">
+                  Items
+                </span>
 
                 <span className="text-[11px] font-medium text-slate-400">
                   {cartCount}
@@ -505,7 +399,9 @@ function Checkout() {
               </div>
 
               <div className="flex items-center justify-between">
-                <span className="text-[10px] text-slate-600">Subtotal</span>
+                <span className="text-[10px] text-slate-600">
+                  Subtotal
+                </span>
 
                 <span className="text-[11px] font-semibold text-slate-300">
                   {formatPrice(subtotal)}
@@ -513,7 +409,9 @@ function Checkout() {
               </div>
 
               <div className="flex items-center justify-between">
-                <span className="text-[10px] text-slate-600">Payment</span>
+                <span className="text-[10px] text-slate-600">
+                  Payment
+                </span>
 
                 <span className="text-[9px] font-semibold uppercase tracking-[0.05em] text-emerald-400/80">
                   Next step
@@ -554,7 +452,9 @@ function Checkout() {
                 "
                 role="alert"
               >
-                <p className="!text-[9px] leading-4 text-red-300">{error}</p>
+                <p className="!text-[9px] leading-4 text-red-300">
+                  {error}
+                </p>
               </motion.div>
             )}
 
@@ -594,19 +494,19 @@ function Checkout() {
               {loading ? (
                 <>
                   <LoaderCircle className="size-3.5 animate-spin" />
-                  Processing...
+                  Creating Order...
                 </>
               ) : (
                 <>
                   <LockKeyhole className="size-3.5" />
-                  {pendingOrder ? "Retry Payment" : "Pay Now"}
+                  Create Order
                 </>
               )}
             </button>
 
             <p className="mt-3 text-center !text-[7px] leading-4 text-slate-700">
-              By continuing, your order will be created using the current
-              server-side game prices and paid securely through Razorpay.
+              By continuing, your order will be created with the
+              current server-side game prices.
             </p>
           </aside>
         </div>

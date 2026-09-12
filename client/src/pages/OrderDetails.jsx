@@ -57,9 +57,7 @@ function OrderDetails() {
         }
       } catch (requestError) {
         if (!cancelled) {
-          setError(
-            requestError.message || "Unable to load order details.",
-          );
+          setError(requestError.message || "Unable to load order details.");
         }
       } finally {
         if (!cancelled) {
@@ -268,9 +266,7 @@ function OrderDetails() {
                   <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1">
                     <span className="!text-[9px] text-slate-500">
                       Quantity:{" "}
-                      <span className="text-slate-300">
-                        {item.quantity}
-                      </span>
+                      <span className="text-slate-300">{item.quantity}</span>
                     </span>
 
                     <span className="!text-[9px] text-slate-500">
@@ -301,15 +297,11 @@ function OrderDetails() {
         <div className="space-y-4">
           {/* Summary */}
           <section className="rounded-2xl border border-white/[0.07] bg-[#080B15] p-5">
-            <h2 className="text-sm font-semibold text-white">
-              Order Summary
-            </h2>
+            <h2 className="text-sm font-semibold text-white">Order Summary</h2>
 
             <div className="mt-5 space-y-3">
               <div className="flex items-center justify-between">
-                <span className="!text-[10px] text-slate-500">
-                  Subtotal
-                </span>
+                <span className="!text-[10px] text-slate-500">Subtotal</span>
 
                 <span className="!text-[10px] text-slate-300">
                   ₹{Number(order.subtotal || 0).toFixed(2)}
@@ -317,9 +309,7 @@ function OrderDetails() {
               </div>
 
               <div className="flex items-center justify-between">
-                <span className="!text-[10px] text-slate-500">
-                  Discount
-                </span>
+                <span className="!text-[10px] text-slate-500">Discount</span>
 
                 <span className="!text-[10px] text-emerald-400">
                   -₹{Number(order.discount || 0).toFixed(2)}
@@ -342,15 +332,11 @@ function OrderDetails() {
 
           {/* Payment */}
           <section className="rounded-2xl border border-white/[0.07] bg-[#080B15] p-5">
-            <h2 className="text-sm font-semibold text-white">
-              Payment
-            </h2>
+            <h2 className="text-sm font-semibold text-white">Payment</h2>
 
             <div className="mt-4 space-y-3">
               <div className="flex items-center justify-between">
-                <span className="!text-[10px] text-slate-500">
-                  Status
-                </span>
+                <span className="!text-[10px] text-slate-500">Status</span>
 
                 <span
                   className={`
@@ -368,24 +354,28 @@ function OrderDetails() {
                     }
                   `}
                 >
-                  {order.paymentStatus || "pending"}
+                  {order.paymentStatus === "paid"
+                    ? "PAID"
+                    : order.paymentStatus === "failed"
+                      ? "PAYMENT FAILED"
+                      : order.paymentStatus === "refunded"
+                        ? "REFUNDED"
+                        : "PAYMENT PENDING"}
                 </span>
               </div>
 
               <div className="flex items-center justify-between">
-                <span className="!text-[10px] text-slate-500">
-                  Provider
-                </span>
+                <span className="!text-[10px] text-slate-500">Provider</span>
 
-                <span className="!text-[10px] capitalize text-slate-300">
-                  {order.paymentProvider || "none"}
+                <span className="!text-[10px] text-slate-300">
+                  {order.paymentProvider === "demo"
+                    ? "NovaVault Demo"
+                    : order.paymentProvider || "Not paid"}
                 </span>
               </div>
 
               <div className="flex items-center justify-between">
-                <span className="!text-[10px] text-slate-500">
-                  Currency
-                </span>
+                <span className="!text-[10px] text-slate-500">Currency</span>
 
                 <span className="!text-[10px] text-slate-300">
                   {order.currency || "INR"}
@@ -400,7 +390,7 @@ function OrderDetails() {
               <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-violet-400" />
 
               <div>
-                <p className="text-![10px] font-semibold text-slate-300">
+                <p className="!text-[10px] font-semibold text-slate-300">
                   Order secured
                 </p>
 

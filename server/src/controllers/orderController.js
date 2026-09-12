@@ -1,6 +1,8 @@
 const mongoose = require("mongoose");
+
 const Order = require("../models/Order");
 const Game = require("../models/Game");
+const GameOwnership = require("../models/GameOwnership");
 
 // ==========================================
 // CREATE ORDER
@@ -47,6 +49,35 @@ const createOrder = async (req, res, next) => {
         message: "One or more games could not be found.",
       });
     }
+
+    const existingOwnerships = await GameOwnership.find({
+  user: req.user.userId,
+  game: { $in: uniqueGameIds },
+})
+  .select("game")
+  .lean();
+
+if (existingOwnerships.length > 0) {
+  const ownedGameIds = new Set(
+    existingOwnerships.map((ownership) =>
+      ownership.game.toString(),
+    ),
+  );
+
+  const ownedGames = games.filter((game) =>
+    ownedGameIds.has(game._id.toString()),
+  );
+
+  return res.status(409).json({
+    message:
+      ownedGames.length === 1
+        ? `${ownedGames[0].title} is already in your library.`
+        : "One or more selected games are already in your library.",
+    ownedGameIds: ownedGames.map((game) =>
+      game._id.toString(),
+    ),
+  });
+}
 
     const gameMap = new Map(
       games.map((game) => [game._id.toString(), game]),
