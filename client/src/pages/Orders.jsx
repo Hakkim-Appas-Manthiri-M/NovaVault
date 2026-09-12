@@ -11,6 +11,10 @@ import { useEffect, useState } from "react";
 import { motion } from "motion/react";
 
 import { getMyOrders } from "../services/orderApi";
+import {
+  retryRazorpayPayment,
+  verifyRazorpayPayment,
+} from "../services/paymentApi";
 
 function formatDate(date) {
   if (!date) return "Unknown date";
@@ -34,6 +38,7 @@ function Orders() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [retryingOrderId, setRetryingOrderId] = useState(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -50,9 +55,7 @@ function Orders() {
         }
       } catch (requestError) {
         if (!cancelled) {
-          setError(
-            requestError.message || "Unable to load your orders.",
-          );
+          setError(requestError.message || "Unable to load your orders.");
         }
       } finally {
         if (!cancelled) {
@@ -67,6 +70,112 @@ function Orders() {
       cancelled = true;
     };
   }, []);
+
+  useEffect(() => {
+    if (window.Razorpay) {
+      return;
+    }
+
+    const existingScript = document.querySelector(
+      'script[src="https://checkout.razorpay.com/v1/checkout.js"]',
+    );
+
+    if (existingScript) {
+      return;
+    }
+
+    const script = document.createElement("script");
+
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    script.async = true;
+
+    document.body.appendChild(script);
+  }, []);
+
+  const handleRetryPayment = async (order) => {
+    if (!order?._id || order.paymentStatus === "paid" || retryingOrderId) {
+      return;
+    }
+
+    try {
+      setRetryingOrderId(order._id);
+      setError("");
+
+      if (!window.Razorpay) {
+        throw new Error(
+          "Payment gateway is not loaded. Please open Checkout and try again.",
+        );
+      }
+
+      const razorpayData = await retryRazorpayPayment(order._id);
+
+      const options = {
+        key: razorpayData.keyId,
+        amount: razorpayData.amount,
+        currency: razorpayData.currency,
+        name: "NovaVault",
+        description: "Game purchase",
+        order_id: razorpayData.razorpayOrderId,
+
+        handler: async (paymentResponse) => {
+          try {
+            const verificationData = await verifyRazorpayPayment({
+              novaVaultOrderId: order._id,
+              razorpay_payment_id: paymentResponse.razorpay_payment_id,
+              razorpay_order_id: paymentResponse.razorpay_order_id,
+              razorpay_signature: paymentResponse.razorpay_signature,
+            });
+
+            setOrders((currentOrders) =>
+              currentOrders.map((currentOrder) =>
+                currentOrder._id === order._id
+                  ? verificationData.order
+                  : currentOrder,
+              ),
+            );
+
+            setRetryingOrderId(null);
+          } catch (verificationError) {
+            setRetryingOrderId(null);
+
+            setError(
+              verificationError.message ||
+                "Payment verification failed. Please contact support if your payment was deducted.",
+            );
+          }
+        },
+
+        modal: {
+          ondismiss: () => {
+            setRetryingOrderId(null);
+          },
+        },
+
+        theme: {
+          color: "#7c3aed",
+        },
+      };
+
+      const razorpay = new window.Razorpay(options);
+
+      razorpay.on("payment.failed", (response) => {
+        setRetryingOrderId(null);
+
+        setError(
+          response.error?.description || "Payment failed. Please try again.",
+        );
+      });
+
+      razorpay.open();
+    } catch (requestError) {
+      setRetryingOrderId(null);
+
+      setError(
+        requestError.message ||
+          "Unable to start the payment. Please try again.",
+      );
+    }
+  };
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 lg:px-8">
@@ -129,9 +238,7 @@ function Orders() {
             Unable to load orders
           </h2>
 
-          <p className="mt-1 !text-[11px] text-slate-500">
-            {error}
-          </p>
+          <p className="mt-1 !text-[11px] text-slate-500">{error}</p>
         </div>
       )}
 
@@ -155,8 +262,8 @@ function Orders() {
           </h2>
 
           <p className="mx-auto mt-1 max-w-sm !text-[11px] leading-5 text-slate-500">
-            Your game purchases will appear here once you place
-            your first order.
+            Your game purchases will appear here once you place your first
+            order.
           </p>
 
           <Link
@@ -202,8 +309,7 @@ function Orders() {
                   delay: index * 0.04,
                 }}
               >
-                <Link
-                  to={`/orders/${order._id}`}
+                <div
                   className="
                     group
                     block
@@ -252,9 +358,7 @@ function Orders() {
 
                             <span className="!text-[9px] text-slate-600">
                               {order.items?.length || 0}{" "}
-                              {order.items?.length === 1
-                                ? "item"
-                                : "items"}
+                              {order.items?.length === 1 ? "item" : "items"}
                             </span>
                           </div>
                         </div>
@@ -274,44 +378,76 @@ function Orders() {
                       </div>
 
                       <div className="flex items-center gap-2">
+                        {order.paymentStatus === "pending" && (
+                          <button
+                            type="button"
+                            onClick={(event) => {
+                              event.preventDefault();
+                              event.stopPropagation();
+                              handleRetryPayment(order);
+                            }}
+                            disabled={retryingOrderId === order._id}
+                            className="
+                              inline-flex h-7 items-center
+                              justify-center rounded-lg
+                              border border-violet-400/15
+                              bg-violet-500/[0.08]
+                              px-2.5 !text-[8px]
+                              font-semibold uppercase
+                              tracking-wider text-violet-300
+                              transition-all duration-200
+                              hover:border-violet-400/25
+                              hover:bg-violet-500/[0.14]
+                              hover:text-violet-200
+                              disabled:cursor-not-allowed
+                              disabled:opacity-50
+                            "
+                          >
+                            {retryingOrderId === order._id
+                              ? "Processing..."
+                              : "Pay Again"}
+                          </button>
+                        )}
+
                         <span
                           className={`
-                            inline-flex
-                            items-center
-                            gap-1.5
-                            rounded-full
-                            px-2.5
-                            py-1
-                            !text-[8px]
-                            font-semibold
-                            uppercase
+                            inline-flex items-center
+                            gap-1.5 rounded-full
+                            px-2.5 py-1 !text-[8px]
+                            font-semibold uppercase
                             tracking-wider
                             ${
-                              order.status === "completed"
+                              order.paymentStatus === "paid"
                                 ? "bg-emerald-400/10 text-emerald-400"
                                 : "bg-amber-400/10 text-amber-400"
                             }
                           `}
                         >
                           <StatusIcon className="h-3 w-3" />
-                          {order.status || "pending"}
+
+                          {order.paymentStatus === "paid"
+                            ? "PAID"
+                            : order.paymentStatus?.toUpperCase() || "PENDING"}
                         </span>
 
-                        <ChevronRight
-                          className="
-                            h-4
-                            w-4
-                            text-slate-600
-                            transition-transform
-                            duration-200
-                            group-hover:translate-x-0.5
-                            group-hover:text-violet-400
-                          "
-                        />
+                        <Link
+                          to={`/orders/${order._id}`}
+                          aria-label={`View order ${order._id.slice(-8)}`}
+                        >
+                          <ChevronRight
+                            className="
+                              h-4 w-4 text-slate-600
+                              transition-transform
+                              duration-200
+                              hover:text-violet-400
+                              group-hover:translate-x-0.5
+                            "
+                          />
+                        </Link>
                       </div>
                     </div>
                   </div>
-                </Link>
+                </div>
               </motion.div>
             );
           })}

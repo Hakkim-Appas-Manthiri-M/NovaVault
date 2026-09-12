@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   ArrowLeft,
   Gamepad2,
@@ -12,6 +12,10 @@ import { Link, useNavigate } from "react-router-dom";
 import { motion } from "motion/react";
 
 import { createOrder } from "../services/orderApi";
+import {
+  createRazorpayOrder,
+  verifyRazorpayPayment,
+} from "../services/paymentApi";
 import { useStore } from "../context/useStore";
 
 function Checkout() {
@@ -21,6 +25,46 @@ function Checkout() {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  const [razorpayReady, setRazorpayReady] = useState(false);
+
+  const [pendingOrder, setPendingOrder] = useState(null);
+
+  useEffect(() => {
+    if (window.Razorpay) {
+      setRazorpayReady(true);
+      return;
+    }
+
+    const existingScript = document.querySelector(
+      'script[src="https://checkout.razorpay.com/v1/checkout.js"]',
+    );
+
+    if (existingScript) {
+      existingScript.addEventListener("load", () => setRazorpayReady(true));
+      return;
+    }
+
+    const script = document.createElement("script");
+
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    script.async = true;
+
+    script.onload = () => {
+      setRazorpayReady(true);
+    };
+
+    script.onerror = () => {
+      setError("Unable to load the payment gateway. Please try again.");
+    };
+
+    document.body.appendChild(script);
+
+    return () => {
+      script.onload = null;
+      script.onerror = null;
+    };
+  }, []);
 
   const subtotal = cart.reduce(
     (total, item) => total + Number(item.price || 0) * item.quantity,
@@ -36,35 +80,107 @@ function Checkout() {
       return;
     }
 
+    if (!razorpayReady || !window.Razorpay) {
+      setError("Payment gateway is still loading. Please try again.");
+      return;
+    }
+
     setError("");
+    setLoading(true);
 
     try {
-      setLoading(true);
+      // 1. Create or reuse NovaVault order
+      let novaVaultOrder = pendingOrder;
 
-      const items = cart.map((item) => ({
-        game: item.id,
-        quantity: item.quantity,
-      }));
+      if (!novaVaultOrder) {
+        const items = cart.map((item) => ({
+          game: item.id,
+          quantity: item.quantity,
+        }));
 
-      const data = await createOrder(items);
+        const orderData = await createOrder(items);
 
-      clearCart();
+        novaVaultOrder = orderData.order;
+        setPendingOrder(novaVaultOrder);
+      }
 
-      navigate("/order-success", {
-        state: {
-          order: data.order,
+      // 2. Create or reuse Razorpay order
+      const razorpayData = await createRazorpayOrder(novaVaultOrder._id);
+
+      // 3. Open Razorpay Checkout
+      const options = {
+        key: razorpayData.keyId,
+        amount: razorpayData.amount,
+        currency: razorpayData.currency,
+        name: "NovaVault",
+        description: "Game purchase",
+        order_id: razorpayData.razorpayOrderId,
+
+        handler: async (paymentResponse) => {
+          try {
+            setError("");
+
+            const verificationData = await verifyRazorpayPayment({
+              novaVaultOrderId: novaVaultOrder._id,
+              razorpay_payment_id: paymentResponse.razorpay_payment_id,
+              razorpay_order_id: paymentResponse.razorpay_order_id,
+              razorpay_signature: paymentResponse.razorpay_signature,
+            });
+
+            clearCart();
+            setPendingOrder(null);
+
+            navigate("/order-success", {
+              state: {
+                order: verificationData.order,
+              },
+            });
+          } catch (verificationError) {
+            setLoading(false);
+
+            setError(
+              verificationError.message ||
+                "Payment verification failed. Please contact support if your payment was deducted.",
+            );
+          }
         },
+
+        modal: {
+          ondismiss: () => {
+            setLoading(false);
+
+            setError(
+              "Payment was cancelled. Your order is still available to retry.",
+            );
+          },
+        },
+
+        theme: {
+          color: "#7c3aed",
+        },
+      };
+
+      const razorpay = new window.Razorpay(options);
+
+      razorpay.on("payment.failed", (response) => {
+        setLoading(false);
+
+        setError(
+          response.error?.description ||
+            "Payment failed. Your order is still available to retry.",
+        );
       });
+
+      razorpay.open();
     } catch (requestError) {
+      setLoading(false);
+
       setError(
         requestError.message ||
-          "Unable to create your order. Please try again.",
+          "Unable to start the payment. Please try again.",
       );
-    } finally {
-      setLoading(false);
     }
   };
-
 
   // ==========================================================
   // EMPTY CART
@@ -478,19 +594,19 @@ function Checkout() {
               {loading ? (
                 <>
                   <LoaderCircle className="size-3.5 animate-spin" />
-                  Creating Order...
+                  Processing...
                 </>
               ) : (
                 <>
                   <LockKeyhole className="size-3.5" />
-                  Create Order
+                  {pendingOrder ? "Retry Payment" : "Pay Now"}
                 </>
               )}
             </button>
 
             <p className="mt-3 text-center !text-[7px] leading-4 text-slate-700">
-              By continuing, your order will be created with the current
-              server-side game prices.
+              By continuing, your order will be created using the current
+              server-side game prices and paid securely through Razorpay.
             </p>
           </aside>
         </div>

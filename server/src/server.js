@@ -28,6 +28,11 @@ app.use(
 
 app.use(helmet());
 
+app.use(
+  "/api/payments/razorpay/webhook",
+  express.raw({ type: "application/json" }),
+);
+
 app.use(express.json());
 
 app.use(cookieParser());

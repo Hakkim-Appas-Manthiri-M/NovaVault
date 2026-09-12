@@ -5,6 +5,7 @@ const authRoutes = require("./authRoutes");
 const gameRoutes = require("./gameRoutes");
 const orderRoutes = require("./orderRoutes");
 const paymentRoutes = require("./paymentRoutes");
+const webhookRoutes = require("./webhookRoutes");
 
 const router = express.Router();
 
@@ -24,5 +25,7 @@ router.use("/games", gameRoutes);
 router.use("/orders", orderRoutes);
 
 router.use("/payments", paymentRoutes);
+
+router.use("/payments", webhookRoutes);
 
 module.exports = router;

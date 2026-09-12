@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const crypto = require("crypto");
 
 const Order = require("../models/Order");
 const razorpay = require("../services/razorpayService");
@@ -97,6 +98,143 @@ const createRazorpayOrder = async (req, res, next) => {
   }
 };
 
+// VERIFY RAZORPAY PAYMENT
+const verifyRazorpayPayment = async (req, res, next) => {
+  try {
+    const {
+      novaVaultOrderId,
+      razorpay_payment_id,
+      razorpay_order_id,
+      razorpay_signature,
+    } = req.body;
+
+    if (
+      !novaVaultOrderId ||
+      !razorpay_payment_id ||
+      !razorpay_order_id ||
+      !razorpay_signature
+    ) {
+      return res.status(400).json({
+        message: "Payment verification details are required.",
+      });
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(novaVaultOrderId)) {
+      return res.status(400).json({
+        message: "Invalid NovaVault order ID.",
+      });
+    }
+
+    // Find the NovaVault order belonging to the authenticated user.
+    const order = await Order.findOne({
+      _id: novaVaultOrderId,
+      user: req.user.userId,
+    });
+
+    if (!order) {
+      return res.status(404).json({
+        message: "Order not found.",
+      });
+    }
+
+    // Already paid = idempotent success response.
+    if (order.paymentStatus === "paid") {
+      return res.status(200).json({
+        message: "Payment is already verified.",
+        order,
+      });
+    }
+
+    if (order.status === "cancelled") {
+      return res.status(400).json({
+        message: "Cancelled orders cannot be verified.",
+      });
+    }
+
+    // The Razorpay order ID must match the one created by our server.
+    if (
+      !order.transactionId ||
+      order.transactionId !== razorpay_order_id
+    ) {
+      return res.status(400).json({
+        message: "Razorpay order does not match the NovaVault order.",
+      });
+    }
+
+    // Generate the expected signature on the server.
+    const generatedSignature = crypto
+      .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
+      .update(`${order.transactionId}|${razorpay_payment_id}`)
+      .digest("hex");
+
+    // Timing-safe comparison prevents subtle comparison attacks.
+    const signaturesMatch =
+      generatedSignature.length === razorpay_signature.length &&
+      crypto.timingSafeEqual(
+        Buffer.from(generatedSignature),
+        Buffer.from(razorpay_signature),
+      );
+
+    if (!signaturesMatch) {
+      return res.status(400).json({
+        message: "Payment signature verification failed.",
+      });
+    }
+
+    // Fetch the payment directly from Razorpay.
+    const payment = await razorpay.payments.fetch(
+      razorpay_payment_id,
+    );
+
+    // Make sure Razorpay reports the same order.
+    if (payment.order_id !== order.transactionId) {
+      return res.status(400).json({
+        message: "Razorpay payment does not match the order.",
+      });
+    }
+
+    // Our current checkout is configured for INR.
+    if (payment.currency !== order.currency) {
+      return res.status(400).json({
+        message: "Payment currency does not match the order.",
+      });
+    }
+
+    // Confirm the amount matches the server-side order total.
+    const expectedAmount = Math.round(Number(order.total) * 100);
+
+    if (Number(payment.amount) !== expectedAmount) {
+      return res.status(400).json({
+        message: "Payment amount does not match the order total.",
+      });
+    }
+
+    // Razorpay's captured status confirms the payment was captured.
+    if (payment.status !== "captured") {
+      return res.status(400).json({
+        message: `Payment is not captured. Current status: ${payment.status}.`,
+      });
+    }
+
+    // Payment is now verified.
+    order.paymentProvider = "razorpay";
+    order.paymentStatus = "paid";
+    order.paymentId = razorpay_payment_id;
+    order.status = "completed";
+    order.paidAt = new Date();
+
+    await order.save();
+
+    return res.status(200).json({
+      message: "Payment verified successfully.",
+      order,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   createRazorpayOrder,
+  verifyRazorpayPayment,
 };

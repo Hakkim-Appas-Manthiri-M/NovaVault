@@ -97,11 +97,15 @@ function OrderSuccess() {
         </p>
 
         <h1 className="mt-2 text-2xl font-bold tracking-tight text-white">
-          Order Created Successfully
+          {order.paymentStatus === "paid"
+            ? "Payment Successful"
+            : "Order Created Successfully"}
         </h1>
 
         <p className="mx-auto mt-3 max-w-md text-xs leading-5 text-slate-400">
-          Your order has been created and is currently awaiting payment.
+          {order.paymentStatus === "paid"
+            ? "Your payment was verified successfully and your order is confirmed."
+            : "Your order has been created and is currently awaiting payment."}
         </p>
 
         <div className="mx-auto mt-7 max-w-md rounded-xl border border-white/[0.07] bg-white/[0.02] p-4 text-left">
@@ -130,8 +134,16 @@ function OrderSuccess() {
               Status
             </span>
 
-            <span className="rounded-full bg-amber-400/10 px-2.5 py-1 !text-[8px] font-semibold uppercase tracking-wider text-amber-400">
-              {order.paymentStatus || "pending"}
+            <span
+              className={`rounded-full px-2.5 py-1 !text-[8px] font-semibold uppercase tracking-wider ${
+                order.paymentStatus === "paid"
+                  ? "bg-green-400/10 text-green-400"
+                  : "bg-amber-400/10 text-amber-400"
+              }`}
+            >
+              {order.paymentStatus === "paid"
+                ? "PAID"
+                : order.paymentStatus?.toUpperCase() || "PENDING"}
             </span>
           </div>
         </div>
