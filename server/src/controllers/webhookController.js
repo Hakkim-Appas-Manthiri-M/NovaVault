@@ -25,6 +25,8 @@ const verifyWebhookSignature = (rawBody, signature, secret) => {
 
 const handleRazorpayWebhook = async (req, res, next) => {
   try {
+    console.log("RAZORPAY WEBHOOK REQUEST RECEIVED");
+
     const webhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET;
     const signature = req.headers["x-razorpay-signature"];
     const eventId = req.headers["x-razorpay-event-id"];
