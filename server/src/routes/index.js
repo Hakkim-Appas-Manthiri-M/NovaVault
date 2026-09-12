@@ -24,8 +24,8 @@ router.use("/games", gameRoutes);
 
 router.use("/orders", orderRoutes);
 
-router.use("/payments", paymentRoutes);
-
 router.use("/payments", webhookRoutes);
+
+router.use("/payments", paymentRoutes);
 
 module.exports = router;
