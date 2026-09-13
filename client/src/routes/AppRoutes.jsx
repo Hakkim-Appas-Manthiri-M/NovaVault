@@ -115,12 +115,6 @@ function AppRoutes() {
           element={<ComingSoon title="Support" />}
         />
 
-        {/* New Releases */}
-        <Route
-          path="/new-releases"
-          element={<ComingSoon title="New Releases" />}
-        />
-
         {/* Fallback */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>

@@ -440,7 +440,7 @@ function Home() {
             description="Discover the latest additions to NovaVault."
             link={{
               label: "All Releases",
-              to: "/new-releases",
+              to: "/games",
             }}
           />
 
