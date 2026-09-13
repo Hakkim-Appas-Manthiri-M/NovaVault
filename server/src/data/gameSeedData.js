@@ -19,7 +19,7 @@ const gameSeedData = [
     image:
       "https://image.api.playstation.com/vulcan/ap/rnd/202512/1506/3878ff92261c1fda7ce03772ac149514ce6f6bf5c715e64b.png",
     mobileImage:
-      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRHVvSrtCSlrtUHD_GvZUzR9Clb63TCq9_RnGANiluPo3pgibSQuGe7xefj&s=10",
+      "https://www.gamewallpapers.com/img_script/mobile_dir2/img.php?src=wallpaper_resident_evil_requiem_03_1440pwide.jpg&height=450&width=506&crop-to-fit&sharpen",
     portraitImage:
       "https://image.api.playstation.com/vulcan/ap/rnd/202512/1205/79661d7a2bdb9784749b4e57e1456ca89f7ac7bed8615aee.png",
     platforms: ["PC", "PS5", "Xbox"],
@@ -60,7 +60,7 @@ const gameSeedData = [
     image:
       "https://image.api.playstation.com/vulcan/img/rnd/202011/1215/WyHa1BM3ISDVqYSEUMB9VZJs.png",
     mobileImage:
-      "https://media.rockstargames.com/rockstargames-newsite/uploads/735dced71b9c0a15490e7ce2995df16f61fb2e79.jpg",
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSjFXYaNr-8VDcks1088jUqscqhAf3GY-dbemId1dcqWQ07o0vb0SQUilgI&s=10",
     portraitImage:
       "https://image.api.playstation.com/cdn/UP1004/CUSA03041_00/Hpl5MtwQgOVF9vJqlfui6SDB5Jl4oBSq.png",
     platforms: ["PC", "Xbox"],

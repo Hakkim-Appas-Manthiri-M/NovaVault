@@ -37,7 +37,7 @@ const items = [
 
 function MobileBottomNav() {
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-white/[0.07] bg-[#060914]/95 px-2 pb-[env(safe-area-inset-bottom)] pt-1.5 lg:hidden">
+    <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-white/[0.07] bg-[#060914] px-2 pb-[env(safe-area-inset-bottom)] pt-1.5 lg:hidden">
       <div className="mx-auto flex max-w-lg items-center justify-around">
         {items.map((item) => {
           const Icon = item.icon

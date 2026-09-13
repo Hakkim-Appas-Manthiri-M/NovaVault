@@ -20,6 +20,7 @@ import GameCard from "../components/games/GameCard";
 import { getGameById, getGames } from "../services/gameApi";
 
 import { useStore } from "../context/useStore";
+import GiftModal from "../components/common/GiftModal";
 
 function getYouTubeVideoId(url = "") {
   if (!url) return "";
@@ -125,6 +126,7 @@ function GameDetails() {
   const [relatedGames, setRelatedGames] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [giftModalOpen, setGiftModalOpen] = useState(false);
 
   const owned = game ? isGameOwned(game.id) : false;
 
@@ -623,8 +625,7 @@ function GameDetails() {
   const handleGift = () => {
     if (!game || !owned) return;
 
-    // Gift flow will be implemented next.
-    console.log(`Gift ${game.title}`);
+    setGiftModalOpen(true);
   };
 
   /*
@@ -1407,6 +1408,16 @@ function GameDetails() {
             </div>
           </section>
         )}
+        <GiftModal
+          open={giftModalOpen}
+          game={game}
+          onClose={() => setGiftModalOpen(false)}
+          onSubmit={(recipient) => {
+            console.log("Gift recipient:", recipient);
+
+            setGiftModalOpen(false);
+          }}
+        />
       </PageContainer>
     </div>
   );

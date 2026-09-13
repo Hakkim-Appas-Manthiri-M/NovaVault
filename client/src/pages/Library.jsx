@@ -99,7 +99,7 @@ function Library() {
                   <LibraryBig className="size-4" />
                 </div>
 
-                <p className="text-[8px] font-bold uppercase tracking-[0.22em] text-violet-400">
+                <p className="!text-[8px] font-bold uppercase tracking-[0.22em] text-violet-400">
                   Your Collection
                 </p>
               </div>
@@ -108,7 +108,7 @@ function Library() {
                 Game Library
               </h1>
 
-              <p className="mt-2 max-w-xl text-[9px] leading-5 text-slate-500 sm:text-[10px]">
+              <p className="mt-2 max-w-xl !text-[9px] leading-5 text-slate-500 sm:!text-[10px]">
                 Your purchased games, permanently connected to
                 your NovaVault account.
               </p>
@@ -118,7 +118,7 @@ function Library() {
               <div className="flex items-center gap-2 rounded-lg border border-white/[0.06] bg-white/[0.02] px-3 py-2">
                 <BookOpen className="size-3.5 text-violet-400" />
 
-                <span className="text-[9px] font-semibold text-slate-400">
+                <span className="!text-[9px] font-semibold text-slate-400">
                   {games.length}{" "}
                   {games.length === 1 ? "Game" : "Games"}
                 </span>
@@ -181,7 +181,7 @@ function Library() {
                   bg-[#080B15]
                   pl-9
                   pr-3
-                  text-[9px]
+                  !text-[12px]
                   text-white
                   outline-none
                   placeholder:text-slate-700
@@ -206,7 +206,7 @@ function Library() {
               p-4
             "
           >
-            <p className="text-[9px] leading-4 text-red-300">
+            <p className="!text-[9px] leading-4 text-red-300">
               {error}
             </p>
 
@@ -223,7 +223,7 @@ function Library() {
                 border-red-400/15
                 px-3
                 py-2
-                text-[8px]
+                !text-[8px]
                 font-bold
                 uppercase
                 tracking-[0.08em]
@@ -288,7 +288,7 @@ function Library() {
               <Gamepad2 className="size-6" />
             </div>
 
-            <p className="mt-5 text-[8px] font-bold uppercase tracking-[0.2em] text-violet-400">
+            <p className="mt-5 !text-[8px] font-bold uppercase tracking-[0.2em] text-violet-400">
               Your Vault Is Empty
             </p>
 
@@ -296,7 +296,7 @@ function Library() {
               No games yet
             </h2>
 
-            <p className="mt-2 max-w-md text-[9px] leading-5 text-slate-600">
+            <p className="mt-2 max-w-md !text-[9px] leading-5 text-slate-600">
               Purchase a game from the NovaVault store and it
               will appear here permanently.
             </p>
@@ -312,7 +312,7 @@ function Library() {
                 rounded-lg
                 bg-violet-600
                 px-4
-                text-[8px]
+                !text-[8px]
                 font-bold
                 uppercase
                 tracking-[0.08em]
@@ -339,7 +339,7 @@ function Library() {
                 No games found
               </h2>
 
-              <p className="mt-1 text-[9px] text-slate-600">
+              <p className="mt-1 !text-[9px] text-slate-600">
                 Try a different game title or genre.
               </p>
             </div>
@@ -358,7 +358,7 @@ function Library() {
               <div className="mb-4 flex items-center gap-2">
                 <ShieldCheck className="size-3.5 text-emerald-400/70" />
 
-                <p className="text-[8px] font-semibold uppercase tracking-[0.14em] text-slate-600">
+                <p className="!text-[8px] font-semibold uppercase tracking-[0.14em] text-slate-600">
                   Account-owned titles
                 </p>
               </div>
@@ -415,22 +415,22 @@ function Library() {
                         <div className="absolute left-2.5 top-2.5 flex items-center gap-1 rounded-md border border-emerald-400/15 bg-[#06100c]/80 px-2 py-1 backdrop-blur-sm">
                           <ShieldCheck className="size-2.5 text-emerald-400" />
 
-                          <span className="text-[6px] font-bold uppercase tracking-[0.08em] text-emerald-300">
+                          <span className="!text-[6px] font-bold uppercase tracking-[0.08em] text-emerald-300">
                             Owned
                           </span>
                         </div>
 
                         <div className="absolute bottom-3 left-3 right-3">
-                          <p className="truncate text-[10px] font-bold text-white">
+                          <p className="truncate !text-[10px] font-bold text-white">
                             {game.title}
                           </p>
 
                           <div className="mt-1 flex items-center justify-between gap-2">
-                            <span className="truncate text-[7px] uppercase tracking-[0.06em] text-slate-500">
+                            <span className="truncate !text-[7px] uppercase tracking-[0.06em] text-slate-500">
                               {game.genre || "Game"}
                             </span>
 
-                            <span className="shrink-0 text-[8px] font-semibold text-slate-400">
+                            <span className="shrink-0 !text-[8px] font-semibold text-slate-400">
                               {formatPrice(game.price)}
                             </span>
                           </div>

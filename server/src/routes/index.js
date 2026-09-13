@@ -6,6 +6,8 @@ const gameRoutes = require("./gameRoutes");
 const orderRoutes = require("./orderRoutes");
 const demoPaymentRoutes = require("./demoPaymentRoutes");
 const ownershipRoutes = require("./ownershipRoutes");
+const giftRoutes = require("./giftRoutes");
+const notificationRoutes = require("./notificationRoutes");
 
 const router = express.Router();
 
@@ -27,5 +29,9 @@ router.use("/orders", orderRoutes);
 router.use("/payments/demo", demoPaymentRoutes);
 
 router.use("/ownership", ownershipRoutes);
+
+router.use("/gifts", giftRoutes);
+
+router.use("/notifications", notificationRoutes);
 
 module.exports = router;

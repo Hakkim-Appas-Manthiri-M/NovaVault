@@ -2,6 +2,7 @@ import AppRoutes from "./routes/AppRoutes";
 import PageLoader from "./components/common/PageLoader";
 import StoreProvider from "./context/StoreProvider";
 import AuthProvider from "./context/AuthContext.jsx";
+import NotificationProvider from "./context/NotificationProvider";
 
 function App() {
   return (
@@ -9,9 +10,11 @@ function App() {
       <PageLoader />
 
       <AuthProvider>
-        <StoreProvider>
-          <AppRoutes />
-        </StoreProvider>
+        <NotificationProvider>
+          <StoreProvider>
+            <AppRoutes />
+          </StoreProvider>
+        </NotificationProvider>
       </AuthProvider>
     </>
   );

@@ -17,6 +17,7 @@ import {
 import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 
 import NovaVaultLogo from "./NovaVaultLogo";
+import NotificationBell from "../notifications/NotificationBell";
 
 import { useStore } from "../../context/useStore";
 import useAuth from "../../context/useAuth";
@@ -596,6 +597,9 @@ function TopNavbar() {
                 </span>
               )}
             </Link>
+
+            {/* Notifications */}
+            {isAuthenticated && <NotificationBell />}
 
             {/* Mobile search button */}
             {showGlobalSearch && (

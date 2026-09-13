@@ -13,12 +13,14 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { motion } from "motion/react";
 
 import { completeDemoPayment } from "../services/paymentApi";
+import { useStore } from "../context/useStore";
 
 function formatPrice(price) {
   return `₹${Number(price || 0).toLocaleString("en-IN")}`;
 }
 
 function DemoPayment() {
+  const { clearCart } = useStore();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -54,6 +56,7 @@ function DemoPayment() {
 
     try {
       const data = await completeDemoPayment(order._id);
+      clearCart();
 
       setOrder(data.order);
       setSuccess(true);

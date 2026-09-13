@@ -1,7 +1,4 @@
-import {
-  ChevronLeft,
-  ChevronRight,
-} from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
@@ -10,10 +7,7 @@ import GameCard from "../components/games/GameCard";
 import PageContainer from "../components/common/PageContainer";
 import SectionHeader from "../components/common/SectionHeader";
 import gameCategories from "../constants/categoryData";
-import {
-  getNewReleaseGames,
-  getTrendingGames,
-} from "../services/gameApi";
+import { getNewReleaseGames, getTrendingGames } from "../services/gameApi";
 
 function GameCollection({ games }) {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -31,7 +25,9 @@ function GameCollection({ games }) {
     const updateVisibleCount = () => {
       const width = window.innerWidth;
 
-      if (width >= 1024) {
+      if (width >= 1280) {
+        setVisibleCount(5);
+      } else if (width >= 1024) {
         setVisibleCount(4);
       } else if (width >= 640) {
         setVisibleCount(3);
@@ -48,7 +44,6 @@ function GameCollection({ games }) {
       window.removeEventListener("resize", updateVisibleCount);
     };
   }, []);
-
 
   if (!games.length) {
     return null;
@@ -95,6 +90,7 @@ function GameCollection({ games }) {
           gap-3
           sm:grid-cols-3
           lg:grid-cols-4
+          xl:grid-cols-5
           xl:gap-4
         "
       >
@@ -285,7 +281,7 @@ function Home() {
   return (
     <div className="min-h-screen bg-[#050711]">
       {/* Hero */}
-      <HomeHero/>
+      <HomeHero />
 
       <PageContainer className="py-8 sm:py-10 lg:py-12">
         {/* =====================================================

@@ -19,7 +19,7 @@ function AppShell() {
       <main
         className={[
           "min-h-screen pt-[70px] pb-[70px] lg:pb-0",
-          isAuthenticated ? "lg:ml-[152px]" : "lg:ml-[20px]",
+          isAuthenticated ? "lg:ml-[152px]" : "lg:ml-0",
         ].join(" ")}
       >
         <Outlet />

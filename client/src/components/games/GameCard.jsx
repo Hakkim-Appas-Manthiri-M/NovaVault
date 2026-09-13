@@ -1,8 +1,13 @@
+import { useState } from "react";
 import { Gift, Heart, ShoppingCart, Star } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useStore } from "../../context/useStore";
+import GiftModal from "../common/GiftModal";
+import { sendGameGift } from "../../services/giftApi";
 
 function GameCard({ game }) {
+  const [giftModalOpen, setGiftModalOpen] = useState(false);
+
   const { toggleWishlist, isWishlisted, addToCart, isInCart, isGameOwned } =
     useStore();
 
@@ -98,21 +103,19 @@ function GameCard({ game }) {
             onClick={(event) => {
               event.preventDefault();
               event.stopPropagation();
-
-              // Gift flow will be connected next.
             }}
             className="
               absolute right-3 top-3
               flex size-8 items-center justify-center
               rounded-lg
-              border border-emerald-400/20
+              border border-violet-400/20
               bg-black/35
-              text-emerald-300
+              text-violet-300
               backdrop-blur-md
               transition-all duration-200
-              hover:border-emerald-400/35
-              hover:bg-emerald-500/15
-              hover:text-emerald-200
+              hover:border-violet-400/35
+              hover:bg-violet-500/15
+              hover:text-violet-200
               active:scale-95
             "
           >
@@ -206,10 +209,10 @@ function GameCard({ game }) {
                   className="
                     flex h-8 items-center
                     rounded-lg
-                    border border-emerald-400/15
-                    bg-emerald-400/[0.05]
+                    border border-violet-400/25
+                    bg-violet-400/[0.07]
                     px-2.5 !text-[8px] font-bold uppercase
-                    tracking-[0.06em] text-emerald-300
+                    tracking-[0.06em] text-violet-300
                   "
                 >
                   ✓ In Library
@@ -218,12 +221,7 @@ function GameCard({ game }) {
                 <button
                   type="button"
                   aria-label={`Gift ${game.title}`}
-                  onClick={(event) => {
-                    event.preventDefault();
-                    event.stopPropagation();
-
-                    // Gift flow will be connected next.
-                  }}
+                  onClick={() => setGiftModalOpen(true)}
                   className="
                     flex size-8 shrink-0
                     items-center justify-center
@@ -232,9 +230,9 @@ function GameCard({ game }) {
                     bg-white/[0.03]
                     text-slate-400
                     transition-all duration-200
-                    hover:border-emerald-400/30
-                    hover:bg-emerald-500/15
-                    hover:text-emerald-300
+                    hover:border-violet-400/30
+                    hover:bg-violet-500/15
+                    hover:text-violet-300
                     active:scale-95
                   "
                 >
@@ -245,16 +243,12 @@ function GameCard({ game }) {
               <>
                 <div className="text-right">
                   {hasDiscount && (
-                    <span
-                      className="mr-1.5 text-[7px] text-slate-600 line-through"
-                    >
+                    <span className="mr-1.5 text-[7px] text-slate-600 line-through">
                       ₹{Number(game.originalPrice).toLocaleString("en-IN")}
                     </span>
                   )}
 
-                  <span
-                    className="nv-display text-[11px] font-bold text-white"
-                  >
+                  <span className="nv-display text-[11px] font-bold text-white">
                     ₹{Number(game.price).toLocaleString("en-IN")}
                   </span>
                 </div>
@@ -293,6 +287,20 @@ function GameCard({ game }) {
           </div>
         </div>
       </div>
+
+      <GiftModal
+        open={giftModalOpen}
+        game={game}
+        onClose={() => setGiftModalOpen(false)}
+        onSubmit={async (recipient) => {
+          await sendGameGift({
+            recipient,
+            gameId: game.id,
+          });
+
+          setGiftModalOpen(false);
+        }}
+      />
     </article>
   );
 }
