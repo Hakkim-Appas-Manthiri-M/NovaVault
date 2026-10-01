@@ -37,7 +37,58 @@ const loginValidation = [
     .withMessage("Password is required"),
 ];
 
+const verifyEmailValidation = [
+  body("email")
+    .trim()
+    .notEmpty()
+    .withMessage("Email is required")
+    .isEmail()
+    .withMessage("Please provide a valid email address")
+    .normalizeEmail(),
+
+  body("otp")
+    .trim()
+    .notEmpty()
+    .withMessage("Verification code is required")
+    .isLength({ min: 6, max: 6 })
+    .withMessage("Verification code must be 6 digits")
+    .isNumeric()
+    .withMessage("Verification code must contain only numbers"),
+];
+
+const resendOtpValidation = [
+  body("email")
+    .trim()
+    .notEmpty()
+    .withMessage("Email is required")
+    .isEmail()
+    .withMessage("Please provide a valid email address")
+    .normalizeEmail(),
+];
+
+const forgotPasswordValidation = [
+  body("email")
+    .trim()
+    .notEmpty()
+    .withMessage("Email is required")
+    .isEmail()
+    .withMessage("Please provide a valid email address")
+    .normalizeEmail(),
+];
+
+const resetPasswordValidation = [
+  body("password")
+    .notEmpty()
+    .withMessage("Password is required")
+    .isLength({ min: 6 })
+    .withMessage("Password must be at least 6 characters"),
+];
+
 module.exports = {
   registerValidation,
   loginValidation,
+  verifyEmailValidation,
+  resendOtpValidation,
+  forgotPasswordValidation,
+  resetPasswordValidation,
 };

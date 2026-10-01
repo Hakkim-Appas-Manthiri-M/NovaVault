@@ -15,6 +15,7 @@ import {
   Package,
 } from "lucide-react";
 import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 
 import NovaVaultLogo from "./NovaVaultLogo";
 import NotificationBell from "../notifications/NotificationBell";
@@ -183,13 +184,20 @@ function TopNavbar() {
   const showGlobalSearch = location.pathname === "/";
 
   const handleLogout = async () => {
-    try {
-      await logout();
-      navigate("/");
-    } catch {
-      // Auth state is already cleared by the context when logout succeeds.
-    }
-  };
+  try {
+    await logout();
+
+    toast.success("Signed out successfully.", {
+      icon: "✓",
+    });
+
+    navigate("/");
+  } catch (error) {
+    toast.error(
+      error?.message || "Unable to sign out. Please try again.",
+    );
+  }
+};
 
   // =========================
   // GLOBAL SEARCH
@@ -1265,13 +1273,11 @@ function TopNavbar() {
                     {authLoading ? (
                       <div
                         className="
-        flex h-12
-        items-center gap-3
-        rounded-xl border
-        border-white/[0.04]
-        bg-white/[0.015]
-        px-4
-      "
+                          flex h-12 items-center gap-3
+                          rounded-xl border
+                        border-white/[0.04]
+                        bg-white/[0.015] px-4
+                        "
                       >
                         <span className="flex size-6 items-center justify-center">
                           <span className="size-3 animate-spin rounded-full border-2 border-white/20 border-t-violet-400" />
@@ -1279,11 +1285,11 @@ function TopNavbar() {
 
                         <span
                           className="
-          !text-[10px]
-          font-bold uppercase
-          tracking-[0.08em]
-          text-slate-500
-        "
+                            !text-[10px]
+                            font-bold uppercase
+                            tracking-[0.08em]
+                          text-slate-500
+                          "
                         >
                           Loading account
                         </span>
@@ -1294,47 +1300,44 @@ function TopNavbar() {
                           to="/profile"
                           onClick={closeMobileMenu}
                           className="
-          flex h-12
-          items-center gap-3
-          rounded-xl border
-          border-white/[0.04]
-          bg-white/[0.015]
-          px-4
-          !text-[10px]
-          font-bold uppercase
-          tracking-[0.08em]
-          text-slate-400
-          transition
-          hover:bg-white/[0.035]
-          hover:text-white
-        "
+                            flex h-12
+                            items-center gap-3
+                            rounded-xl border
+                          border-white/[0.04]
+                          bg-white/[0.015]
+                            px-4 !text-[10px]
+                            font-bold uppercase
+                            tracking-[0.08em]
+                          text-slate-400
+                            transition
+                          hover:bg-white/[0.035]
+                          hover:text-white
+                          "
                         >
                           <span
                             className="
-            flex size-6 shrink-0
-            items-center justify-center
-            rounded-full
-            border border-violet-400/30
-            bg-violet-500/10
-            !text-[8px]
-            font-bold
-            uppercase
-            text-violet-200
-          "
+                              flex size-6 shrink-0
+                              items-center justify-center
+                              rounded-full 
+                              border border-violet-400/30
+                            bg-violet-500/10
+                              !text-[8px] font-bold
+                              uppercase text-violet-200
+                            "
                           >
                             {user?.name?.charAt(0) || "U"}
                           </span>
                           Profile
                           <span
                             className="
-            ml-auto
-            max-w-[120px]
-            truncate
-            !text-[8px]
-            normal-case
-            tracking-normal
-            text-slate-600
-          "
+                              ml-auto
+                              max-w-[120px]
+                              truncate
+                              !text-[8px]
+                              normal-case
+                              tracking-normal
+                            text-slate-600
+                            "
                           >
                             {user?.name || "Account"}
                           </span>
@@ -1347,57 +1350,51 @@ function TopNavbar() {
                             closeMobileMenu();
                           }}
                           className="
-          mt-2 flex h-12 w-full
-          items-center gap-3
-          rounded-xl border
-          border-red-400/[0.08]
-          bg-red-500/[0.025]
-          px-4
-          !text-[10px]
-          font-bold uppercase
-          tracking-[0.08em]
-          text-red-400/80
-          transition
-          hover:border-red-400/[0.15]
-          hover:bg-red-500/[0.06]
-          hover:text-red-300
-        "
+                            mt-2 flex h-12 w-full
+                            items-center gap-3
+                            rounded-xl border
+                          border-red-400/[0.08]
+                          bg-red-500/[0.025]
+                            px-4 !text-[10px]
+                            font-bold uppercase
+                            tracking-[0.08em]
+                          text-red-400/80
+                            transition
+                          hover:border-red-400/[0.15]
+                          hover:bg-red-500/[0.06]
+                          hover:text-red-300
+                          "
                         >
                           <LogOut className="size-4" />
                           Sign out
                         </button>
                       </>
-                    ) : (
+                      ) : (
                       <NavLink
                         to="/login"
                         onClick={closeMobileMenu}
                         className="
-        flex h-12
-        items-center gap-3
-        rounded-xl border
-        border-violet-400/15
-        bg-violet-500/[0.08]
-        px-4
-        !text-[10px]
-        font-bold uppercase
-        tracking-[0.08em]
-        text-violet-300
-        transition
-        hover:border-violet-400/25
-        hover:bg-violet-500/[0.12]
-        hover:text-violet-200
-      "
+                          flex h-12 items-center gap-3
+                          rounded-xl border
+                        border-violet-400/15
+                        bg-violet-500/[0.08]
+                          px-4 !text-[10px]
+                          font-bold uppercase
+                          tracking-[0.08em]
+                        text-violet-300 transition
+                        hover:border-violet-400/25
+                        hover:bg-violet-500/[0.12]
+                        hover:text-violet-200
+                      "
                       >
                         <LogIn className="size-4" />
                         Sign in
                         <span
                           className="
-          ml-auto
-          !text-[8px]
-          normal-case
-          tracking-normal
-          text-violet-400/50
-        "
+                            ml-auto !text-[8px]
+                            normal-case tracking-normal
+                          text-violet-400/50
+                          "
                         >
                           Account
                         </span>

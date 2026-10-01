@@ -4,7 +4,12 @@ import {
   loginUser,
   logoutUser,
   registerUser,
+  verifyEmail as verifyEmailRequest,
+  resendOtp as resendOtpRequest,
+  forgotPassword as forgotPasswordRequest,
+  resetPassword as resetPasswordRequest,
 } from "../services/authApi";
+
 import { AuthContext } from "./AuthContext";
 
 function AuthProvider({ children }) {
@@ -62,6 +67,27 @@ function AuthProvider({ children }) {
     return data;
   }, []);
 
+  const verifyEmail = useCallback(async (email, otp) => {
+    const data = await verifyEmailRequest(email, otp);
+    setUser(data.user || null);
+    return data;
+  }, []);
+
+  const resendOtp = useCallback(async (email) => {
+    const data = await resendOtpRequest(email);
+    return data;
+  }, []);
+
+  const forgotPassword = useCallback(async (email) => {
+    const data = await forgotPasswordRequest(email);
+    return data;
+  }, []);
+
+  const resetPassword = useCallback(async (token, password) => {
+    const data = await resetPasswordRequest(token, password);
+    return data;
+  }, []);
+
   const logout = useCallback(async () => {
     const data = await logoutUser();
     setUser(null);
@@ -75,10 +101,14 @@ function AuthProvider({ children }) {
       authLoading,
       login,
       register,
+      verifyEmail,
+      resendOtp,
+      forgotPassword,
+      resetPassword,
       logout,
       checkAuth,
     }),
-    [user, authLoading, login, register, logout, checkAuth],
+    [user, authLoading, login, register, verifyEmail, resendOtp, forgotPassword, resetPassword, logout, checkAuth],
   );
 
   return (

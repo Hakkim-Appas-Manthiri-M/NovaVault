@@ -1,4 +1,5 @@
 import { useState } from "react";
+import toast from "react-hot-toast";
 import { Gift, Heart, ShoppingCart, Star } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useStore } from "../../context/useStore";
@@ -129,6 +130,15 @@ function GameCard({ game }) {
               event.preventDefault();
               event.stopPropagation();
               toggleWishlist(game);
+              
+              toast.success(
+                wishlisted
+                  ? "Removed from wishlist"
+                  : "Added to wishlist",
+                {
+                  icon: wishlisted ? "♡" : "♥",
+                },
+              );
             }}
             className="
               absolute right-3 top-3
@@ -260,6 +270,8 @@ function GameCard({ game }) {
                     event.preventDefault();
                     event.stopPropagation();
                     addToCart(game);
+
+                    toast.success("Added to cart");
                   }}
                   className="
                     flex size-8 shrink-0

@@ -106,11 +106,23 @@ function Register() {
     try {
       setLoading(true);
 
-      await register({
+      const result = await register({
         name,
         email,
         password: form.password,
       });
+
+      if(result.success){
+        navigate("/verify-email", {
+          replace: true,
+          state: {
+            email,
+            from: redirectPath,
+          },
+        });
+
+        return;
+      }
 
       navigate(redirectPath, {
         replace: true,

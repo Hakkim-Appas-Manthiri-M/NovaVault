@@ -21,9 +21,16 @@ const userSchema = new mongoose.Schema(
 
     password: {
       type: String,
-      required: true,
+      default: null,
       minlength: 6,
       select: false,
+    },
+
+    googleId: {
+      type: String,
+      unique: true,
+      sparse: true,
+      index: true,
     },
 
     avatar: {
@@ -36,6 +43,35 @@ const userSchema = new mongoose.Schema(
       enum: ["user", "admin"],
       default: "user",
     },
+
+    emailVerified: {
+      type: Boolean,
+      default: false,
+    },
+
+    otp: {
+      type: String,
+      default: null,
+      select: false,
+    },
+
+    otpExpires: {
+      type: Date,
+      default: null,
+      select: false,
+    },
+
+    resetPasswordToken: {
+      type: String,
+      default: null,
+      select: false,
+    },
+
+    resetPasswordExpires: {
+      type: Date,
+      default: null,
+      select: false,
+    },
   },
   {
     timestamps: true,
@@ -43,7 +79,7 @@ const userSchema = new mongoose.Schema(
 );
 
 userSchema.pre("save", async function () {
-  if (!this.isModified("password")) {
+  if (!this.isModified("password") || !this.password) {
     return;
   }
 
@@ -53,6 +89,10 @@ userSchema.pre("save", async function () {
 });
 
 userSchema.methods.comparePassword = async function (candidatePassword) {
+  if (!this.password) {
+    return false;
+  }
+
   return bcrypt.compare(candidatePassword, this.password);
 };
 

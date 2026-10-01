@@ -1,24 +1,16 @@
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import {
-  ArrowRight,
-  Eye,
-  EyeOff,
-  LockKeyhole,
-  Mail,
-} from "lucide-react";
+import { ArrowRight, Eye, EyeOff, LockKeyhole, Mail } from "lucide-react";
 import { motion } from "motion/react";
+import { GoogleLogin } from "@react-oauth/google";
+import toast from "react-hot-toast";
 
 import useAuth from "../context/useAuth";
 import NovaVaultLogo from "../components/navigation/NovaVaultLogo";
 
 function GoogleIcon() {
   return (
-    <svg
-      viewBox="0 0 24 24"
-      className="size-4"
-      aria-hidden="true"
-    >
+    <svg viewBox="0 0 24 24" className="size-4" aria-hidden="true">
       <path
         fill="#4285F4"
         d="M21.35 12.23c0-.78-.07-1.53-.22-2.25H12v4.26h5.24a4.48 4.48 0 0 1-1.94 2.94v2.45h3.14c1.84-1.69 2.91-4.18 2.91-7.4Z"
@@ -45,7 +37,8 @@ function GoogleIcon() {
 function Login() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { login } = useAuth();
+
+  const { login, checkAuth } = useAuth();
 
   const [form, setForm] = useState({
     email: "",
@@ -82,28 +75,83 @@ function Login() {
     }
 
     try {
+  setLoading(true);
+
+  await login({
+    email: form.email.trim(),
+    password: form.password,
+  });
+
+  toast.success("Welcome back to NovaVault!", {
+    icon: "✦",
+  });
+
+  navigate(redirectPath, {
+    replace: true,
+  });
+} catch (requestError) {
+  toast.error(
+    requestError.message ||
+      "Unable to sign in. Please try again.",
+  );
+} finally {
+  setLoading(false);
+}
+  };
+
+
+  const handleGoogleSuccess = async (credentialResponse) => {
+    try {
+      setError("");
       setLoading(true);
 
-      await login({
-        email: form.email.trim(),
-        password: form.password,
+      if (!credentialResponse?.credential) {
+        throw new Error(
+          "Google did not return a valid authentication credential.",
+        );
+      }
+
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/auth/google`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify({
+            idToken: credentialResponse.credential,
+          }),
+        },
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Google sign-in failed.");
+      }
+
+      await checkAuth();
+
+      toast.success("Signed in with Google successfully!", {
+        icon: "✦",
       });
 
       navigate(redirectPath, {
         replace: true,
       });
     } catch (requestError) {
-      setError(
+      toast.error(
         requestError.message ||
-          "Unable to sign in. Please try again.",
+          "Unable to sign in with Google. Please try again.",
       );
     } finally {
       setLoading(false);
     }
   };
 
-  const handleGoogleLogin = () => {
-    // Google authentication will be connected later.
+  const handleGoogleError = () => {
+    toast.error("Google sign-in was cancelled or failed.");
   };
 
   return (
@@ -206,7 +254,7 @@ function Login() {
                   mx-auto
                   mt-2
                   max-w-[280px]
-                  !text-[10px]
+                  !text-[12px]
                   leading-5
                   text-slate-500
                 "
@@ -274,7 +322,6 @@ function Login() {
                       disabled={loading}
                       className="
                         nv-auth-input
-
                         h-11
                         w-full
                         rounded-lg
@@ -283,22 +330,18 @@ function Login() {
                         bg-black/25
                         pl-10
                         pr-3
-                        !text-[11px]
+                        !text-[13px]
                         text-white
                         caret-violet-300
                         outline-none
                         transition-all
                         duration-200
-
                         placeholder:text-slate-700
-
                         hover:border-white/[0.12]
-
                         focus:border-violet-400/40
                         focus:bg-violet-500/[0.025]
                         focus:ring-2
                         focus:ring-violet-500/10
-
                         disabled:cursor-not-allowed
                         disabled:opacity-60
                       "
@@ -322,18 +365,32 @@ function Login() {
                       Password
                     </label>
 
-                    <Link
-                      to="/forgot-password"
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (!form.email.trim()) {
+                          setError("Please enter your email address first.");
+                          return;
+                        }
+
+                        navigate("/forgot-password", {
+                          state: {
+                            email: form.email.trim(),
+                          },
+                        });
+                      }}
+                      disabled={loading}
                       className="
-                        !text-[8px]
-                        font-semibold
-                        text-violet-400/80
+                        !text-[10px] font-semibold
+                      text-violet-400/80
                         transition
-                        hover:text-violet-300
+                      hover:text-violet-300
+                        disabled:cursor-not-allowed
+                        disabled:opacity-60
                       "
                     >
                       Forgot password?
-                    </Link>
+                    </button>
                   </div>
 
                   <div className="relative">
@@ -354,11 +411,7 @@ function Login() {
                     <input
                       id="password"
                       name="password"
-                      type={
-                        showPassword
-                          ? "text"
-                          : "password"
-                      }
+                      type={showPassword ? "text" : "password"}
                       autoComplete="current-password"
                       value={form.password}
                       onChange={handleChange}
@@ -366,7 +419,6 @@ function Login() {
                       disabled={loading}
                       className="
                         nv-auth-input
-
                         h-11
                         w-full
                         rounded-lg
@@ -375,22 +427,18 @@ function Login() {
                         bg-black/25
                         pl-10
                         pr-10
-                        !text-[11px]
+                        !text-[13px]
                         text-white
                         caret-violet-300
                         outline-none
                         transition-all
                         duration-200
-
                         placeholder:text-slate-700
-
                         hover:border-white/[0.12]
-
                         focus:border-violet-400/40
                         focus:bg-violet-500/[0.025]
                         focus:ring-2
                         focus:ring-violet-500/10
-
                         disabled:cursor-not-allowed
                         disabled:opacity-60
                       "
@@ -398,16 +446,10 @@ function Login() {
 
                     <button
                       type="button"
-                      onClick={() =>
-                        setShowPassword(
-                          (current) => !current,
-                        )
-                      }
+                      onClick={() => setShowPassword((current) => !current)}
                       disabled={loading}
                       aria-label={
-                        showPassword
-                          ? "Hide password"
-                          : "Show password"
+                        showPassword ? "Hide password" : "Show password"
                       }
                       className="
                         absolute
@@ -422,14 +464,11 @@ function Login() {
                         rounded-md
                         text-slate-600
                         transition
-
                         hover:bg-white/[0.05]
                         hover:text-slate-300
-
                         focus:outline-none
                         focus:ring-2
                         focus:ring-violet-400/40
-
                         disabled:pointer-events-none
                       "
                     >
@@ -492,17 +531,13 @@ function Login() {
                     text-white
                     transition-all
                     duration-200
-
                     hover:bg-violet-500
                     hover:shadow-lg
                     hover:shadow-violet-950/30
-
                     active:scale-[0.99]
-
                     focus:outline-none
                     focus:ring-2
                     focus:ring-violet-400/50
-
                     disabled:cursor-not-allowed
                     disabled:opacity-60
                   "
@@ -549,47 +584,61 @@ function Login() {
                 <div className="h-px flex-1 bg-white/[0.06]" />
               </div>
 
-              {/* Google */}
-              <button
-                type="button"
-                onClick={handleGoogleLogin}
-                disabled={loading}
-                className="
-                  flex
-                  h-11
-                  w-full
-                  items-center
-                  justify-center
-                  gap-2.5
-                  rounded-lg
-                  border
-                  border-white/[0.08]
-                  bg-white/[0.025]
-                  px-4
-                  !text-[10px]
-                  font-bold
-                  text-slate-300
-                  transition-all
-                  duration-200
+              <div className="group relative h-11 w-full overflow-hidden rounded-lg">
+                {/* Original NovaVault Google button */}
+                <button
+                  type="button"
+                  disabled={loading}
+                  className="
+                    relative
+                    z-0
+                    flex
+                    h-11
+                    w-full
+                    items-center
+                    justify-center
+                    gap-2.5
+                    rounded-lg
+                    border
+                    border-white/[0.08]
+                    bg-white/[0.025]
+                    px-4
+                    !text-[11px]
+                    font-bold
+                    text-slate-300
+                    transition-all
+                    duration-200
+                    group-hover:border-white/[0.13]
+                    group-hover:bg-white/[0.05]
+                    group-hover:text-white
+                    group-active:scale-[0.99]
+                    focus:outline-none
+                    focus:ring-2
+                    focus:ring-violet-400/30
+                    disabled:cursor-not-allowed
+                    disabled:opacity-60
+                  "
+                >
+                  <GoogleIcon />
+                  Continue with Google
+                </button>
 
-                  hover:border-white/[0.13]
-                  hover:bg-white/[0.05]
-                  hover:text-white
-
-                  active:scale-[0.99]
-
-                  focus:outline-none
-                  focus:ring-2
-                  focus:ring-violet-400/30
-
-                  disabled:cursor-not-allowed
-                  disabled:opacity-60
-                "
-              >
-                <GoogleIcon />
-
-                Continue with Google
-              </button>
+                {/* Real Google authentication layer */}
+                {!loading && (
+                  <div className="absolute inset-0 z-10 opacity-0">
+                    <GoogleLogin
+                      onSuccess={handleGoogleSuccess}
+                      onError={handleGoogleError}
+                      useOneTap={false}
+                      theme="filled_black"
+                      size="large"
+                      text="continue_with"
+                      shape="rectangular"
+                      width="360"
+                    />
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Register */}
@@ -597,25 +646,26 @@ function Login() {
               className="
                 mt-6
                 text-center
-                !text-[9px]
+                !text-[12px]
                 text-slate-600
               "
             >
               Don't have a NovaVault account?{" "}
-              <span 
+              <span
                 className="
                   font-semibold
-                text-violet-500
+                  text-violet-500
                   transition
-                hover:text-violet-300"
-               >
+                  hover:text-violet-300
+                "
+              >
                 <Link
-                    to="/register"
-                    state={{
-                        from: redirectPath,
-                    }}
+                  to="/register"
+                  state={{
+                    from: redirectPath,
+                  }}
                 >
-                 Create one
+                  Create one
                 </Link>
               </span>
             </p>

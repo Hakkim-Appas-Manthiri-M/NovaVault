@@ -10,6 +10,8 @@ import {
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
+import toast from "react-hot-toast";
+
 import { useStore } from "../../context/useStore";
 import { getGames } from "../../services/gameApi";
 import GiftModal from "../common/GiftModal";
@@ -673,7 +675,20 @@ function HomeHero() {
                     ? `Remove ${activeGame.title} from wishlist`
                     : `Add ${activeGame.title} to wishlist`
                 }
-                onClick={() => toggleWishlist(activeGame)}
+                onClick={() => {
+                  const alreadyWishlisted = isWishlisted(activeGame.id);
+
+                  toggleWishlist(activeGame);
+
+                  toast.success(
+                    alreadyWishlisted
+                      ? "Removed from wishlist"
+                      : "Added to wishlist",
+                    {
+                      icon: alreadyWishlisted ? "♡" : "♥",
+                    },
+                  );
+                }}
                 className="
                   absolute
                   right-5
@@ -1359,7 +1374,20 @@ function HomeHero() {
                   ? `Remove ${activeGame.title} from wishlist`
                   : `Add ${activeGame.title} to wishlist`
               }
-              onClick={() => toggleWishlist(activeGame)}
+              onClick={() => {
+                const alreadyWishlisted = isWishlisted(activeGame.id);
+
+                toggleWishlist(activeGame);
+
+                toast.success(
+                  alreadyWishlisted
+                    ? "Removed from wishlist"
+                    : "Added to wishlist",
+                  {
+                    icon: alreadyWishlisted ? "♡" : "♥",
+                  },
+                );
+              }}
               className="
                 absolute
                 right-3
