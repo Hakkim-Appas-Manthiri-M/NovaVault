@@ -295,7 +295,7 @@ function Home() {
             description="The games NovaVault players are playing right now."
             link={{
               label: "View All",
-              to: "/games",
+              to: "/trending",
             }}
           />
 
@@ -440,7 +440,7 @@ function Home() {
             description="Discover the latest additions to NovaVault."
             link={{
               label: "All Releases",
-              to: "/games",
+              to: "/new-releases",
             }}
           />
 

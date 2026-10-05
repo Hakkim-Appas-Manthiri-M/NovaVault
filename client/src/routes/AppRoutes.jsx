@@ -3,8 +3,11 @@ import { Navigate, Route, Routes } from "react-router-dom";
 import AppShell from "../layouts/AppShell";
 import ComingSoon from "../pages/ComingSoon";
 import Library from "../pages/Library";
+import Downloads from "../pages/Downloads";
 import GameDetails from "../pages/GameDetails";
 import Games from "../pages/Games";
+import Trending from "../pages/Trending";
+import NewReleases from "../pages/NewReleases";
 import Home from "../pages/Home";
 import Wishlist from "../pages/Wishlist";
 import Cart from "../pages/Cart";
@@ -38,6 +41,12 @@ function AppRoutes() {
         {/* Store */}
         <Route path="/games" element={<Games />} />
 
+        {/* Trending */}
+        <Route path="/trending" element={<Trending />} />
+        
+        {/* New Releases */}
+        <Route path="/new-releases" element={<NewReleases />} />
+
         {/* Game Details */}
         <Route path="/games/:gameId" element={<GameDetails />} />
 
@@ -65,10 +74,7 @@ function AppRoutes() {
           <Route path="/profile" element={<Profile />} />
 
           {/* Downloads */}
-          <Route
-            path="/downloads"
-            element={<ComingSoon title="Downloads" />}
-          />
+          <Route path="/downloads" element={<Downloads />} />
 
           {/* Settings */}
           <Route
