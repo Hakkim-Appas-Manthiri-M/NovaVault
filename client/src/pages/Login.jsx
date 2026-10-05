@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
 import { ArrowRight, Eye, EyeOff, LockKeyhole, Mail } from "lucide-react";
 import { motion } from "motion/react";
 import { GoogleLogin } from "@react-oauth/google";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 
 import useAuth from "../context/useAuth";
@@ -15,17 +15,14 @@ function GoogleIcon() {
         fill="#4285F4"
         d="M21.35 12.23c0-.78-.07-1.53-.22-2.25H12v4.26h5.24a4.48 4.48 0 0 1-1.94 2.94v2.45h3.14c1.84-1.69 2.91-4.18 2.91-7.4Z"
       />
-
       <path
         fill="#34A853"
         d="M12 21.58c2.63 0 4.84-.87 6.45-2.35l-3.14-2.45c-.87.58-1.98.92-3.31.92-2.54 0-4.7-1.72-5.47-4.03H3.28v2.52A9.75 9.75 0 0 0 12 21.58Z"
       />
-
       <path
         fill="#FBBC05"
         d="M6.53 13.67a5.86 5.86 0 0 1 0-3.34V7.81H3.28a9.75 9.75 0 0 0 0 8.38l3.25-2.52Z"
       />
-
       <path
         fill="#EA4335"
         d="M12 6.3c1.43 0 2.71.49 3.72 1.45l2.79-2.79C16.84 3.4 14.63 2.42 12 2.42a9.75 9.75 0 0 0-8.72 5.39l3.25 2.52C7.3 8.02 9.46 6.3 12 6.3Z"
@@ -75,30 +72,28 @@ function Login() {
     }
 
     try {
-  setLoading(true);
+      setLoading(true);
 
-  await login({
-    email: form.email.trim(),
-    password: form.password,
-  });
+      await login({
+        email: form.email.trim(),
+        password: form.password,
+      });
 
-  toast.success("Welcome back to NovaVault!", {
-    icon: "✦",
-  });
+      toast.success("Welcome back to NovaVault!", {
+        icon: "✦",
+      });
 
-  navigate(redirectPath, {
-    replace: true,
-  });
-} catch (requestError) {
-  toast.error(
-    requestError.message ||
-      "Unable to sign in. Please try again.",
-  );
-} finally {
-  setLoading(false);
-}
+      navigate(redirectPath, {
+        replace: true,
+      });
+    } catch (requestError) {
+      toast.error(
+        requestError.message || "Unable to sign in. Please try again.",
+      );
+    } finally {
+      setLoading(false);
+    }
   };
-
 
   const handleGoogleSuccess = async (credentialResponse) => {
     try {
@@ -156,9 +151,6 @@ function Login() {
 
   return (
     <>
-      {/* =====================================================
-          CHROME AUTOFILL FIX
-      ====================================================== */}
       <style>
         {`
           input.nv-auth-input:-webkit-autofill,
@@ -184,16 +176,12 @@ function Login() {
       </style>
 
       <main className="relative min-h-screen overflow-hidden bg-[#050711] text-slate-100">
-        {/* Ambient background */}
         <div className="pointer-events-none absolute inset-0 overflow-hidden">
           <div className="absolute left-1/2 top-[-220px] h-[440px] w-[440px] -translate-x-1/2 rounded-full bg-violet-600/[0.09] blur-[130px]" />
-
           <div className="absolute bottom-[-220px] right-[-160px] h-[420px] w-[420px] rounded-full bg-indigo-600/[0.06] blur-[130px]" />
-
           <div className="absolute left-[-180px] top-1/2 h-[360px] w-[360px] -translate-y-1/2 rounded-full bg-violet-500/[0.035] blur-[120px]" />
         </div>
 
-        {/* Main content */}
         <div className="relative z-10 flex min-h-screen items-center justify-center px-4 py-8 sm:px-6">
           <motion.div
             initial={{
@@ -210,9 +198,6 @@ function Login() {
             }}
             className="w-full max-w-[430px]"
           >
-            {/* =================================================
-                NOVAVAULT BRAND
-            ================================================== */}
             <div className="mb-4 flex justify-center">
               <Link
                 to="/"
@@ -232,9 +217,6 @@ function Login() {
               </Link>
             </div>
 
-            {/* =================================================
-                HEADING
-            ================================================== */}
             <div className="mb-7 text-center">
               <h1
                 className="
@@ -263,9 +245,6 @@ function Login() {
               </p>
             </div>
 
-            {/* =================================================
-                LOGIN CARD
-            ================================================== */}
             <div
               className="
                 rounded-2xl
@@ -279,7 +258,6 @@ function Login() {
               "
             >
               <form onSubmit={handleSubmit} noValidate>
-                {/* Email */}
                 <div>
                   <label
                     htmlFor="email"
@@ -349,7 +327,6 @@ function Login() {
                   </div>
                 </div>
 
-                {/* Password */}
                 <div className="mt-4">
                   <div className="mb-2 flex items-center justify-between">
                     <label
@@ -381,10 +358,11 @@ function Login() {
                       }}
                       disabled={loading}
                       className="
-                        !text-[10px] font-semibold
-                      text-violet-400/80
+                        !text-[10px]
+                        font-semibold
+                        text-violet-400/80
                         transition
-                      hover:text-violet-300
+                        hover:text-violet-300
                         disabled:cursor-not-allowed
                         disabled:opacity-60
                       "
@@ -481,7 +459,6 @@ function Login() {
                   </div>
                 </div>
 
-                {/* Error */}
                 {error && (
                   <motion.div
                     initial={{
@@ -509,35 +486,28 @@ function Login() {
                   </motion.div>
                 )}
 
-                {/* Sign in */}
                 <button
                   type="submit"
                   disabled={loading}
                   className="
-                    mt-5
-                    flex
-                    h-11
-                    w-full
-                    items-center
-                    justify-center
-                    gap-2
+                    mt-5 flex h-11 w-full
+                    items-center justify-center gap-2
                     rounded-lg
-                    bg-violet-600
+                  bg-violet-600
                     px-4
                     !text-[10px]
-                    font-bold
-                    uppercase
+                    font-bold uppercase
                     tracking-[0.12em]
-                    text-white
-                    transition-all
-                    duration-200
-                    hover:bg-violet-500
-                    hover:shadow-lg
-                    hover:shadow-violet-950/30
+                  text-white
+                    transition-all duration-300
+                    hover:-translate-y-[1px]
+                  hover:bg-violet-500
+                    hover:shadow-[0_8px_30px_rgba(124,58,237,0.35)]
+                    active:translate-y-0
                     active:scale-[0.99]
                     focus:outline-none
                     focus:ring-2
-                    focus:ring-violet-400/50
+                  focus:ring-violet-400/50
                     disabled:cursor-not-allowed
                     disabled:opacity-60
                   "
@@ -565,7 +535,6 @@ function Login() {
                 </button>
               </form>
 
-              {/* Divider */}
               <div className="my-5 flex items-center gap-3">
                 <div className="h-px flex-1 bg-white/[0.06]" />
 
@@ -584,48 +553,61 @@ function Login() {
                 <div className="h-px flex-1 bg-white/[0.06]" />
               </div>
 
-              <div className="group relative h-11 w-full overflow-hidden rounded-lg">
-                {/* Original NovaVault Google button */}
+              <div className="group relative h-11 w-full rounded-lg">
                 <button
                   type="button"
                   disabled={loading}
                   className="
-                    relative
-                    z-0
-                    flex
-                    h-11
-                    w-full
-                    items-center
-                    justify-center
-                    gap-2.5
+                    pointer-events-none
+                    absolute inset-0 z-0
+                    flex h-11 w-full
+                    items-center justify-center gap-2.5
+                    overflow-hidden
                     rounded-lg
-                    border
-                    border-white/[0.08]
-                    bg-white/[0.025]
+                    border border-white/[0.08]
+                  bg-white/[0.025]
                     px-4
-                    !text-[11px]
+                    !text-[10px]
                     font-bold
-                    text-slate-300
-                    transition-all
-                    duration-200
-                    group-hover:border-white/[0.13]
-                    group-hover:bg-white/[0.05]
-                    group-hover:text-white
+                  text-slate-300
+                    transition-all duration-300
+                    group-hover:-translate-y-[1px]
+                  group-hover:border-violet-400/30
+                  group-hover:bg-violet-500/[0.07]
+                  group-hover:text-white
+                    group-hover:shadow-[0_8px_30px_rgba(124,58,237,0.18)]
+                    group-active:translate-y-0
                     group-active:scale-[0.99]
                     focus:outline-none
                     focus:ring-2
-                    focus:ring-violet-400/30
-                    disabled:cursor-not-allowed
+                  focus:ring-violet-400/30
                     disabled:opacity-60
                   "
                 >
-                  <GoogleIcon />
-                  Continue with Google
+                  <span
+                    className="
+                      pointer-events-none
+                      absolute inset-0
+                      -translate-x-full
+                      bg-gradient-to-r
+                      from-transparent
+                    via-white/[0.06]
+                      to-transparent
+                      transition-transform duration-700
+                      group-hover:translate-x-full
+                    "
+                  />
+
+                  <span className="relative z-10 flex items-center gap-2.5">
+                    <GoogleIcon />
+                    {loading
+                      ? "Signing in with Google..."
+                      : "Continue with Google"}
+                  </span>
                 </button>
 
-                {/* Real Google authentication layer */}
                 {!loading && (
-                  <div className="absolute inset-0 z-10 opacity-0">
+                  <div className="absolute inset-0 z-10 h-11 w-full opacity-0">
                     <GoogleLogin
                       onSuccess={handleGoogleSuccess}
                       onError={handleGoogleError}
@@ -634,14 +616,13 @@ function Login() {
                       size="large"
                       text="continue_with"
                       shape="rectangular"
-                      width="360"
+                      width="100%"
                     />
                   </div>
                 )}
               </div>
             </div>
 
-            {/* Register */}
             <p
               className="
                 mt-6

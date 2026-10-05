@@ -9,17 +9,15 @@ import {
   UserRound,
 } from "lucide-react";
 import { motion } from "motion/react";
+import { GoogleLogin } from "@react-oauth/google";
+import toast from "react-hot-toast";
 
 import useAuth from "../context/useAuth";
 import NovaVaultLogo from "../components/navigation/NovaVaultLogo";
 
 function GoogleIcon() {
   return (
-    <svg
-      viewBox="0 0 24 24"
-      className="h-4 w-4"
-      aria-hidden="true"
-    >
+    <svg viewBox="0 0 24 24" className="h-4 w-4 shrink-0" aria-hidden="true">
       <path
         fill="#4285F4"
         d="M21.35 12.23c0-.78-.07-1.53-.22-2.25H12v4.26h5.24a4.48 4.48 0 0 1-1.94 2.94v2.45h3.14c1.84-1.69 2.91-4.18 2.91-7.4Z"
@@ -46,7 +44,7 @@ function GoogleIcon() {
 function Register() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { register } = useAuth();
+  const { register, checkAuth } = useAuth();
 
   const [form, setForm] = useState({
     name: "",
@@ -112,7 +110,7 @@ function Register() {
         password: form.password,
       });
 
-      if(result.success){
+      if (result.success) {
         navigate("/verify-email", {
           replace: true,
           state: {
@@ -137,13 +135,62 @@ function Register() {
     }
   };
 
-  const handleGoogleRegister = () => {
-    // Google authentication will be connected later.
+  const handleGoogleSuccess = async (credentialResponse) => {
+    try {
+      setError("");
+      setLoading(true);
+
+      if (!credentialResponse?.credential) {
+        throw new Error(
+          "Google did not return a valid authentication credential.",
+        );
+      }
+
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/auth/google`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify({
+            idToken: credentialResponse.credential,
+          }),
+        },
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Google registration failed.");
+      }
+
+      await checkAuth();
+
+      toast.success("Welcome to NovaVault!", {
+        icon: "✦",
+      });
+
+      navigate(redirectPath, {
+        replace: true,
+      });
+    } catch (requestError) {
+      toast.error(
+        requestError.message ||
+          "Unable to continue with Google. Please try again.",
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleError = () => {
+    toast.error("Google sign up was cancelled or failed.");
   };
 
   return (
     <>
-      {/* Chrome autofill fix */}
       <style>
         {`
           input:-webkit-autofill,
@@ -159,7 +206,6 @@ function Register() {
       </style>
 
       <main className="relative min-h-screen overflow-hidden bg-[#050711] text-slate-100">
-        {/* Ambient background */}
         <div className="pointer-events-none absolute inset-0 overflow-hidden">
           <div className="absolute left-1/2 top-[-220px] h-[440px] w-[440px] -translate-x-1/2 rounded-full bg-violet-600/[0.09] blur-[130px]" />
 
@@ -168,7 +214,6 @@ function Register() {
           <div className="absolute right-[-180px] top-1/2 h-[360px] w-[360px] -translate-y-1/2 rounded-full bg-violet-500/[0.035] blur-[120px]" />
         </div>
 
-        {/* Main content */}
         <div className="relative z-10 flex min-h-screen items-center justify-center px-4 py-8 sm:px-6">
           <motion.div
             initial={{ opacity: 0, y: 18 }}
@@ -179,15 +224,15 @@ function Register() {
             }}
             className="w-full max-w-[420px]"
           >
-            {/* NovaVault logo */}
             <div className="mb-4 flex justify-center">
               <Link
                 to="/"
                 aria-label="Go to NovaVault home"
                 className="
                   inline-flex rounded-lg
-                  transition-opacity duration-200
-                  hover:opacity-90
+                  transition-all duration-300
+                  hover:scale-[1.02]
+                  hover:opacity-95
                   focus:outline-none
                   focus:ring-2
                   focus:ring-violet-400/50
@@ -197,7 +242,6 @@ function Register() {
               </Link>
             </div>
 
-            {/* Heading */}
             <div className="mb-7 text-center">
               <h1 className="nv-display !text-[28px] font-bold tracking-[-0.025em] text-white !sm:text-[30px]">
                 Create your account
@@ -208,7 +252,6 @@ function Register() {
               </p>
             </div>
 
-            {/* Register card */}
             <div
               className="
                 rounded-2xl
@@ -221,7 +264,6 @@ function Register() {
               "
             >
               <form onSubmit={handleSubmit} noValidate>
-                {/* Full name */}
                 <div>
                   <label
                     htmlFor="name"
@@ -282,7 +324,6 @@ function Register() {
                   </div>
                 </div>
 
-                {/* Email */}
                 <div className="mt-4">
                   <label
                     htmlFor="email"
@@ -342,7 +383,6 @@ function Register() {
                   </div>
                 </div>
 
-                {/* Password */}
                 <div className="mt-4">
                   <label
                     htmlFor="password"
@@ -403,14 +443,10 @@ function Register() {
 
                     <button
                       type="button"
-                      onClick={() =>
-                        setShowPassword((current) => !current)
-                      }
+                      onClick={() => setShowPassword((current) => !current)}
                       disabled={loading}
                       aria-label={
-                        showPassword
-                          ? "Hide password"
-                          : "Show password"
+                        showPassword ? "Hide password" : "Show password"
                       }
                       className="
                         absolute right-2 top-1/2
@@ -419,7 +455,7 @@ function Register() {
                         items-center justify-center
                         rounded-md
                         text-slate-600
-                        transition
+                        transition-all duration-200
                         hover:bg-white/[0.05]
                         hover:text-slate-300
                         focus:outline-none
@@ -437,7 +473,6 @@ function Register() {
                   </div>
                 </div>
 
-                {/* Confirm password */}
                 <div className="mt-4">
                   <label
                     htmlFor="confirmPassword"
@@ -467,11 +502,7 @@ function Register() {
                     <input
                       id="confirmPassword"
                       name="confirmPassword"
-                      type={
-                        showConfirmPassword
-                          ? "text"
-                          : "password"
-                      }
+                      type={showConfirmPassword ? "text" : "password"}
                       autoComplete="new-password"
                       value={form.confirmPassword}
                       onChange={handleChange}
@@ -503,9 +534,7 @@ function Register() {
                     <button
                       type="button"
                       onClick={() =>
-                        setShowConfirmPassword(
-                          (current) => !current,
-                        )
+                        setShowConfirmPassword((current) => !current)
                       }
                       disabled={loading}
                       aria-label={
@@ -520,7 +549,7 @@ function Register() {
                         items-center justify-center
                         rounded-md
                         text-slate-600
-                        transition
+                        transition-all duration-200
                         hover:bg-white/[0.05]
                         hover:text-slate-300
                         focus:outline-none
@@ -538,7 +567,6 @@ function Register() {
                   </div>
                 </div>
 
-                {/* Error */}
                 {error && (
                   <motion.div
                     initial={{
@@ -564,7 +592,6 @@ function Register() {
                   </motion.div>
                 )}
 
-                {/* Create account */}
                 <button
                   type="submit"
                   disabled={loading}
@@ -578,10 +605,11 @@ function Register() {
                     font-bold uppercase
                     tracking-[0.12em]
                     text-white
-                    transition-all duration-200
+                    transition-all duration-300
+                    hover:-translate-y-[1px]
                     hover:bg-violet-500
-                    hover:shadow-lg
-                    hover:shadow-violet-950/30
+                    hover:shadow-[0_8px_30px_rgba(124,58,237,0.35)]
+                    active:translate-y-0
                     active:scale-[0.99]
                     focus:outline-none
                     focus:ring-2
@@ -598,13 +626,12 @@ function Register() {
                   ) : (
                     <>
                       Create account
-                      <ArrowRight className="size-3.5" />
+                      <ArrowRight className="size-3.5 transition-transform duration-300 group-hover:translate-x-0.5" />
                     </>
                   )}
                 </button>
               </form>
 
-              {/* Divider */}
               <div className="my-5 flex items-center gap-3">
                 <div className="h-px flex-1 bg-white/[0.06]" />
 
@@ -615,54 +642,95 @@ function Register() {
                 <div className="h-px flex-1 bg-white/[0.06]" />
               </div>
 
-              {/* Google */}
-              <button
-                type="button"
-                onClick={handleGoogleRegister}
-                disabled={loading}
-                className="
-                  flex h-11 w-full
-                  items-center justify-center gap-2.5
-                  rounded-lg
-                  border border-white/[0.08]
+              <div className="group relative h-11 w-full rounded-lg">
+                <button
+                  type="button"
+                  disabled={loading}
+                  className="
+                    pointer-events-none
+                    absolute inset-0 z-0
+                    flex h-11 w-full
+                    items-center justify-center gap-2.5
+                    overflow-hidden
+                    rounded-lg
+                    border border-white/[0.08]
                   bg-white/[0.025]
-                  px-4
-                  !text-[10px]
-                  font-bold
+                    px-4
+                    !text-[10px]
+                    font-bold
                   text-slate-300
-                  transition-all duration-200
-                  hover:border-white/[0.13]
-                  hover:bg-white/[0.05]
-                  hover:text-white
-                  active:scale-[0.99]
-                  focus:outline-none
-                  focus:ring-2
+                    transition-all duration-300
+                    group-hover:-translate-y-[1px]
+                  group-hover:border-violet-400/30
+                  group-hover:bg-violet-500/[0.07]
+                  group-hover:text-white
+                    group-hover:shadow-[0_8px_30px_rgba(124,58,237,0.18)]
+                    group-active:translate-y-0
+                    group-active:scale-[0.99]
+                    focus:outline-none
+                    focus:ring-2
                   focus:ring-violet-400/30
-                  disabled:cursor-not-allowed
-                  disabled:opacity-60
-                "
-              >
-                <GoogleIcon />
-                Continue with Google
-              </button>
+                    disabled:opacity-60
+                  "
+                >
+                  <span
+                    className="
+                      pointer-events-none
+                      absolute inset-0
+                      -translate-x-full
+                      bg-gradient-to-r
+                      from-transparent
+                    via-white/[0.06]
+                      to-transparent
+                      transition-transform duration-700
+                      group-hover:translate-x-full
+                    "
+                  />
+
+                  <span className="relative z-10 flex items-center gap-2.5">
+                    <GoogleIcon />
+                    {loading
+                      ? "Signing in with Google..."
+                      : "Continue with Google"}
+                  </span>
+                </button>
+
+                {!loading && (
+                  <div
+                    className="
+                      absolute inset-0 z-10
+                      h-11 w-full
+                      opacity-0
+                    "
+                  >
+                    <GoogleLogin
+                      onSuccess={handleGoogleSuccess}
+                      onError={handleGoogleError}
+                      useOneTap={false}
+                      theme="filled_black"
+                      size="large"
+                      text="continue_with"
+                      shape="rectangular"
+                      width="100%"
+                    />
+                  </div>
+                )}
+              </div>
             </div>
 
-            {/* Login */}
             <p className="mt-6 text-center !text-[9px] text-slate-600">
               Already have a NovaVault account?{" "}
-              <span 
+              <span
                 className="
                   font-semibold
-                text-violet-500
-                  transition
-                hover:text-violet-300"
-               >
-              <Link
-                to="/login"
-                state={{ from: redirectPath }} 
+                  text-violet-500
+                  transition-colors duration-200
+                  hover:text-violet-300
+                "
               >
-                Sign in
-              </Link>
+                <Link to="/login" state={{ from: redirectPath }}>
+                  Sign in
+                </Link>
               </span>
             </p>
           </motion.div>
