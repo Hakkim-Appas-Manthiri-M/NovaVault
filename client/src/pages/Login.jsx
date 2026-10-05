@@ -341,34 +341,6 @@ function Login() {
                     >
                       Password
                     </label>
-
-                    <button
-                      type="button"
-                      onClick={() => {
-                        if (!form.email.trim()) {
-                          setError("Please enter your email address first.");
-                          return;
-                        }
-
-                        navigate("/forgot-password", {
-                          state: {
-                            email: form.email.trim(),
-                          },
-                        });
-                      }}
-                      disabled={loading}
-                      className="
-                        !text-[10px]
-                        font-semibold
-                        text-violet-400/80
-                        transition
-                        hover:text-violet-300
-                        disabled:cursor-not-allowed
-                        disabled:opacity-60
-                      "
-                    >
-                      Forgot password?
-                    </button>
                   </div>
 
                   <div className="relative">

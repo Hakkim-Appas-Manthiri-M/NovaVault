@@ -23,63 +23,6 @@ export async function registerUser(userData) {
   return parseResponse(response);
 }
 
-export async function verifyEmail(email, otp) {
-  const response = await fetch(`${API_URL}/auth/verify-email`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    credentials: "include",
-    body: JSON.stringify({
-      email,
-      otp,
-    }),
-  });
-
-  return parseResponse(response);
-}
-
-export async function resendOtp(email) {
-  const response = await fetch(`${API_URL}/auth/resend-otp`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    credentials: "include",
-    body: JSON.stringify({
-      email,
-    }),
-  });
-
-  return parseResponse(response);
-}
-
-export async function forgotPassword(email) {
-  const response = await fetch(`${API_URL}/auth/forgot-password`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    credentials: "include",
-    body: JSON.stringify({ email }),
-  });
-
-  return parseResponse(response);
-}
-
-export async function resetPassword(token, password) {
-  const response = await fetch(`${API_URL}/auth/reset-password/${token}`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    credentials: "include",
-    body: JSON.stringify({ password }),
-  });
-
-  return parseResponse(response);
-}
-
 export async function loginUser(credentials) {
   const response = await fetch(`${API_URL}/auth/login`, {
     method: "POST",

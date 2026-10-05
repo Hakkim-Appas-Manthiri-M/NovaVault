@@ -111,12 +111,14 @@ function Register() {
       });
 
       if (result.success) {
-        navigate("/verify-email", {
+        await checkAuth();
+
+        toast.success("Account created successfully!", {
+          icon: "✦",
+        });
+
+        navigate(redirectPath, {
           replace: true,
-          state: {
-            email,
-            from: redirectPath,
-          },
         });
 
         return;
