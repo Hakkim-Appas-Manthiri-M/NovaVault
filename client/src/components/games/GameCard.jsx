@@ -47,13 +47,7 @@ function GameCard({ game }) {
           src={game.portraitImage || game.image}
           alt={game.title}
           loading="lazy"
-          className="
-            h-full w-full object-cover object-[center_30%]
-            transition-transform duration-500 ease-out
-            group-hover:scale-[1.045]
-            motion-reduce:transform-none
-            motion-reduce:transition-none
-          "
+          className="h-full w-full object-cover object-[center_30%]"
         />
 
         {/* Artwork gradient */}
@@ -174,7 +168,7 @@ function GameCard({ game }) {
           to={`/games/${game.slug || game.id}`}
           className="
             block truncate
-            text-[11px] font-bold
+            !text-[11px] font-bold
             tracking-[-0.01em]
             text-white
             transition-colors
@@ -188,7 +182,7 @@ function GameCard({ game }) {
         <div
           className="
             mt-1 flex min-w-0 items-center gap-1.5
-            text-[7px] font-medium
+            !text-[7px] font-medium
             uppercase tracking-[0.08em]
             text-slate-500
           "
@@ -206,7 +200,7 @@ function GameCard({ game }) {
           <div className="relative -top-2 flex items-center gap-1">
             <Star className="size-3 fill-current text-amber-400" />
 
-            <span className="text-[8px] font-semibold text-slate-300">
+            <span className="!text-[8px] font-semibold text-slate-300">
               {game.rating}
             </span>
           </div>

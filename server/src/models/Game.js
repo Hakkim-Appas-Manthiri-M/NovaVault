@@ -127,6 +127,35 @@ const gameSchema = new mongoose.Schema(
       default: [],
     },
 
+    // ============================================================
+    // GAME DOWNLOAD
+    // ============================================================
+    download: {
+      downloadSize: {
+        type: Number,
+        default: 0,
+        min: 0,
+      },
+
+      installSize: {
+        type: Number,
+        default: 0,
+        min: 0,
+      },
+
+      version: {
+        type: String,
+        default: "1.0.0",
+        trim: true,
+      },
+
+      url: {
+        type: String,
+        default: "",
+        trim: true,
+      },
+    },
+
     releaseDate: {
       type: Date,
     },

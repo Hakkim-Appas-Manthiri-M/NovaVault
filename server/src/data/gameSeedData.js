@@ -23,6 +23,12 @@ const gameSeedData = [
     portraitImage:
       "https://image.api.playstation.com/vulcan/ap/rnd/202512/1205/79661d7a2bdb9784749b4e57e1456ca89f7ac7bed8615aee.png",
     platforms: ["PC", "PS5", "Xbox"],
+    download: {
+      downloadSize: 68.4,
+      installSize: 99.8,
+      version: "1.0.0",
+      url: "",
+    },
     featured: true,
     trending: false,
     newRelease: true,
@@ -64,6 +70,12 @@ const gameSeedData = [
     portraitImage:
       "https://image.api.playstation.com/cdn/UP1004/CUSA03041_00/Hpl5MtwQgOVF9vJqlfui6SDB5Jl4oBSq.png",
     platforms: ["PC", "Xbox"],
+    download: {
+      downloadSize: 119.0,
+      installSize: 150.0,
+      version: "1.0.0",
+      url: "",
+    },
     featured: true,
     trending: false,
     newRelease: false,
@@ -102,6 +114,12 @@ const gameSeedData = [
     portraitImage:
       "https://image.api.playstation.com/vulcan/ap/rnd/202009/3021/B2aUYFC0qUAkNnjbTHRyhrg3.png",
     platforms: ["PC", "PS5"],
+    download: {
+      downloadSize: 65.0,
+      installSize: 75.0,
+      version: "1.0.0",
+      url: "",
+    },
     featured: true,
     trending: false,
     newRelease: false,
@@ -140,6 +158,12 @@ const gameSeedData = [
     portraitImage:
       "https://image.api.playstation.com/vulcan/ap/rnd/202507/0215/f54f11bcf773a3bcace540344dc12154973f53d3490b93fc.png",
     platforms: ["PC", "PS5", "Xbox"],
+    download: {
+      downloadSize: 70.0,
+      installSize: 85.0,
+      version: "1.0.0",
+      url: "",
+    },
     featured: true,
     trending: false,
     newRelease: false,
@@ -175,6 +199,12 @@ const gameSeedData = [
     rating: 4.8,
     image:
       "https://cdn1.epicgames.com/salesEvent/salesEvent/EGS_SherlockHolmesTheDevilsDaughter_Frogwares_S2_1200x1600-f7135cf6cabd6b1d2b15cd94473bbebd",
+    download: {
+      downloadSize: 20.0,
+      installSize: 25.0,
+      version: "1.0.0",
+      url: "",
+    },
     featured: false,
     trending: true,
     newRelease: false,
@@ -204,6 +234,12 @@ const gameSeedData = [
     rating: 4.9,
     image:
       "https://cdn1.epicgames.com/spt-assets/53150f5307944899a0e8d8b95147449c/winter-survival-1tpgd.jpg",
+    download: {
+      downloadSize: 18.0,
+      installSize: 25.0,
+      version: "1.0.0",
+      url: "",
+    },
     featured: false,
     trending: true,
     newRelease: false,
@@ -234,6 +270,12 @@ const gameSeedData = [
     rating: 4.6,
     image:
       "https://cdn1.epicgames.com/salesEvent/salesEvent/EGS_StrandedDeep_BeamTeamGames_S2_1200x1600-f24f1e2a724ff81c6996a72caa0be642",
+    download: {
+      downloadSize: 8.0,
+      installSize: 12.0,
+      version: "1.0.0",
+      url: "",
+    },
     featured: false,
     trending: true,
     newRelease: false,
@@ -264,6 +306,12 @@ const gameSeedData = [
     rating: 4.7,
     image:
       "https://cdn1.epicgames.com/offer/f9bc208b965c4fb7afd0c842d764fc37/EGS_SherlockHolmesTheAwakened_Frogwares_S2_1200x1600-0ed490340fbe9567880c4751f6b9b10c",
+    download: {
+      downloadSize: 28.0,
+      installSize: 35.0,
+      version: "1.0.0",
+      url: "",
+    },
     featured: false,
     trending: true,
     newRelease: false,
@@ -294,6 +342,12 @@ const gameSeedData = [
     rating: 4.7,
     image:
       "https://cdn1.epicgames.com/offer/b0cd075465c44f87be3b505ac04a2e46/GTAV_CHARM_Epic_FirstParty_PortraitFOB_1200x1600_R02_1200x1600-a5528b33df876e64f5dee728830c80a3",
+    download: {
+      downloadSize: 95.0,
+      installSize: 120.0,
+      version: "1.0.0",
+      url: "",
+    },
     featured: false,
     trending: true,
     newRelease: false,
@@ -325,6 +379,12 @@ const gameSeedData = [
     rating: 4.2,
     image:
       "https://cdn1.epicgames.com/salesEvent/salesEvent/amogusportrait_1200x1600-66ad0e4d363e1c92f9f8aae67a96dd31",
+    download: {
+      downloadSize: 1.0,
+      installSize: 2.0,
+      version: "1.0.0",
+      url: "",
+    },
     featured: false,
     trending: true,
     newRelease: false,
@@ -355,6 +415,12 @@ const gameSeedData = [
     rating: 4.5,
     image:
       "https://cdn1.epicgames.com/offer/e97659b501af4e3981d5430dad170911/EGS_HogwartsLegacy_AvalancheSoftware_S2_1200x1600-bb9f789b6628ff2aa935f06f5e0f218a",
+    download: {
+      downloadSize: 75.0,
+      installSize: 85.0,
+      version: "1.0.0",
+      url: "",
+    },
     featured: false,
     trending: true,
     newRelease: false,
@@ -385,6 +451,12 @@ const gameSeedData = [
     rating: 4.7,
     image:
       "https://image.api.playstation.com/vulcan/ap/rnd/202501/2717/42b3ee6b1b2094212231b0b0a82824f687fc5c4dc9bde31c.png",
+    download: {
+      downloadSize: 110.0,
+      installSize: 130.0,
+      version: "1.0.0",
+      url: "",
+    },
     featured: false,
     trending: true,
     newRelease: false,
@@ -419,6 +491,12 @@ const gameSeedData = [
     rating: 4.8,
     image:
       "https://cdn1.epicgames.com/spt-assets/f9616d900e1048a29ee9ffe9523c1594/crimson-desert-1b8y7.jpg",
+    download: {
+      downloadSize: 80.0,
+      installSize: 100.0,
+      version: "1.0.0",
+      url: "",
+    },
     featured: false,
     trending: false,
     newRelease: true,
@@ -447,6 +525,12 @@ const gameSeedData = [
     rating: 4.5,
     image:
       "https://cdn1.epicgames.com/spt-assets/011270e3237f4bf69a3459942f005393/subnautica-2-rwzi9.jpg",
+    download: {
+      downloadSize: 30.0,
+      installSize: 40.0,
+      version: "1.0.0",
+      url: "",
+    },
     featured: false,
     trending: false,
     newRelease: true,
@@ -476,6 +560,12 @@ const gameSeedData = [
     rating: 4.7,
     image:
       "https://cdn1.epicgames.com/spt-assets/3e0c82e7863e40818a56f934edc55712/project-murray-10vqs.png",
+    download: {
+      downloadSize: 90.0,
+      installSize: 110.0,
+      version: "1.0.0",
+      url: "",
+    },
     featured: false,
     trending: false,
     newRelease: true,
@@ -506,6 +596,12 @@ const gameSeedData = [
     rating: 4.7,
     image:
       "https://cdn1.epicgames.com/08ae29e4f70a4b62aa055e383381aa82/offer/EGS_Breathedge_RedRuinsSoftworks_S2-1200x1600-c0559585221ea11c9d48273c3a79b1ba.jpg",
+    download: {
+      downloadSize: 8.0,
+      installSize: 12.0,
+      version: "1.0.0",
+      url: "",
+    },
     featured: false,
     trending: false,
     newRelease: true,
@@ -532,6 +628,12 @@ const gameSeedData = [
     rating: 4.7,
     image:
       "https://cdn1.epicgames.com/spt-assets/4e573b1b397348d385d12ddc640fc894/resonance-a-plague-tale-legacy-1vz91.jpg",
+    download: {
+      downloadSize: 45.0,
+      installSize: 55.0,
+      version: "1.0.0",
+      url: "",
+    },
     featured: false,
     trending: false,
     newRelease: true,
@@ -560,6 +662,12 @@ const gameSeedData = [
     rating: 4.7,
     image:
       "https://cdn1.epicgames.com/offer/f70e5faa37d24a97b79f24cfd9bcb6fc/EGST_StorePortrait_1200x1600_1200x1600-70103eb223534146ba3d05f9350ada1e",
+    download: {
+      downloadSize: 72.3,
+      installSize: 88.7,
+      version: "1.0.0",
+      url: "",
+    },
     featured: false,
     trending: false,
     newRelease: true,
@@ -589,6 +697,12 @@ const gameSeedData = [
     rating: 4.1,
     image:
       "https://cdn1.epicgames.com/spt-assets/50e956c439ca454ca17efefdf49fdbae/dispatch-1uyw4.png",
+    download: {
+      downloadSize: 15.4,
+      installSize: 25.5,
+      version: "1.0.0",
+      url: "",
+    },
     featured: false,
     trending: false,
     newRelease: true,

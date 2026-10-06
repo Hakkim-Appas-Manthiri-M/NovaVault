@@ -26,6 +26,7 @@ function Library() {
   const [search, setSearch] = useState("");
   const [openMenu, setOpenMenu] = useState(null);
   const [storageGame, setStorageGame] = useState(null);
+  const [startingGameId, setStartingGameId] = useState(null);
   const [installingGame, setInstallingGame] = useState(null);
   const [browseLocation, setBrowseLocation] = useState("D:\\NovaVault\\Games");
 
@@ -55,9 +56,7 @@ function Library() {
         }
       } catch (requestError) {
         if (!cancelled) {
-          setError(
-            requestError.message || "Unable to load your library.",
-          );
+          setError(requestError.message || "Unable to load your library.");
         }
       } finally {
         if (!cancelled) {
@@ -100,11 +99,21 @@ function Library() {
 
   const handleInstall = (game) => {
     setOpenMenu(null);
-    setInstallingGame(game);
+
+    const gameId = game._id || game.id;
+
+    if (!gameId || startingGameId) {
+      return;
+    }
+
+    setStartingGameId(gameId);
+
+    window.open(`/downloads?gameId=${encodeURIComponent(gameId)}`, "_blank");
 
     window.setTimeout(() => {
-      setInstallingGame(null);
-    }, 1500);
+      setStartingGameId(null);
+      setInstallingGame(gameId);
+    }, 5000);
   };
 
   const handleStorage = (game) => {
@@ -147,7 +156,8 @@ function Library() {
               </h1>
 
               <p className="mt-2 max-w-xl !text-[9px] leading-5 text-slate-500 sm:!text-[10px]">
-                Your purchased games, permanently connected to your NovaVault account.
+                Your purchased games, permanently connected to your NovaVault
+                account.
               </p>
             </div>
 
@@ -166,7 +176,9 @@ function Library() {
                 className="flex size-8 items-center justify-center rounded-lg border border-white/[0.06] bg-white/[0.02] text-slate-500 transition hover:border-violet-400/20 hover:bg-violet-500/[0.05] hover:text-violet-300 disabled:cursor-not-allowed disabled:opacity-50"
                 aria-label="Refresh library"
               >
-                <RefreshCw className={`size-3.5 ${loading ? "animate-spin" : ""}`} />
+                <RefreshCw
+                  className={`size-3.5 ${loading ? "animate-spin" : ""}`}
+                />
               </button>
             </div>
           </div>
@@ -247,7 +259,8 @@ function Library() {
             </h2>
 
             <p className="mt-2 max-w-md !text-[9px] leading-5 text-slate-600">
-              Purchase a game from the NovaVault store and it will appear here permanently.
+              Purchase a game from the NovaVault store and it will appear here
+              permanently.
             </p>
 
             <Link
@@ -260,17 +273,20 @@ function Library() {
           </motion.section>
         )}
 
-        {!loading && !error && games.length > 0 && filteredGames.length === 0 && (
-          <div className="mt-10 flex min-h-[220px] flex-col items-center justify-center text-center">
-            <Search className="size-6 text-slate-700" />
-            <h2 className="mt-3 text-sm font-semibold text-slate-300">
-              No games found
-            </h2>
-            <p className="mt-1 !text-[9px] text-slate-600">
-              Try a different game title or genre.
-            </p>
-          </div>
-        )}
+        {!loading &&
+          !error &&
+          games.length > 0 &&
+          filteredGames.length === 0 && (
+            <div className="mt-10 flex min-h-[220px] flex-col items-center justify-center text-center">
+              <Search className="size-6 text-slate-700" />
+              <h2 className="mt-3 text-sm font-semibold text-slate-300">
+                No games found
+              </h2>
+              <p className="mt-1 !text-[9px] text-slate-600">
+                Try a different game title or genre.
+              </p>
+            </div>
+          )}
 
         {!loading && !error && filteredGames.length > 0 && (
           <motion.section
@@ -337,10 +353,16 @@ function Library() {
                       <button
                         type="button"
                         onClick={() => handleInstall(game)}
-                        className="flex h-8 min-w-0 flex-1 items-center justify-center gap-1.5 rounded-lg bg-violet-600 px-2 !text-[8px] font-bold uppercase tracking-[0.08em] text-white transition hover:bg-violet-500 active:scale-[0.98]"
+                        disabled={startingGameId === (game._id || game.id)}
+                        className="flex h-8 min-w-0 flex-1 items-center justify-center gap-1.5 rounded-lg bg-violet-600 px-2 !text-[8px] font-bold uppercase tracking-[0.08em] text-white transition hover:bg-violet-500 active:scale-[0.98] disabled:cursor-wait disabled:opacity-70"
                       >
                         <Download className="size-3" />
-                        {installingGame?._id === game._id ? "Starting..." : "Install"}
+
+                        {startingGameId === (game._id || game.id)
+                          ? "Starting..."
+                          : installingGame === (game._id || game.id)
+                            ? "Installing..."
+                            : "Install"}
                       </button>
 
                       <div className="relative" data-library-menu>
@@ -434,22 +456,44 @@ function Library() {
                     Required Storage
                   </span>
                   <span className="text-sm font-bold text-white">
-                    {storageGame.storageSize
-                      ? `${storageGame.storageSize} GB`
-                      : "99.8 GB"}
+                    {storageGame.download?.installSize
+                      ? `${Number(storageGame.download.installSize).toFixed(2)} GB`
+                      : "—"}
                   </span>
                 </div>
 
                 <div className="h-2 overflow-hidden rounded-full bg-white/[0.06]">
-                  <div className="h-full w-[68%] rounded-full bg-gradient-to-r from-violet-600 to-fuchsia-400" />
+                  <div
+                    className="h-full rounded-full bg-gradient-to-r from-violet-600 to-fuchsia-400"
+                    style={{
+                      width: `${
+                        storageGame.download?.installSize > 0
+                          ? Math.min(
+                              (Number(storageGame.download.downloadSize || 0) /
+                                Number(storageGame.download.installSize)) *
+                                100,
+                              100,
+                            )
+                          : 0
+                      }%`,
+                    }}
+                  />
                 </div>
 
                 <div className="mt-2 flex justify-between">
                   <span className="!text-[8px] text-slate-600">
-                    Game files
+                    Download files
                   </span>
+
                   <span className="!text-[8px] text-slate-500">
-                    68% allocated
+                    {storageGame.download?.downloadSize &&
+                    storageGame.download?.installSize
+                      ? `${(
+                          (Number(storageGame.download.downloadSize) /
+                            Number(storageGame.download.installSize)) *
+                          100
+                        ).toFixed(0)}% of install size`
+                      : "—"}
                   </span>
                 </div>
               </div>
@@ -460,9 +504,9 @@ function Library() {
                     Game Size
                   </p>
                   <p className="mt-1 text-xs font-semibold text-slate-300">
-                    {storageGame.storageSize
-                      ? `${storageGame.storageSize} GB`
-                      : "99.8 GB"}
+                    {storageGame.download?.installSize
+                      ? `${Number(storageGame.download.installSize).toFixed(2)} GB`
+                      : "—"}
                   </p>
                 </div>
 
@@ -470,8 +514,8 @@ function Library() {
                   <p className="!text-[8px] uppercase tracking-[0.08em] text-slate-600">
                     Free Space
                   </p>
-                  <p className="mt-1 text-xs font-semibold text-emerald-400">
-                    148.2 GB
+                  <p className="mt-1 text-xs font-semibold text-slate-400">
+                    Check on install
                   </p>
                 </div>
 

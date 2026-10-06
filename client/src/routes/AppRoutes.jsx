@@ -30,6 +30,11 @@ function AppRoutes() {
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
 
+      {/* Standalone Download Manager */}
+      <Route element={<ProtectedRoute />}>
+        <Route path="/downloads" element={<Downloads />} />
+      </Route>
+
       <Route element={<AppShell />}>
         {/* =========================
             PUBLIC STORE
@@ -72,9 +77,6 @@ function AppRoutes() {
 
           {/* Profile */}
           <Route path="/profile" element={<Profile />} />
-
-          {/* Downloads */}
-          <Route path="/downloads" element={<Downloads />} />
 
           {/* Settings */}
           <Route

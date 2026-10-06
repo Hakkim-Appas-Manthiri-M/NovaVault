@@ -1,9 +1,9 @@
 import {
-  CalendarDays,
+  CheckCircle2,
   Download,
   DownloadCloud,
-  HardDriveDownload,
-  Megaphone,
+  HardDrive,
+  LibraryBig,
   MoreHorizontal,
   Pause,
   Play,
@@ -11,693 +11,693 @@ import {
   Trash2,
   X,
 } from "lucide-react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
-import { useEffect, useState } from "react";
-
-const INITIAL_DOWNLOAD = {
-  id: 1,
-  title: "Grand Theft Auto V",
-  edition: "Enhanced Edition",
-  size: 106.8,
-  downloaded: 30.6,
-  progress: 30.8,
-  remaining: "12 min remaining",
-  status: "Installing",
-  speed: 30.37,
-  read: 0,
-  write: 25.33,
-};
+import { getGameById } from "../services/gameApi";
 
 function formatSize(value) {
-  return `${value.toFixed(2)} GB`;
+  const number = Number(value);
+
+  if (!Number.isFinite(number)) {
+    return "—";
+  }
+
+  return `${number.toFixed(2)} GB`;
 }
 
 function formatSpeed(value) {
-  return `${value.toFixed(2)} Mbps`;
+  const number = Number(value);
+
+  if (!Number.isFinite(number) || number <= 0) {
+    return "0.00 Mbps";
+  }
+
+  return `${number.toFixed(2)} Mbps`;
+}
+
+function formatTime(seconds) {
+  if (!Number.isFinite(seconds) || seconds <= 0) {
+    return "Calculating...";
+  }
+
+  const totalSeconds = Math.ceil(seconds);
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const remainingSeconds = totalSeconds % 60;
+
+  if (hours > 0) {
+    return `${hours}h ${minutes}m remaining`;
+  }
+
+  if (minutes > 0) {
+    return `${minutes}m ${remainingSeconds}s remaining`;
+  }
+
+  return `${remainingSeconds}s remaining`;
 }
 
 function Downloads() {
-  const [activeSection, setActiveSection] = useState("overview");
-  const [download, setDownload] = useState(INITIAL_DOWNLOAD);
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const gameId = searchParams.get("gameId");
+
+  const [game, setGame] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  const [downloaded, setDownloaded] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [downloadSpeed, setDownloadSpeed] = useState(0);
+  const [isCancelled, setIsCancelled] = useState(false);
+
+  const [browseLocation, setBrowseLocation] = useState("D:\\NovaVault\\Games");
+
+  const simulationRef = useRef(null);
+  const lastTimeRef = useRef(0);
+  const lastDownloadedRef = useRef(0);
 
   useEffect(() => {
-    if (isPaused) {
-      return;
-    }
+    let cancelled = false;
 
-    const interval = setInterval(() => {
-      setDownload((current) => {
-        if (!current) return current;
+    const loadGame = async () => {
+      if (!gameId) {
+        setLoading(false);
+        return;
+      }
 
-        const nextDownloaded = Math.min(
-          current.downloaded + 0.08,
-          current.size,
-        );
+      try {
+        setLoading(true);
+        setError("");
 
-        const nextProgress = (nextDownloaded / current.size) * 100;
+        const data = await getGameById(gameId);
 
-        if (nextDownloaded >= current.size) {
-          return {
-            ...current,
-            downloaded: current.size,
-            progress: 100,
-            remaining: "Completed",
-            status: "Completed",
-            speed: 0,
-            read: 0,
-            write: 0,
-          };
+        if (cancelled) {
+          return;
         }
 
-        return {
-          ...current,
-          downloaded: nextDownloaded,
-          progress: nextProgress,
-        };
-      });
-    }, 1000);
+        if (!data?.game) {
+          throw new Error("Game not found.");
+        }
 
-    return () => clearInterval(interval);
-  }, [isPaused]);
+        setGame({
+          ...data.game,
+          id: data.game._id || data.game.id,
+        });
+      } catch (requestError) {
+        if (!cancelled) {
+          setError(requestError.message || "Unable to load the selected game.");
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    };
 
-  const togglePause = () => {
-    if (!download || download.progress >= 100) {
+    loadGame();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [gameId]);
+
+  const downloadSize = useMemo(() => {
+    if (!game) {
+      return 0;
+    }
+
+    return Number(game.download?.downloadSize ?? 0);
+  }, [game]);
+
+  const installSize = useMemo(() => {
+    if (!game) {
+      return 0;
+    }
+
+    return Number(game.download?.installSize ?? 0);
+  }, [game]);
+
+  const progress =
+    downloadSize > 0 ? Math.min((downloaded / downloadSize) * 100, 100) : 0;
+
+  const isCompleted = progress >= 100;
+
+  const speed = isPaused || isCompleted ? 0 : downloadSpeed;
+
+  const remainingBytes = Math.max(downloadSize - downloaded, 0);
+
+  const remainingSeconds =
+    speed > 0
+      ? (remainingBytes * 1024 * 1024 * 1024) / ((speed * 1024 * 1024) / 8)
+      : 0;
+
+  const stopSimulation = useCallback(() => {
+    if (simulationRef.current) {
+      window.clearInterval(simulationRef.current);
+      simulationRef.current = null;
+    }
+  }, []);
+
+  const createSimulation = useCallback(() => {
+    if (!game || downloadSize <= 0 || isCompleted) {
       return;
     }
 
-    setIsPaused((current) => !current);
+    stopSimulation();
 
-    setDownload((current) => {
-      if (!current) return current;
+    lastTimeRef.current = performance.now();
+    lastDownloadedRef.current = downloaded;
 
-      return {
-        ...current,
-        status: isPaused ? "Installing" : "Paused",
-      };
-    });
+    simulationRef.current = window.setInterval(() => {
+      setDownloaded((current) => {
+        if (current >= downloadSize) {
+          stopSimulation();
+          setDownloadSpeed(0);
+          return downloadSize;
+        }
+
+        const now = performance.now();
+        const elapsed = (now - lastTimeRef.current) / 1000;
+
+        const simulatedSpeedMbps = 35 + Math.random() * 30;
+
+        const bytesPerSecond = (simulatedSpeedMbps * 1024 * 1024) / 8;
+
+        const increase =
+          (bytesPerSecond * Math.max(elapsed, 0.1)) / (1024 * 1024 * 1024);
+
+        const nextValue = Math.min(current + increase, downloadSize);
+
+        const actualElapsed = (now - lastTimeRef.current) / 1000;
+
+        if (actualElapsed >= 0.4) {
+          const actualIncrease = nextValue - lastDownloadedRef.current;
+
+          const actualSpeed =
+            actualElapsed > 0
+              ? (actualIncrease * 1024 * 1024 * 1024 * 8) /
+                actualElapsed /
+                (1024 * 1024)
+              : 0;
+
+          setDownloadSpeed(
+            Number(Math.max(actualSpeed, simulatedSpeedMbps).toFixed(2)),
+          );
+
+          lastTimeRef.current = now;
+          lastDownloadedRef.current = nextValue;
+        }
+
+        if (nextValue >= downloadSize) {
+          stopSimulation();
+          setDownloadSpeed(0);
+          return downloadSize;
+        }
+
+        return Number(nextValue.toFixed(4));
+      });
+    }, 250);
+  }, [game, downloadSize, isCompleted, downloaded, stopSimulation]);
+
+  const startSimulation = () => {
+    if (!game || downloadSize <= 0 || isCompleted) {
+      return;
+    }
+
+    setIsPaused(false);
+    createSimulation();
   };
 
-  const cancelDownload = () => {
-    setDownload(null);
-    setIsPaused(false);
+  useEffect(() => {
+    if (!game || downloadSize <= 0 || isCompleted) {
+      return;
+    }
+
+    createSimulation();
+
+    return () => {
+      stopSimulation();
+    };
+  }, [game, downloadSize, isCompleted, createSimulation, stopSimulation]);
+
+  const togglePause = () => {
+    if (!game || isCompleted) {
+      return;
+    }
+
+    if (isPaused) {
+      startSimulation();
+    } else {
+      stopSimulation();
+      setIsPaused(true);
+      setDownloadSpeed(0);
+    }
+
     setMenuOpen(false);
   };
 
-  const resetDownload = () => {
-    setDownload(INITIAL_DOWNLOAD);
-    setIsPaused(false);
+  const cancelDownload = () => {
+    stopSimulation();
+
+    setDownloaded(0);
+    setDownloadSpeed(0);
+    setIsPaused(true);
+    setMenuOpen(false);
+    setIsCancelled(true);
   };
 
-  const renderContent = () => {
-    if (activeSection === "scheduled") {
-      return (
-        <section className="nv-download-empty">
-          <CalendarDays className="size-7 text-violet-400" />
+  const changeLocation = () => {
+    const nextLocation = window.prompt(
+      "Enter your NovaVault game installation location:",
+      browseLocation,
+    );
 
-          <h2>Scheduled Downloads</h2>
-
-          <p>Games scheduled for download will appear here.</p>
-        </section>
-      );
+    if (nextLocation?.trim()) {
+      setBrowseLocation(nextLocation.trim());
     }
+  };
 
-    if (activeSection === "recent") {
-      return (
-        <section className="nv-download-empty">
-          <DownloadCloud className="size-7 text-violet-400" />
-
-          <h2>Recently Updated</h2>
-
-          <p>Recently downloaded and updated games will appear here.</p>
-        </section>
-      );
-    }
-
-    if (activeSection === "settings") {
-      return (
-        <section className="nv-download-settings">
-          <div>
-            <p className="nv-download-eyebrow">Downloads</p>
-
-            <h2>Download Settings</h2>
-
-            <p>Manage how NovaVault handles your game downloads.</p>
-          </div>
-
-          <div className="nv-setting-card">
-            <div>
-              <strong>Download location</strong>
-
-              <span>Choose where your games are installed.</span>
-            </div>
-
-            <button type="button">Change</button>
-          </div>
-
-          <div className="nv-setting-card">
-            <div>
-              <strong>Download speed</strong>
-
-              <span>Use the fastest available connection.</span>
-            </div>
-
-            <button type="button">Unlimited</button>
-          </div>
-        </section>
-      );
-    }
-
+  if (loading) {
     return (
-      <>
-        <div className="mb-7">
-          <p className="nv-download-eyebrow">Downloads</p>
+      <main className="min-h-screen bg-[#09090D] px-4 py-8 text-slate-100 sm:px-8 lg:px-12">
+        <div className="mx-auto w-full max-w-[1280px]">
+          <div className="h-5 w-24 animate-pulse rounded bg-white/[0.06]" />
+          <div className="mt-3 h-8 w-64 animate-pulse rounded bg-white/[0.06]" />
+          <div className="mt-2 h-4 w-96 max-w-full animate-pulse rounded bg-white/[0.04]" />
+          <div className="mt-8 h-52 animate-pulse rounded-2xl border border-white/[0.05] bg-white/[0.025]" />
+        </div>
+      </main>
+    );
+  }
 
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+  if (isCancelled || !gameId) {
+    return (
+      <main className="min-h-screen bg-[#09090D] text-slate-100">
+        <div className="mx-auto flex min-h-screen w-full max-w-[1440px] items-center justify-center px-4 py-10">
+          <section className="w-full max-w-md rounded-2xl border border-white/[0.07] bg-[#111117] p-7 text-center shadow-2xl shadow-black/20">
+            <div className="mx-auto flex size-12 items-center justify-center rounded-xl border border-violet-400/15 bg-violet-500/[0.08] text-violet-400">
+              <DownloadCloud className="size-5" />
+            </div>
+
+            <h1 className="mt-4 text-xl font-bold text-white">
+              No active downloads
+            </h1>
+
+            <p className="mt-2 text-sm leading-6 text-slate-500">
+              There are currently no active game downloads.
+            </p>
+
+            <button
+              type="button"
+              onClick={() => navigate("/library")}
+              className="mt-6 inline-flex h-10 items-center gap-2 rounded-lg bg-violet-600 px-5 !text-[10px] font-bold uppercase tracking-[0.08em] text-white transition hover:bg-violet-500"
+            >
+              <LibraryBig className="size-3.5" />
+              Go to Library
+            </button>
+          </section>
+        </div>
+      </main>
+    );
+  }
+
+  if (error || !game) {
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-[#09090D] px-5 text-slate-100">
+        <section className="w-full max-w-md rounded-2xl border border-white/[0.07] bg-[#111117] p-7 text-center shadow-2xl shadow-black/30">
+          <div className="mx-auto flex size-12 items-center justify-center rounded-xl border border-violet-400/15 bg-violet-500/[0.08] text-violet-400">
+            <DownloadCloud className="size-5" />
+          </div>
+
+          <h1 className="mt-4 text-xl font-bold text-white">
+            Download unavailable
+          </h1>
+
+          <p className="mt-2 text-sm leading-6 text-slate-500">
+            {error || "The selected game could not be loaded."}
+          </p>
+
+          <button
+            type="button"
+            onClick={() => navigate("/library")}
+            className="mt-6 inline-flex h-10 items-center gap-2 rounded-lg bg-violet-600 px-5 !text-[10px] font-bold uppercase tracking-[0.08em] text-white transition hover:bg-violet-500"
+          >
+            <LibraryBig className="size-3.5" />
+            Go to Library
+          </button>
+        </section>
+      </main>
+    );
+  }
+
+  return (
+    <main className="min-h-screen bg-[#09090D] text-slate-100">
+      <div className="mx-auto w-full max-w-[1440px] px-4 py-6 sm:px-7 sm:py-8 lg:px-10 lg:py-10">
+        <header className="mb-7">
+          <div className="flex items-center gap-2">
+            <div className="flex size-8 items-center justify-center rounded-lg border border-violet-400/15 bg-violet-500/[0.08] text-violet-400">
+              <Download className="size-4" />
+            </div>
+
+            <p className="!text-[8px] font-bold uppercase tracking-[0.2em] text-violet-400">
+              NovaVault
+            </p>
+          </div>
+
+          <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <h1 className="nv-display text-2xl font-bold tracking-tight text-white sm:text-3xl">
-                Latest Activity
+              <h1 className="text-2xl font-bold tracking-tight text-white sm:text-3xl">
+                Download Manager
               </h1>
 
-              <p className="mt-1 !text-[12px] text-slate-500">
-                Manage your active game downloads and updates.
+              <p className="mt-1 !text-[11px] leading-5 text-slate-500 sm:text-xs">
+                Manage your NovaVault game download and installation.
               </p>
             </div>
 
-            <div className="hidden items-center gap-2 !text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-600 sm:flex">
-              <Download className="size-3" />
-              <span>Download Manager</span>
+            <div className="hidden items-center gap-2 !text-[9px] font-semibold uppercase tracking-[0.12em] text-slate-600 sm:flex">
+              <HardDrive className="size-3.5" />
+              <span>{browseLocation}</span>
             </div>
           </div>
-        </div>
+        </header>
 
         <section>
           <div className="mb-3 flex items-center gap-2">
-            <span className="size-1.5 rounded-full bg-violet-400" />
+            <span
+              className={[
+                "size-1.5 rounded-full",
+                isCompleted
+                  ? "bg-emerald-400"
+                  : isPaused
+                    ? "bg-amber-400"
+                    : "bg-violet-400",
+              ].join(" ")}
+            />
 
-            <span className="!text-[10px] font-bold uppercase tracking-[0.14em] text-slate-500">
-              Active
+            <span className="!text-[9px] font-bold uppercase tracking-[0.15em] text-slate-500">
+              {isCompleted ? "Completed" : isPaused ? "Paused" : "Active"}
             </span>
           </div>
 
-          {download ? (
-            <article className="overflow-hidden rounded-xl border border-white/[0.07] bg-[#101019]/90 shadow-2xl shadow-black/20">
-              {/* Main download row */}
-              <div className="p-3.5 sm:p-4">
-                <div className="flex items-center gap-3">
-                  {/* Game cover */}
-                  <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-lg border border-white/[0.08] bg-gradient-to-br from-violet-600 via-indigo-600 to-slate-950 shadow-lg shadow-violet-950/20 sm:h-16 sm:w-16">
-                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,.25),transparent_35%)]" />
+          <article className="overflow-hidden rounded-2xl border border-white/[0.07] bg-[#111117] shadow-2xl shadow-black/20">
+            <div className="p-4 sm:p-5">
+              <div className="flex flex-col gap-5 lg:flex-row lg:items-center">
+                <div className="flex min-w-0 flex-1 items-center gap-3.5">
+                  <div className="size-16 shrink-0 overflow-hidden rounded-xl border border-white/[0.08] bg-[#0B0D16] sm:size-[72px]">
+                    <img
+                      src={game.portraitImage || game.image || ""}
+                      alt={game.title}
+                      className="h-full w-full object-cover"
+                    />
+                  </div>
 
-                    <div className="relative flex h-full flex-col justify-end p-2">
-                      <span className="!text-[7px] font-black uppercase tracking-[0.1em] text-white/70">
-                        NovaVault
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-bold text-white sm:text-base">
+                      {game.title}
+                    </p>
+
+                    <p className="mt-1 truncate !text-[9px] uppercase tracking-[0.08em] text-slate-600">
+                      {game.genre || "Game"} •{" "}
+                      {game.platforms?.join(" • ") || "PC"}
+                    </p>
+
+                    <div className="mt-2 flex items-center gap-2">
+                      <span
+                        className={[
+                          "!text-[9px] font-semibold",
+                          isCompleted
+                            ? "text-emerald-400"
+                            : isPaused
+                              ? "text-amber-400"
+                              : "text-slate-400",
+                        ].join(" ")}
+                      >
+                        {isCompleted
+                          ? "Installation complete"
+                          : isPaused
+                            ? "Download paused"
+                            : "Downloading"}
                       </span>
 
-                      <span className="!text-[9px] font-black leading-tight text-white">
-                        FORZA
-                      </span>
+                      <span className="text-slate-700">•</span>
 
-                      <span className="!text-[7px] font-bold text-violet-200">
-                        HORIZON 5
+                      <span className="!text-[9px] text-slate-600">
+                        v{game.download?.version || "1.0.0"}
                       </span>
                     </div>
                   </div>
+                </div>
 
-                  {/* Title + progress */}
-                  <div className="min-w-0 flex-1">
-                    <div className="mb-1.5 flex items-center justify-between gap-3">
-                      <div className="min-w-0">
-                        <h2 className="truncate !text-[14px] font-bold text-white sm:!text-[16px]">
-                          {download.title}
-                        </h2>
-
-                        <p className="truncate !text-[10px] text-slate-500 sm:!text-[11px]">
-                          {download.edition}
-                        </p>
-                      </div>
-
-                      <div className="hidden shrink-0 text-right sm:block">
-                        <span className="!text-[10px] font-semibold text-slate-400">
-                          {formatSize(download.downloaded)}
-                        </span>
-
-                        <span className="!text-[10px] text-slate-600">
-                          {" "}
-                          / {formatSize(download.size)}
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="h-1.5 overflow-hidden rounded-full bg-white/[0.07]">
-                      <div
-                        className="h-full rounded-full bg-gradient-to-r from-violet-500 via-purple-400 to-fuchsia-400 transition-all duration-500"
-                        style={{
-                          width: `${download.progress}%`,
-                        }}
-                      />
-                    </div>
-
-                    <div className="mt-1.5 flex items-center justify-between gap-3">
-                      <span className="!text-[10px] text-slate-500">
-                        {isPaused ? "Download paused" : download.status}
-                        {" · "}
-                        {download.remaining}
-                      </span>
-
-                      <span className="shrink-0 !text-[10px] font-semibold text-slate-400 sm:hidden">
-                        {formatSize(download.downloaded)} /{" "}
-                        {formatSize(download.size)}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Actions */}
-                  <div className="hidden shrink-0 items-center gap-1.5 sm:flex">
+                <div className="relative flex shrink-0 items-center gap-2">
+                  {!isCompleted && (
                     <button
                       type="button"
                       onClick={togglePause}
                       aria-label={
                         isPaused ? "Resume download" : "Pause download"
                       }
-                      className="flex size-9 items-center justify-center rounded-lg border border-white/[0.07] bg-white/[0.05] text-slate-400 transition hover:border-violet-500/30 hover:bg-violet-500/10 hover:text-violet-300"
+                      className="flex size-9 items-center justify-center rounded-lg border border-white/[0.07] bg-white/[0.03] text-slate-400 transition hover:border-violet-400/20 hover:bg-violet-500/[0.08] hover:text-violet-300"
                     >
                       {isPaused ? (
-                        <Play className="size-3.5" />
+                        <Play className="size-4 fill-current" />
                       ) : (
-                        <Pause className="size-3.5" />
+                        <Pause className="size-4" />
                       )}
                     </button>
+                  )}
 
+                  <button
+                    type="button"
+                    onClick={() => setMenuOpen((current) => !current)}
+                    aria-label={
+                      menuOpen ? "Close download options" : "Download options"
+                    }
+                    aria-expanded={menuOpen}
+                    className="flex size-9 items-center justify-center rounded-lg border border-white/[0.07] bg-white/[0.03] text-slate-400 transition-colors duration-300 hover:border-violet-400/20 hover:bg-violet-500/[0.08] hover:text-violet-300"
+                  >
+                    <span
+                      className={[
+                        "flex items-center justify-center transition-transform duration-[700ms] ease-in-out",
+                        menuOpen ? "rotate-[180deg]" : "rotate-0",
+                      ].join(" ")}
+                    >
+                      {menuOpen ? (
+                        <X className="size-4" />
+                      ) : (
+                        <MoreHorizontal className="size-4" />
+                      )}
+                    </span>
+                  </button>
+
+                  <div
+                    className={[
+                      "absolute right-0 top-11 z-50 w-40 origin-top-right overflow-hidden rounded-xl border border-white/[0.08] bg-[#101017] p-1.5 shadow-2xl shadow-black/50",
+                      "transition-all duration-600 ease-out",
+                      menuOpen && !isCompleted
+                        ? "visible translate-y-0 scale-100 opacity-100"
+                        : "invisible -translate-y-2 scale-95 opacity-0 pointer-events-none",
+                    ].join(" ")}
+                  >
                     <button
                       type="button"
                       onClick={cancelDownload}
-                      aria-label="Cancel download"
-                      className="flex size-9 items-center justify-center rounded-lg border border-white/[0.07] bg-white/[0.05] text-slate-400 transition hover:border-red-500/30 hover:bg-red-500/10 hover:text-red-300"
+                      className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left !text-[8px] font-bold uppercase tracking-[0.08em] text-red-400 transition-colors duration-200 hover:bg-red-500/[0.08] hover:text-red-300"
                     >
-                      <X className="size-4" />
+                      <Trash2 className="size-3 shrink-0" />
+
+                      <span className="leading-none">Cancel download</span>
                     </button>
-
-                    <div className="relative">
-                      <button
-                        type="button"
-                        onClick={() => setMenuOpen((current) => !current)}
-                        aria-label="More download actions"
-                        className="flex size-9 items-center justify-center rounded-lg text-slate-500 transition hover:bg-white/[0.05] hover:text-slate-200"
-                      >
-                        <MoreHorizontal className="size-4" />
-                      </button>
-
-                      {menuOpen && (
-                        <div className="absolute right-0 top-full z-30 mt-2 w-44 overflow-hidden rounded-xl border border-white/[0.07] bg-[#0c0d15] p-1.5 shadow-2xl">
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setMenuOpen(false);
-                              setIsPaused(true);
-                            }}
-                            className="flex w-full items-center gap-2 rounded-lg px-3 py-2.5 text-left !text-[10px] font-semibold text-slate-400 transition hover:bg-white/[0.05] hover:text-white"
-                          >
-                            <Pause className="size-3.5" />
-                            Pause download
-                          </button>
-
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setMenuOpen(false);
-                              cancelDownload();
-                            }}
-                            className="flex w-full items-center gap-2 rounded-lg px-3 py-2.5 text-left !text-[8px] font-semibold text-red-400 transition hover:bg-red-500/10"
-                          >
-                            <Trash2 className="size-3.5" />
-                            Cancel download
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Mobile action */}
-                  <button
-                    type="button"
-                    onClick={togglePause}
-                    className="flex size-8 shrink-0 items-center justify-center rounded-lg border border-white/[0.07] bg-white/[0.04] text-slate-400 sm:hidden"
-                    aria-label={isPaused ? "Resume download" : "Pause download"}
-                  >
-                    {isPaused ? (
-                      <Play className="size-3" />
-                    ) : (
-                      <Pause className="size-3" />
-                    )}
-                  </button>
-                </div>
-              </div>
-
-              {/* Transfer statistics */}
-              <div className="grid grid-cols-1 border-t border-white/[0.06] sm:grid-cols-3">
-                <div className="min-w-0 border-b border-white/[0.06] p-4 sm:border-b-0 sm:border-r">
-                  <div className="mb-2 flex items-center justify-between">
-                    <span className="!text-[10px] font-bold uppercase tracking-[0.08em] text-slate-400">
-                      Download
-                    </span>
-
-                    <DownloadCloud className="size-3.5 text-violet-400" />
-                  </div>
-
-                  <div className="flex items-end justify-between gap-4">
-                    <span className="!text-[12px] font-semibold text-slate-400">
-                      {formatSpeed(isPaused ? 0 : download.speed)}
-                    </span>
-
-                    <div className="h-8 w-1/2 overflow-hidden">
-                      <svg
-                        viewBox="0 0 180 40"
-                        className="h-full w-full"
-                        preserveAspectRatio="none"
-                      >
-                        <path
-                          d="M0 29 L15 29 L25 23 L38 26 L52 21 L65 23 L80 19 L96 23 L110 17 L128 20 L145 18 L160 21 L180 14"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          className="text-violet-400"
-                        />
-                      </svg>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="min-w-0 border-b border-white/[0.06] p-4 sm:border-b-0 sm:border-r">
-                  <div className="mb-2 flex items-center justify-between">
-                    <span className="!text-[10px] font-bold uppercase tracking-[0.08em] text-slate-400">
-                      Read
-                    </span>
-
-                    <HardDriveDownload className="size-3.5 text-slate-500" />
-                  </div>
-
-                  <div className="flex items-end justify-between gap-4">
-                    <span className="!text-[12px] font-semibold text-slate-400">
-                      {formatSpeed(download.read)}
-                    </span>
-
-                    <div className="h-8 w-1/2 overflow-hidden">
-                      <svg
-                        viewBox="0 0 180 40"
-                        className="h-full w-full"
-                        preserveAspectRatio="none"
-                      >
-                        <path
-                          d="M0 29 L180 29"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          className="text-violet-500/60"
-                        />
-                      </svg>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="min-w-0 p-4">
-                  <div className="mb-2 flex items-center justify-between">
-                    <span className="!text-[10px] font-bold uppercase tracking-[0.08em] text-slate-400">
-                      Write
-                    </span>
-
-                    <HardDriveDownload className="size-3.5 text-fuchsia-400" />
-                  </div>
-
-                  <div className="flex items-end justify-between gap-4">
-                    <span className="!text-[12px] font-semibold text-slate-400">
-                      {formatSpeed(isPaused ? 0 : download.write)}
-                    </span>
-
-                    <div className="h-8 w-1/2 overflow-hidden">
-                      <svg
-                        viewBox="0 0 180 40"
-                        className="h-full w-full"
-                        preserveAspectRatio="none"
-                      >
-                        <path
-                          d="M0 17 L18 21 L35 20 L51 23 L68 18 L84 21 L103 19 L121 23 L137 18 L154 21 L170 17 L180 18"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          className="text-fuchsia-400/70"
-                        />
-                      </svg>
-                    </div>
                   </div>
                 </div>
               </div>
 
-              {/* Mobile cancel */}
-              <div className="flex border-t border-white/[0.06] p-2 sm:hidden">
-                <button
-                  type="button"
-                  onClick={cancelDownload}
-                  className="flex flex-1 items-center justify-center gap-2 rounded-lg py-2 !text-[10px] font-semibold text-slate-500 transition hover:bg-red-500/10 hover:text-red-300"
-                >
-                  <X className="size-3" />
-                  Cancel Download
-                </button>
+              <div className="mt-5">
+                <div className="flex items-end justify-between gap-4">
+                  <div className="min-w-0 flex-1">
+                    <div className="h-2 overflow-hidden rounded-full bg-white/[0.06]">
+                      <div
+                        className={[
+                          "h-full rounded-full transition-[width] duration-500",
+                          isCompleted ? "bg-emerald-500" : "bg-violet-600",
+                        ].join(" ")}
+                        style={{
+                          width: `${progress}%`,
+                        }}
+                      />
+                    </div>
+                  </div>
+
+                  <span className="shrink-0 !text-[10px] font-bold text-slate-400">
+                    {progress.toFixed(1)}%
+                  </span>
+                </div>
+
+                <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
+                  <span className="!text-[9px] text-slate-600">
+                    {formatSize(downloaded)} of {formatSize(downloadSize)}
+                  </span>
+
+                  <span className="!text-[9px] text-slate-600">
+                    {isCompleted
+                      ? "Ready to play"
+                      : isPaused
+                        ? "Paused"
+                        : formatTime(remainingSeconds)}
+                  </span>
+                </div>
               </div>
-            </article>
-          ) : (
-            <div className="nv-download-empty">
-              <DownloadCloud className="size-7 text-violet-400" />
-
-              <h2>No Active Downloads</h2>
-
-              <p>Your active downloads will appear here.</p>
-
-              <button
-                type="button"
-                onClick={resetDownload}
-                className="mt-2 rounded-lg bg-violet-600 px-4 py-2 !text-[10px] font-bold uppercase tracking-[0.08em] text-white transition hover:bg-violet-500"
-              >
-                Demo Download
-              </button>
             </div>
-          )}
-        </section>
-      </>
-    );
-  };
 
-  return (
-    <section className="min-h-screen min-w-0 bg-[#07080D] text-white">
-      <div className="flex min-h-[calc(100vh-0px)] flex-col lg:flex-row">
-        {/* Downloads Sidebar */}
-        <aside className="w-full shrink-0 border-b border-white/[0.06] bg-[#0A0B10] lg:w-[230px] lg:border-b-0 lg:border-r">
-          <div className="sticky top-0 p-4 lg:p-5">
-            <div className="mb-5 flex items-center gap-2 px-1">
-              <div className="flex size-8 items-center justify-center rounded-lg border border-violet-500/20 bg-violet-500/10">
-                <Download className="size-4 text-violet-400" />
-              </div>
-
-              <div>
-                <p className="!text-[11px] font-bold uppercase tracking-[0.12em] text-white">
-                  Downloads
+            <div className="grid border-t border-white/[0.06] sm:grid-cols-3">
+              <div className="border-b border-white/[0.06] p-4 sm:border-b-0 sm:border-r">
+                <p className="!text-[8px] font-bold uppercase tracking-[0.1em] text-slate-600">
+                  Download
                 </p>
 
-                <p className="!text-[9px] text-slate-600">NovaVault Manager</p>
+                <p className="mt-1 text-sm font-semibold text-slate-300">
+                  {formatSpeed(speed)}
+                </p>
+              </div>
+
+              <div className="border-b border-white/[0.06] p-4 sm:border-b-0 sm:border-r">
+                <p className="!text-[8px] font-bold uppercase tracking-[0.1em] text-slate-600">
+                  Read
+                </p>
+
+                <p className="mt-1 text-sm font-semibold text-slate-300">
+                  {isCompleted ? "0.00 Mbps" : "18.42 Mbps"}
+                </p>
+              </div>
+
+              <div className="p-4">
+                <p className="!text-[8px] font-bold uppercase tracking-[0.1em] text-slate-600">
+                  Write
+                </p>
+
+                <p className="mt-1 text-sm font-semibold text-slate-300">
+                  {isCompleted ? "0.00 Mbps" : "24.18 Mbps"}
+                </p>
+              </div>
+            </div>
+          </article>
+        </section>
+
+        <section className="mt-5 grid gap-4 lg:grid-cols-[1fr_1fr]">
+          <div className="rounded-2xl border border-white/[0.07] bg-[#111117] p-5">
+            <div className="flex items-center gap-2">
+              <HardDrive className="size-4 text-violet-400" />
+
+              <h2 className="text-xs font-bold text-white">Storage</h2>
+            </div>
+
+            <div className="mt-5 grid grid-cols-2 gap-3">
+              <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-3">
+                <p className="!text-[8px] font-bold uppercase tracking-[0.1em] text-slate-600">
+                  Download Size
+                </p>
+
+                <p className="mt-1 text-sm font-bold text-white">
+                  {formatSize(downloadSize)}
+                </p>
+              </div>
+
+              <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-3">
+                <p className="!text-[8px] font-bold uppercase tracking-[0.1em] text-slate-600">
+                  Install Size
+                </p>
+
+                <p className="mt-1 text-sm font-bold text-white">
+                  {formatSize(installSize)}
+                </p>
               </div>
             </div>
 
-            <nav className="grid grid-cols-2 gap-1.5 sm:grid-cols-4 lg:grid-cols-1">
-              <button
-                type="button"
-                onClick={() => setActiveSection("overview")}
-                className={[
-                  "flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-left",
-                  "transition-all duration-200",
-                  activeSection === "overview"
-                    ? "bg-white/[0.09] text-white"
-                    : "text-slate-500 hover:bg-white/[0.04] hover:text-slate-300",
-                ].join(" ")}
-              >
-                <DownloadCloud className="size-4" />
+            <div className="mt-3 rounded-xl border border-white/[0.06] bg-white/[0.02] p-3">
+              <p className="!text-[8px] font-bold uppercase tracking-[0.1em] text-slate-600">
+                Installation Location
+              </p>
 
-                <span className="!text-[11px] font-semibold">Overview</span>
+              <p className="mt-1 truncate !text-[10px] font-medium text-slate-300">
+                {browseLocation}
+              </p>
+            </div>
 
-                {download && (
-                  <span className="ml-auto flex size-5 items-center justify-center rounded-full bg-white/[0.08] text-[9px] text-slate-400">
-                    1
-                  </span>
-                )}
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setActiveSection("scheduled")}
-                className={[
-                  "flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-left",
-                  "transition-all duration-200",
-                  activeSection === "scheduled"
-                    ? "bg-white/[0.09] text-white"
-                    : "text-slate-500 hover:bg-white/[0.04] hover:text-slate-300",
-                ].join(" ")}
-              >
-                <CalendarDays className="size-4" />
-
-                <span className="!text-[11px] font-semibold">Scheduled</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setActiveSection("recent")}
-                className={[
-                  "flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-left",
-                  "transition-all duration-200",
-                  activeSection === "recent"
-                    ? "bg-white/[0.09] text-white"
-                    : "text-slate-500 hover:bg-white/[0.04] hover:text-slate-300",
-                ].join(" ")}
-              >
-                <Megaphone className="size-4" />
-
-                <span className="!text-[11px] font-semibold">
-                  Recently Updated
-                </span>
-              </button>
-
-              <div className="hidden h-px bg-white/[0.07] lg:block lg:my-2" />
-
-              <button
-                type="button"
-                onClick={() => setActiveSection("settings")}
-                className={[
-                  "flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-left",
-                  "transition-all duration-200",
-                  activeSection === "settings"
-                    ? "bg-white/[0.09] text-white"
-                    : "text-slate-500 hover:bg-white/[0.04] hover:text-slate-300",
-                ].join(" ")}
-              >
-                <Settings className="size-4" />
-
-                <span className="!text-[11px] font-semibold">
-                  Download Settings
-                </span>
-              </button>
-            </nav>
+            <button
+              type="button"
+              onClick={changeLocation}
+              className="mt-3 flex h-9 w-full items-center justify-center gap-2 rounded-lg border border-white/[0.07] bg-white/[0.025] !text-[9px] font-bold uppercase tracking-[0.08em] text-slate-400 transition hover:border-violet-400/20 hover:bg-violet-500/[0.06] hover:text-violet-300"
+            >
+              <Settings className="size-3.5" />
+              Change Location
+            </button>
           </div>
-        </aside>
 
-        {/* Main */}
-        <main className="min-w-0 flex-1 p-4 sm:p-6 lg:p-8">
-          <div className="mx-auto w-full max-w-[1280px]">{renderContent()}</div>
-        </main>
+          <div className="rounded-2xl border border-white/[0.07] bg-[#111117] p-5">
+            <div className="flex items-center gap-2">
+              {isCompleted ? (
+                <CheckCircle2 className="size-4 text-emerald-400" />
+              ) : (
+                <DownloadCloud className="size-4 text-violet-400" />
+              )}
+
+              <h2 className="text-xs font-bold text-white">Download Status</h2>
+            </div>
+
+            <div className="mt-5">
+              <p className="!text-[8px] font-bold uppercase tracking-[0.1em] text-slate-600">
+                Current Status
+              </p>
+
+              <p
+                className={[
+                  "mt-1 text-lg font-bold",
+                  isCompleted
+                    ? "text-emerald-400"
+                    : isPaused
+                      ? "text-amber-400"
+                      : "text-white",
+                ].join(" ")}
+              >
+                {isCompleted
+                  ? "Completed"
+                  : isPaused
+                    ? "Paused"
+                    : "Downloading"}
+              </p>
+            </div>
+
+            <div className="mt-4 h-px bg-white/[0.05]" />
+
+            <div className="mt-4 flex items-center justify-between">
+              <span className="!text-[9px] text-slate-600">Game</span>
+
+              <span className="max-w-[60%] truncate !text-[9px] font-semibold text-slate-300">
+                {game.title}
+              </span>
+            </div>
+
+            <div className="mt-2 flex items-center justify-between">
+              <span className="!text-[9px] text-slate-600">Platform</span>
+
+              <span className="!text-[9px] font-semibold text-slate-300">
+                {game.platforms?.join(" • ") || "PC"}
+              </span>
+            </div>
+
+            <div className="mt-2 flex items-center justify-between">
+              <span className="!text-[9px] text-slate-600">Version</span>
+
+              <span className="!text-[9px] font-semibold text-slate-300">
+                {game.download?.version || "1.0.0"}
+              </span>
+            </div>
+          </div>
+        </section>
       </div>
-
-      <style>{`
-        .nv-download-eyebrow {
-          margin-bottom: 4px;
-          font-size: 10px;
-          font-weight: 700;
-          text-transform: uppercase;
-          letter-spacing: 0.16em;
-          color: rgb(167 139 250);
-        }
-
-        .nv-download-empty {
-          display: flex;
-          min-height: 360px;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          gap: 10px;
-          border: 1px solid rgb(255 255 255 / 0.06);
-          border-radius: 16px;
-          background: rgb(16 17 25 / 0.72);
-          text-align: center;
-        }
-
-        .nv-download-empty h2 {
-          margin: 0;
-          font-size: 17px;
-          font-weight: 700;
-          color: white;
-        }
-
-        .nv-download-empty p {
-          max-width: 360px;
-          margin: 0;
-          font-size: 11px;
-          line-height: 1.6;
-          color: rgb(100 116 139);
-        }
-
-        .nv-download-settings {
-          display: flex;
-          max-width: 760px;
-          flex-direction: column;
-          gap: 12px;
-        }
-
-        .nv-download-settings h2 {
-          margin: 0;
-          font-size: 24px;
-          font-weight: 700;
-          color: white;
-        }
-
-        .nv-download-settings > div:first-child > p:last-child {
-          margin-top: 5px;
-          font-size: 12px;
-          color: rgb(100 116 139);
-        }
-
-        .nv-setting-card {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          gap: 20px;
-          border: 1px solid rgb(255 255 255 / 0.06);
-          border-radius: 12px;
-          background: rgb(16 17 25 / 0.8);
-          padding: 16px;
-        }
-
-        .nv-setting-card div {
-          display: flex;
-          min-width: 0;
-          flex-direction: column;
-          gap: 4px;
-        }
-
-        .nv-setting-card strong {
-          font-size: 12px;
-          color: rgb(226 232 240);
-        }
-
-        .nv-setting-card span {
-          font-size: 10px;
-          color: rgb(100 116 139);
-        }
-
-        .nv-setting-card button {
-          flex-shrink: 0;
-          border: 1px solid rgb(139 92 246 / 0.2);
-          border-radius: 8px;
-          background: rgb(139 92 246 / 0.1);
-          padding: 8px 12px;
-          font-size: 9px;
-          font-weight: 700;
-          color: rgb(196 181 253);
-        }
-
-        @media (max-width: 639px) {
-          .nv-download-settings h2 {
-            font-size: 20px;
-          }
-        }
-      `}</style>
-    </section>
+    </main>
   );
 }
 

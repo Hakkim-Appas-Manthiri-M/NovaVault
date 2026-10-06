@@ -8,13 +8,36 @@ const seedGames = async () => {
   try {
     await connectDB();
 
-    console.log("Clearing existing games...");
-    await Game.deleteMany({});
+    console.log("Updating game seed data...");
 
-    console.log("Inserting game seed data...");
-    const games = await Game.insertMany(gameSeedData);
+    let created = 0;
+    let updated = 0;
 
-    console.log(`✅ ${games.length} games seeded successfully.`);
+    for (const gameData of gameSeedData) {
+      const existingGame = await Game.findOne({
+        slug: gameData.slug,
+      });
+
+      if (existingGame) {
+        await Game.findByIdAndUpdate(
+          existingGame._id,
+          gameData,
+          {
+            returnDocument: "after",
+            runValidators: true,
+          },
+        );
+
+        updated++;
+      } else {
+        await Game.create(gameData);
+        created++;
+      }
+    }
+
+    console.log(
+      `✅ Game seed completed. Updated: ${updated}, Created: ${created}`,
+    );
 
     process.exit(0);
   } catch (error) {

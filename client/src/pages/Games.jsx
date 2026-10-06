@@ -46,7 +46,7 @@ function Games({ mode = "all" }) {
     searchParams.get("search") || "",
   );
 
-  const [sortBy, setSortBy] = useState("rating");
+  const [sortBy, setSortBy] = useState("name");
   const [games, setGames] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -133,6 +133,9 @@ function Games({ mode = "all" }) {
 
     return [...filtered].sort((a, b) => {
       switch (sortBy) {
+        case "name":
+          return (a.title || "").localeCompare(b.title || "");
+
         case "rating":
           return (b.rating ?? 0) - (a.rating ?? 0);
 
@@ -142,11 +145,8 @@ function Games({ mode = "all" }) {
         case "price-high":
           return (b.price ?? 0) - (a.price ?? 0);
 
-        case "name":
-          return (a.title || "").localeCompare(b.title || "");
-
         default:
-          return (b.rating ?? 0) - (a.rating ?? 0);
+          return (a.title || "").localeCompare(b.title || "");
       }
     });
   }, [games, searchQuery, mode, sortBy]);
